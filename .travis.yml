@@ -10,7 +10,10 @@ addons:
 
 before_install:
   - sudo apt-get update -y
-  - sudo apt-get install libboost-all-dev -y
+  # make sure this is the correct directory
+  - cd $HOME/build/gf712/ProStruct
+  - source devtools/travis-ci/install_libraries.sh
+  - cd $HOME/build/gf712/ProStruct
 
 install:
   - mkdir build
