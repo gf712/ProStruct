@@ -1,0 +1,22 @@
+sudo: true
+dist: trusty
+language: python
+os: linux
+
+addons:
+  apt:
+    packages:
+      - cmake
+
+before_install:
+  - sudo apt-get update -y
+  - sudo apt-get install libboost-all-dev -y
+
+install:
+  - mkdir build
+  - cd build
+  - make -j4
+
+# Run tests
+script:
+  - env CTEST_OUTPUT_ON_FAILURE=1 make test
