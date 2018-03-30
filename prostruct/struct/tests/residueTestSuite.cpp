@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_SUITE(ResidueTests)
         BOOST_TEST(gly.getBackbone()[0]->getZ() == -1.031);
         BOOST_TEST(CA->getNumberOfBonds() == 2);
         BOOST_TEST(C->getNumberOfBonds() == 2);
-        BOOST_TEST(gly.getBackbone()[0]->get() == N->get());
+        BOOST_TEST(gly.getBackbone()[0].get() == N.get());
 
         CA->destroyBond(1);
         BOOST_TEST(CA->getNumberOfBonds() == 1);
