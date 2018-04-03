@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/gf712/ProStruct.svg?branch=master)](https://travis-ci.org/gf712/ProStruct)
+
 # ProStruct
 ProStruct is a protein structure analysis tool with the end goal of becoming a solution for protein structure analysis with high performance computing. Got a long way to go!
 
