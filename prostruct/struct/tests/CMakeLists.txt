@@ -12,9 +12,6 @@ add_executable(ResidueTest
 add_executable(ChainTest
         chainTestSuite.cpp)
 
-add_executable(main
-        main.cpp)
-
 target_link_libraries(AtomTest
         STRUCT_LIB
         Boost::unit_test_framework
@@ -33,8 +30,4 @@ target_link_libraries(ResidueTest
 target_link_libraries(ChainTest
         STRUCT_LIB
         Boost::unit_test_framework
-        )
-
-target_link_libraries(main
-        STRUCT_LIB
         )

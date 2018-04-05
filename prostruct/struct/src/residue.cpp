@@ -146,7 +146,8 @@ void Residue::createBonds() {
 
         auto name = atom->getName();
 
-        std::cout << "Name: " << atom->getName() << std::endl;
+//        std::cout << residueName;
+//        std::cout << "Name: " << atom->getName() << std::endl;
 
         if (first) {
             first=false;
@@ -158,19 +159,19 @@ void Residue::createBonds() {
             if (res.find(name) != res.end()) {
                 atomPair = {name, res[name]};
             }
-            else throw "Unknown atom!";
+            else throw "Unknown atom: " + name;
 
-            std::cout << "Bond: from: " << atomPair[0] << " to: " << atomPair[1] << std::endl;
+//            std::cout << "Bond: from: " << atomPair[0] << " to: " << atomPair[1] << std::endl;
 
             // does bond exist?
             if (!atom->hasBond(atoms[atomMap[atomPair[1]]])) {
                 atom->addBond(atoms[atomMap[atomPair[1]]], 1);
-                std::cout << atom->getName() << " n bond: " << atom->getNumberOfBonds()
-                          << " " << atoms[atomMap[atomPair[1]]]->getName() << " n bonds: "
-                          << atoms[atomMap[atomPair[1]]]->getNumberOfBonds() << std::endl;
+//                std::cout << atom->getName() << " n bond: " << atom->getNumberOfBonds()
+//                          << " " << atoms[atomMap[atomPair[1]]]->getName() << " n bonds: "
+//                          << atoms[atomMap[atomPair[1]]]->getNumberOfBonds() << std::endl;
             }
         }
-        std::cout << "Completed " << atom->getName() << std::endl;
+//        std::cout << "Completed " << atom->getName() << std::endl;
     }
 
     switch (aminoAcid) {
@@ -195,10 +196,15 @@ void Residue::createBonds() {
             break;
     }
 
-    std::cout << "Completed bond creation!" << std::endl;
+//    std::cout << "Completed bond creation!" << std::endl;
 }
 
 void Residue::link(std::shared_ptr<Residue> residue_) {
     // links this (C-terminus) with residue_ (N-terminus)
+//    std::cout << atoms[backbone[0]]->getName() << "----" << residue_->getBackbone()[2]->getName() << std::endl;
+//    std::cout << atoms[backbone[0]]->getNumberOfBonds() << "----" << residue_->getBackbone()[2]->getNumberOfBonds() << std::endl;
+
     atoms[backbone[0]]->addBond(residue_->getBackbone()[2], 1);
+//    std::cout << atoms[backbone[0]]->getNumberOfBonds() << "----" << residue_->getBackbone()[2]->getNumberOfBonds() << std::endl;
+
 }

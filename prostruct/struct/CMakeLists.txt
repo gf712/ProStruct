@@ -15,8 +15,8 @@ add_library(${TARGET_NAME} STATIC
 
 set_target_properties(${TARGET_NAME} PROPERTIES OUTPUT_NAME "struct")
 
-target_include_directories(${TARGET_NAME}
-        INTERFACE include/)
+target_include_directories(${TARGET_NAME} SYSTEM PUBLIC
+        include/)
 
 add_subdirectory(tests)
 

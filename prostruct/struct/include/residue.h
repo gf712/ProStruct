@@ -58,6 +58,8 @@ public:
 
     std::shared_ptr<Atom> getAtom(int index) { return atoms[0]; }
 
+    std::string getResidueName() { return residueName; }
+
     void link(std::shared_ptr<Residue>);
 
     void createBonds();

@@ -10,7 +10,7 @@
 
 Bond::Bond(std::shared_ptr<Atom> Atom1, std::shared_ptr<Atom> Atom2, int bondType_) {
 
-    std::cout << "Forming bond between: " << Atom1->getName() << " and " << Atom2->getName() << std::endl;
+//    std::cout << "Forming bond between: " << Atom1->getName() << " and " << Atom2->getName() << std::endl;
 
     atom1 = std::weak_ptr<Atom>(Atom1);
     atom2 = std::weak_ptr<Atom>(Atom2);
