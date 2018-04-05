@@ -10,10 +10,14 @@
 class Chain {
 public:
     Chain(std::vector<std::shared_ptr<Residue>>, std::string);
+    int n_residues() { return nResidues; };
+    int n_atoms() { return nAtoms; };
 
 private:
     std::string chainName;
+    std::vector<std::shared_ptr<Residue>> residues;
     int nResidues;
+    int nAtoms;
 };
 
 

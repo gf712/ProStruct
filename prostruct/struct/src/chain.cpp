@@ -8,7 +8,9 @@
 Chain::Chain(std::vector<std::shared_ptr<Residue>> residues_, std::string chainName_) {
 
     bool first = true;
+    residues = residues_;
     std::shared_ptr<Residue> previousResidue;
+    nAtoms = 0;
 
     // link residues
     for (auto const &residue: residues_) {
@@ -24,9 +26,9 @@ Chain::Chain(std::vector<std::shared_ptr<Residue>> residues_, std::string chainN
             residue->link(previousResidue);
             previousResidue = residue;
         }
+
+        nAtoms += residue->n_atoms();
     }
 
-    chainName = chainName_;
-    nResidues = residues_.size();
-
+    nResidues = static_cast<int>(residues.size());
 }

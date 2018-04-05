@@ -64,6 +64,8 @@ public:
 
     void createBonds();
 
+    int n_atoms() { return atoms.size(); };
+
 private:
     std::vector<int> backbone; /**< A vector with the index number of the backbone atoms */
     std::vector<int> sidechain; /**< A vector with the index number of the sidechain atoms */

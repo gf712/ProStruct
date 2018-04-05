@@ -9,16 +9,15 @@
 PDB::PDB(std::string filename_) {
 
     filename = filename_;
-    std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> ChainMap;
 
-    createMap(filename, ChainMap);
+    std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> chainAtomMap;
 
-    numberOfChains = static_cast<int>(ChainMap.size());
+    createMap(filename, chainAtomMap);
 
-    for (const auto& pair: ChainMap) {
+
+    for (const auto& pair: chainAtomMap) {
 
         std::vector<std::shared_ptr<Residue>> residues;
-
 
         for (auto const &atomPair: pair.second) {
 
@@ -33,13 +32,15 @@ PDB::PDB(std::string filename_) {
         }
 
         try {
-            auto chain = std::make_shared<Chain>(residues, pair.first);
+            chainMap[pair.first] = std::make_shared<Chain>(residues, pair.first);
         }
         catch(const char* msg){
             std::cout << "Chain: " << pair.first << std::endl;
             std::cout << msg << std::endl;
         }
     }
+
+    numberOfChains = static_cast<int>(chainMap.size());
 }
 
 PDB PDB::fetch(std::string PDB_id) {
