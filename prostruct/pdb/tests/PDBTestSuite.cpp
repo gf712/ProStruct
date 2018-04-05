@@ -12,8 +12,9 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
     BOOST_AUTO_TEST_CASE(LoadPDB) {
 
-        auto atom = PDB("test.pdb");
+        auto pdb = PDB("test.pdb");
 
+        BOOST_TEST(pdb.n_chains() == 2);
     }
 
 BOOST_AUTO_TEST_SUITE_END()

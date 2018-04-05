@@ -16,7 +16,9 @@ inline void remove_whitespace (std::string &str) {
 }
 
 
-void createMap(std::string &fname, std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> &chainResMap) {
+void createMap(std::string &fname,
+               std::map<std::string,
+                       std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> &chainResMap) {
 
     std::ifstream file(fname);
 

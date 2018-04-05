@@ -12,6 +12,7 @@
 class PDB {
 
 public:
+
     PDB(std::string filename);
 
     ~PDB() = default;
@@ -20,19 +21,13 @@ public:
 
     std::string getFilename() { return filename;}
 
-    // Overload operator
-//    friend std::istream& operator>>(std::istream& str, std::shared_ptr<Chain>& chain)
-//    {
-//        return nullptr;
-//    }
-
+    int n_chains() { return numberOfChains; }
 
 private:
 
-//    void parse(FILE);
-
     std::string filename;
     std::string title;
+    int numberOfChains;
 
 };
 
