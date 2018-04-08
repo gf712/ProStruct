@@ -17,8 +17,9 @@ inline void remove_whitespace (std::string &str) {
 
 
 void createMap(std::string &fname,
-               std::map<std::string,
-                       std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> &chainResMap) {
+               std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>,
+                       AASequenceOrder>> &chainResMap,
+               std::vector<std::string> &chainOrder) {
 
     std::ifstream file(fname);
 
@@ -56,6 +57,10 @@ void createMap(std::string &fname,
             remove_whitespace(element);
             remove_whitespace(resSeqStr);
             remove_whitespace(insCode);
+
+            if (std::find(chainOrder.begin(), chainOrder.end(), chainID) == chainOrder.end()) {
+                chainOrder.push_back(chainID);
+            }
 
             auto residueID = residue + "-" + resSeqStr + "-" + insCode;
             auto atom = std::make_shared<Atom>(element, name, x, y, z);

@@ -29,7 +29,8 @@ struct AASequenceOrder
     }
 };
 
-void createMap(std::string &, std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> &);
+void createMap(std::string &, std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> &,
+               std::vector<std::string> &);
 
 
 #endif //PROSTRUCT_PDBPARSER_H

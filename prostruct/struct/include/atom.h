@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include "bond.h"
+#include <armadillo>
 
 
 class Atom: public std::enable_shared_from_this< Atom > {
@@ -45,6 +46,8 @@ public:
     double getX() { return x; }
     double getY() { return y; }
     double getZ() { return z; }
+
+    arma::vec getXYZ() {return arma::vec(std::vector<double>({x, y, z}));}
 
     std::string getName() { return name; }
 

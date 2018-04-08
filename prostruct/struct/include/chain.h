@@ -13,6 +13,17 @@ public:
     int n_residues() { return nResidues; };
     int n_atoms() { return nAtoms; };
 
+    std::vector<std::shared_ptr<Residue>> getResidues() { return residues; }
+
+    std::vector<std::vector<std::shared_ptr<Atom>>> getBackboneAtoms() {
+        std::vector<std::vector<std::shared_ptr<Atom>>> backboneAtoms;
+        backboneAtoms.reserve((nResidues));
+        for(auto const& residue: residues) {
+            backboneAtoms.push_back(residue->getBackbone());
+        }
+        return backboneAtoms;
+    }
+
 private:
     std::string chainName;
     std::vector<std::shared_ptr<Residue>> residues;

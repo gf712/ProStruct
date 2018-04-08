@@ -3,6 +3,7 @@
 //
 
 #include <utility>
+#include <cmath>
 #include <iostream>
 
 #include "../include/bond.h"
@@ -36,6 +37,7 @@ Bond::Bond(std::shared_ptr<Atom> Atom1, std::shared_ptr<Atom> Atom2, int bondTyp
 
 void Bond::initialiseBond(int bondType_) {
 
+    // x, y, z is the vector corresponding to the bond
     x = atom2.lock()->getX() - atom1.lock()->getX();
     y = atom2.lock()->getY() - atom1.lock()->getY();
     z = atom2.lock()->getZ() - atom1.lock()->getZ();
@@ -44,4 +46,6 @@ void Bond::initialiseBond(int bondType_) {
 
     bondType = bondType_;
 
+    // calculate magnitude/length
+    length = std::sqrt(x*x + y*y + z*z);
 }

@@ -36,6 +36,7 @@ private:
     double x, y, z;
     std::vector<double> bondVector;
     int bondType;
+    double length;
 };
 
 

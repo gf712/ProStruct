@@ -3,8 +3,6 @@
 //
 
 #include "../include/PDB.h"
-#include "PDBparser.h"
-#include <iostream>
 
 PDB::PDB(std::string filename_) {
 
@@ -12,30 +10,36 @@ PDB::PDB(std::string filename_) {
 
     std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> chainAtomMap;
 
-    createMap(filename, chainAtomMap);
+    createMap(filename, chainAtomMap, chainOrder);
 
+    nAtoms = 0;
 
-    for (const auto& pair: chainAtomMap) {
+    xyz.resize(3, 0);
+
+    for (const auto& chain: chainOrder) {
 
         std::vector<std::shared_ptr<Residue>> residues;
 
-        for (auto const &atomPair: pair.second) {
+        for (auto const &atomPair: chainAtomMap[chain]) {
 
             try {
-                residues.emplace_back(std::make_shared<Residue>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first));
+                auto residue = std::make_shared<Residue>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first);
+                residues.emplace_back(residue);
+                xyz.insert_cols(nAtoms, residue->getXYZ());
+                nAtoms += residue->n_atoms();
+//                residue->getXYZ().print();
             }
             catch(const char* msg){
                 std::cout << "Residue: " << atomPair.first << std::endl;
                 std::cout << msg << std::endl;
             }
-
         }
 
         try {
-            chainMap[pair.first] = std::make_shared<Chain>(residues, pair.first);
+            chainMap[chain] = std::make_shared<Chain>(residues, chain);
         }
         catch(const char* msg){
-            std::cout << "Chain: " << pair.first << std::endl;
+            std::cout << "Chain: " << chain << std::endl;
             std::cout << msg << std::endl;
         }
     }

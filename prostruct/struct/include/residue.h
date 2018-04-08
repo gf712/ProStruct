@@ -6,6 +6,7 @@
 #define PROSTRUCT_RESIDUE_H
 
 #include "atom.h"
+#include <armadillo>
 
 enum class aaLocation {
     Backbone,
@@ -56,6 +57,10 @@ public:
         return sidechainAtoms;
     }
 
+    std::shared_ptr<Atom> operator[](const int index) { return atoms[index]; }
+
+    arma::mat getXYZ() { return xyz; }
+
     std::shared_ptr<Atom> getAtom(int index) { return atoms[0]; }
 
     std::string getResidueName() { return residueName; }
@@ -66,7 +71,15 @@ public:
 
     int n_atoms() { return atoms.size(); };
 
+    void print_atoms() {
+
+        for (auto const &atom: atoms) {
+            std::cout << atom->getName() << "-";
+        }
+    }
+
 private:
+    arma::mat xyz;
     std::vector<int> backbone; /**< A vector with the index number of the backbone atoms */
     std::vector<int> sidechain; /**< A vector with the index number of the sidechain atoms */
     std::string aminoAcidName; /**< Name of the amino acid, e.g. ALA */
