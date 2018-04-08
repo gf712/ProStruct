@@ -196,15 +196,24 @@ void Residue::createBonds() {
             break;
     }
 
-//    std::cout << "Completed bond creation!" << std::endl;
+    xyz.resize(3, atoms.size());
+
+    arma::uword i = 0;
+    for (const auto& atom: getBackbone()) {
+        xyz(0, i) = atom->getX();
+        xyz(1, i) = atom->getY();
+        xyz(2, i) = atom->getZ();
+        i++;
+    }
+    for (const auto& atom: getSidechain()) {
+        xyz(0, i) = atom->getX();
+        xyz(1, i) = atom->getY();
+        xyz(2, i) = atom->getZ();
+        i++;
+    }
 }
 
 void Residue::link(std::shared_ptr<Residue> residue_) {
     // links this (C-terminus) with residue_ (N-terminus)
-//    std::cout << atoms[backbone[0]]->getName() << "----" << residue_->getBackbone()[2]->getName() << std::endl;
-//    std::cout << atoms[backbone[0]]->getNumberOfBonds() << "----" << residue_->getBackbone()[2]->getNumberOfBonds() << std::endl;
-
     atoms[backbone[0]]->addBond(residue_->getBackbone()[2], 1);
-//    std::cout << atoms[backbone[0]]->getNumberOfBonds() << "----" << residue_->getBackbone()[2]->getNumberOfBonds() << std::endl;
-
 }
