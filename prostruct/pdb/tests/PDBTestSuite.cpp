@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
         auto pdb = PDB("test.pdb");
 
-        std::string L = "L";
-        std::string H = "H";
+        const char* L = "L";
+        const char* H = "H";
 
         BOOST_TEST(pdb.n_chains() == 2);
 
