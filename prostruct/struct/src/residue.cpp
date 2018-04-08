@@ -7,16 +7,18 @@
 #include "../include/residue.h"
 
 
-std::map<std::string, int> backboneMap
-        {
-                {"N",  0},
-                {"CA", 1},
-                {"C",  2},
-                {"O",  3},
-        };
+std::map<std::string, int> getBackboneMap() {
+    static std::map<std::string, int> backboneMap = {
+            {"N",  0},
+            {"CA", 1},
+            {"C",  2},
+            {"O",  3},
+    };
 
+    return backboneMap;
+}
 // hardcoded amino acid atoms
-std::vector<std::map<std::string, std::string>> aminoAcidAtoms
+static std::vector<std::map<std::string, std::string>> aminoAcidAtoms
         {
                 {{"N", "-C"}, {"C", "CA"}, {"O", "C"}, {"OXT", "C"}, {"CB", "CA"}, {"HA", "CA"}, {"CA", "N"}, {"CG", "CB"}, {"HB2", "CB"}, {"HB3", "CB"}, {"CD", "CG"   }, {"CD", "HD2"  }, {"CD", "HD3"},   {"NE", "CD"},{"CG", "HG2"},{"CG", "HG3"},{"CZ", "NE"},{"NH1", "CZ"},{"NH2", "CZ"},{"H", "N"},{"H2", "N"},{"H3", "N"},{"HE", "NE"},{"HH11", "NH1"},{"HH12", "NH1"},{"HH21", "NH2"},{"HH22", "NH2"},{"HXT", "OXT"},},
                 {{"N", "-C"}, {"C", "CA"}, {"O", "C"}, {"OXT", "C"}, {"CB", "CA"}, {"HA", "CA"}, {"CA", "N"}, {"HB1","CB"}, {"HB2", "CB"}, {"HB3", "CB"}, {"H", "N"     }, {"H2", "N"    }, {"H3", "N"},     {"HXT", "OXT"},},
@@ -41,7 +43,7 @@ std::vector<std::map<std::string, std::string>> aminoAcidAtoms
         };
 
 // hardcoded map with amino acid atoms
-std::map<std::string, int> aminoAcidIndex
+static std::map<std::string, int> aminoAcidIndex
         {
                 {"ARG",  0},
                 {"ALA",  1},
@@ -78,6 +80,7 @@ Residue::Residue(std::vector<std::shared_ptr<Atom>> atoms_, std::string aminoAci
      */
 
     backbone = std::vector<int>(4);
+    auto backboneMap = getBackboneMap();
 
     // each atom is responsible to form a bond with the previous atom
     int i = 0;
@@ -145,9 +148,6 @@ void Residue::createBonds() {
         auto atom = atoms[pos];
 
         auto name = atom->getName();
-
-//        std::cout << residueName;
-//        std::cout << "Name: " << atom->getName() << std::endl;
 
         if (first) {
             first=false;
