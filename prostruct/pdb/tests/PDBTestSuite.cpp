@@ -50,8 +50,10 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
         PDB pdb = PDB("test.pdb");
 
         arma::mat E = pdb.predict_backboneHbonds();
+        int total = std::accumulate(E.begin(), E.end(), 0.0);
 
         BOOST_TEST(E(2, 25) == 1);
+        BOOST_TEST(total == 159);
 
     }
 

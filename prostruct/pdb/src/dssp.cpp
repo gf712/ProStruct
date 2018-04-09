@@ -17,7 +17,7 @@
 // carbon (C) and oxygen (O) atoms of the C=O group and the nitrogen (N) and hydrogen (H) atoms of the N-H group.
 //
 
-#include <armadillo>
+#include "../include/geometry.h"
 
 #define ARMA_NO_DEBUG
 

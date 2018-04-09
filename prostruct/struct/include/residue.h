@@ -8,6 +8,10 @@
 #include "atom.h"
 #include <armadillo>
 
+typedef std::vector<std::map<std::string, std::string>> aminoAcidAtomMap;
+typedef std::map<std::string, int> stringIndexMap;
+typedef std::vector<std::shared_ptr<Atom>> atomVector;
+
 enum class aaLocation {
     Backbone,
     Sidechain
@@ -40,16 +44,16 @@ class Residue {
 public:
     // takes an arbitrary number of atoms and tries to form a residue
 //    Residue(std::unique_ptr<Atom> atoms...);
-    Residue(std::vector<std::shared_ptr<Atom>>, std::string, std::string);
+    Residue(atomVector, std::string, std::string);
 
-    std::vector<std::shared_ptr<Atom>> getBackbone() {
+    atomVector getBackbone() {
         std::vector<std::shared_ptr<Atom>> backboneAtoms;
         for (auto const &i: backbone) {
             backboneAtoms.emplace_back(atoms[i]);
         }
         return backboneAtoms;
     }
-    std::vector<std::shared_ptr<Atom>> getSidechain() {
+    atomVector getSidechain() {
         std::vector<std::shared_ptr<Atom>> sidechainAtoms;
         for (auto const &i: sidechain) {
             sidechainAtoms.emplace_back(atoms[i]);
@@ -85,7 +89,7 @@ private:
     std::string aminoAcidName; /**< Name of the amino acid, e.g. ALA */
     enum AminoAcid aminoAcid; /**< Amino acid enum, e.g. ALA */
     std::string residueName; /**< Name of the residue, e.g. ALA1 */
-    std::vector<std::shared_ptr<Atom>> atoms; /**< A vector with the pointers to the Atom objects */
+    atomVector atoms; /**< A vector with the pointers to the Atom objects */
     std::map<std::string, int> atomMap; /**< Map atom name to internal index */
 
 };

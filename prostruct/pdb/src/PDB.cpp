@@ -120,40 +120,12 @@ arma::mat PDB::predict_backboneHbonds() {
 
 void PDB::calculate_dssp() {
 
-    int n_residues = 0;
+    arma::mat C_coords(3, nResidues);
+    arma::mat O_coords(3, nResidues);
+    arma::mat N_coords(3, nResidues);
+    arma::mat CA_coords(3, nResidues);
 
-    for (auto const& chain: chainMap) {
-
-        n_residues += static_cast<arma::uword>(chain.second->n_residues());
-
-    }
-
-    arma::mat C_coords(3, n_residues);
-    arma::mat O_coords(3, n_residues);
-    arma::mat N_coords(3, n_residues);
-    arma::mat CA_coords(3, n_residues);
-
-    // get all C, O, N atoms positions
-    arma::uword i = 0;
-    arma::uword pos = 0;
-
-    for (auto const& chain: chainOrder) {
-
-        for (auto const& residue: chainMap[chain]->getResidues()) {
-
-            for (arma::uword coord = 0; coord < 3; ++coord) {
-
-                N_coords.at(coord, i) = xyz.at(coord, pos);
-                CA_coords.at(coord, i) = xyz.at(coord, pos + 1);
-                C_coords.at(coord, i) = xyz.at(coord, pos + 2);
-                O_coords.at(coord, i) = xyz.at(coord, pos + 3);
-
-            }
-
-            pos+=residue->n_atoms();
-            i++;
-        }
-    }
+    getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
 
     dssp(C_coords, O_coords, N_coords, CA_coords);
 }

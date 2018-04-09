@@ -35,6 +35,9 @@ public:
     void addBond(std::shared_ptr<Bond> bond);
     void destroyBond(int);
     void destroyBond(std::shared_ptr<Bond>);
+
+    void setRadius(double radius_) {radius=radius_;}
+
     std::vector<std::shared_ptr<Bond>> getBonds() { return bonds; };
     int getNumberOfBonds() { return bonds.size(); }
 
@@ -46,6 +49,7 @@ public:
     double getX() { return x; }
     double getY() { return y; }
     double getZ() { return z; }
+    double getRadius() { return radius; }
 
     arma::vec getXYZ() {return arma::vec(std::vector<double>({x, y, z}));}
 
@@ -54,6 +58,7 @@ public:
 private:
 
     double x, y, z;
+    double radius;
     void load_atom(std::string element);
     void load_atom(std::string element, std::string name);
     void load_atom(std::string element, std::string name, double x, double y, double z);

@@ -6,20 +6,40 @@
 #include <iostream>
 #include "../include/residue.h"
 
+static stringIndexMap backboneIndexMap = {
+        {"N",  0},
+        {"CA", 1},
+        {"C",  2},
+        {"O",  3},
+};
 
-std::map<std::string, int> getBackboneMap() {
-    static std::map<std::string, int> backboneMap = {
-            {"N",  0},
-            {"CA", 1},
-            {"C",  2},
-            {"O",  3},
-    };
+static std::vector<std::map<std::string, double>> aminoAcidRadii
+    {
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"CD", 1.87}, {"NE", 1.65}, {"CZ", 1.76}, {"NH1", 1.65}, {"NH2", 1.65}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"OXT", 1.4}},
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.76}, {"OD1", 1.40}, {"ND2", 1.65}, {"AD1", 1.65}, {"AD2", 1.65}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.76}, {"OD1", 1.40}, {"OD2", 1.40}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"SG", 1.85}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"CD", 1.76}, {"OE1", 1.40}, {"NE2", 1.65}, {"AE1", 1.65}, {"AE2", 1.65}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"CD", 1.76}, {"OE1", 1.40}, {"OE2", 1.40}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.76}, {"ND1", 1.65}, {"CE1", 1.76}, {"NE2", 1.65}, {"CD2", 1.76}, {"AD1", 1.76}, {"AE1", 1.76}, {"AE2", 1.76}, {"AD2", 1.76}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG2", 1.87}, {"CG1", 1.87}, {"CD1", 1.87}, {"CD", 1.87}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"CD1", 1.87}, {"CD2", 1.87}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"CD", 1.87}, {"CE", 1.87}, {"NZ", 1.50}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"SD", 1.85}, {"CE", 1.87}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.76}, {"CD1", 1.76}, {"CE1", 1.76}, {"CZ", 1.76}, {"CE2", 1.76}, {"CD2", 1.76}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.87}, {"CD", 1.87}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"OG", 1.40}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG2", 1.87}, {"OG1", 1.40}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.76}, {"CD1", 1.76}, {"NE1", 1.65}, {"CE2", 1.76}, {"CZ2", 1.76}, {"CH2", 1.76}, {"CZ3", 1.76}, {"CE3", 1.76}, {"CD2", 1.76}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG", 1.76}, {"CD1", 1.76}, {"CE1", 1.76}, {"CZ", 1.76}, {"CE2", 1.76}, {"CD2", 1.76}, {"OH", 1.40}, {"OXT", 1.4} },
+        {{"N", 1.65}, {"CA", 1.87}, {"C", 1.76}, {"O", 1.40}, {"CB", 1.87}, {"CG1", 1.87}, {"CG2", 1.87}, {"OXT", 1.4} }
 
-    return backboneMap;
-}
+};
 
 // hardcoded amino acid atoms
-static std::vector<std::map<std::string, std::string>> aminoAcidAtoms
+static aminoAcidAtomMap aminoAcidAtoms
         {
                 {{"N", "-C"}, {"C", "CA"}, {"O", "C"}, {"OXT", "C"}, {"CB", "CA"}, {"HA", "CA"}, {"CA", "N"}, {"CG", "CB"}, {"HB2", "CB"}, {"HB3", "CB"}, {"CD", "CG"   }, {"CD", "HD2"  }, {"CD", "HD3"},   {"NE", "CD"},{"CG", "HG2"},{"CG", "HG3"},{"CZ", "NE"},{"NH1", "CZ"},{"NH2", "CZ"},{"H", "N"},{"H2", "N"},{"H3", "N"},{"HE", "NE"},{"HH11", "NH1"},{"HH12", "NH1"},{"HH21", "NH2"},{"HH22", "NH2"},{"HXT", "OXT"},},
                 {{"N", "-C"}, {"C", "CA"}, {"O", "C"}, {"OXT", "C"}, {"CB", "CA"}, {"HA", "CA"}, {"CA", "N"}, {"HB1","CB"}, {"HB2", "CB"}, {"HB3", "CB"}, {"H", "N"     }, {"H2", "N"    }, {"H3", "N"},     {"HXT", "OXT"},},
@@ -43,8 +63,8 @@ static std::vector<std::map<std::string, std::string>> aminoAcidAtoms
                 {{"N", "-C"}, {"C", "CA"}, {"O", "C"}, {"OXT", "C"}, {"CB", "CA"}, {"HA", "CA"}, {"CA", "N"}, {"CG1","CB"}, {"CG2", "CB"}, {"HB" , "CB"}, {"CG1", "HG11"}, {"CG1", "HG12"}, {"CG1", "HG13"}, {"CG2", "HG21"},{"CG2", "HG22"},{"CG2", "HG23"},{"H", "N"},{"H2", "N"},{"H3", "N"},{"HXT", "OXT"}}
         };
 
-// hardcoded map with amino acid atoms
-static std::map<std::string, int> aminoAcidIndex
+
+static stringIndexMap aminoAcidIndex
         {
                 {"ARG",  0},
                 {"ALA",  1},
@@ -81,7 +101,6 @@ Residue::Residue(std::vector<std::shared_ptr<Atom>> atoms_, std::string aminoAci
      */
 
     backbone = std::vector<int>(4);
-    auto backboneMap = getBackboneMap();
 
     // each atom is responsible to form a bond with the previous atom
     int i = 0;
@@ -98,14 +117,14 @@ Residue::Residue(std::vector<std::shared_ptr<Atom>> atoms_, std::string aminoAci
 
         auto name = atom->getName();
         // is the atom in the backbone?
-        auto aaBackbone = backboneMap.find(name);
-        auto aaLocation_ = (aaBackbone != backboneMap.end()) ? aaLocation::Backbone : aaLocation::Sidechain;
+        auto aaBackbone = backboneIndexMap.find(name);
+        auto aaLocation_ = (aaBackbone != backboneIndexMap.end()) ? aaLocation::Backbone : aaLocation::Sidechain;
 
         switch (aaLocation_) {
             case aaLocation::Backbone: {
                 // inserts backbone atom in correct location -> this is important because we will always assume
                 // that the N is at position 0 of atoms and C at position 2.
-                backbone[backboneMap[name]] = i;
+                backbone[backboneIndexMap[name]] = i;
             }
                 break;
             case aaLocation::Sidechain:
@@ -201,15 +220,15 @@ void Residue::createBonds() {
 
     arma::uword i = 0;
     for (const auto& atom: getBackbone()) {
-        xyz(0, i) = atom->getX();
-        xyz(1, i) = atom->getY();
-        xyz(2, i) = atom->getZ();
+        xyz.at(0, i) = atom->getX();
+        xyz.at(1, i) = atom->getY();
+        xyz.at(2, i) = atom->getZ();
         i++;
     }
     for (const auto& atom: getSidechain()) {
-        xyz(0, i) = atom->getX();
-        xyz(1, i) = atom->getY();
-        xyz(2, i) = atom->getZ();
+        xyz.at(0, i) = atom->getX();
+        xyz.at(1, i) = atom->getY();
+        xyz.at(2, i) = atom->getZ();
         i++;
     }
 }
