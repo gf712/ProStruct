@@ -8,7 +8,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include "PDB.h"
 
-namespace utf = boost::unit_test;
+namespace tt = boost::test_tools;
 
 BOOST_AUTO_TEST_SUITE(PDBTests)
 
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
     }
 
-    BOOST_AUTO_TEST_CASE(KabschSander, *utf::tolerance(10e-9)) {
+    BOOST_AUTO_TEST_CASE(KabschSander) {
 
         PDB pdb = PDB("test.pdb");
 
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
         BOOST_TEST(E.n_rows == pdb.n_residues());
         BOOST_TEST(E.n_cols == pdb.n_residues());
 
-        BOOST_TEST(E(2, 25) == -1.9515432974890459);
+        BOOST_TEST(E(2, 25) == -1.9515432974890459, tt::tolerance(10e-9));
 
     }
 
@@ -50,7 +50,8 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
         PDB pdb = PDB("test.pdb");
 
         arma::mat E = pdb.predict_backboneHbonds();
-        int total = std::accumulate(E.begin(), E.end(), 0.0);
+        
+        int total = std::accumulate(E.begin(), E.end(), 0);
 
         BOOST_TEST(E(2, 25) == 1);
         BOOST_TEST(total == 159);
