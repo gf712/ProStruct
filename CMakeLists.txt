@@ -3,11 +3,13 @@ project(ProStruct)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_CXX_FLAGS "-O3 -fopenmp")
+
 enable_testing()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(Boost 1.59 REQUIRED COMPONENTS unit_test_framework)
-find_package(Armadillo 7.3 REQUIRED)
+find_package(Armadillo 7.9 REQUIRED)
 
 add_subdirectory(prostruct)

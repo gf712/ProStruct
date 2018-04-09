@@ -17,6 +17,7 @@ std::map<std::string, int> getBackboneMap() {
 
     return backboneMap;
 }
+
 // hardcoded amino acid atoms
 static std::vector<std::map<std::string, std::string>> aminoAcidAtoms
         {

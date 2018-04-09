@@ -7,6 +7,8 @@
 
 #include "chain.h"
 #include "PDBparser.h"
+#include "geometry.h"
+
 #include <armadillo>
 
 class PDB {
@@ -24,16 +26,20 @@ public:
     int n_chains() { return numberOfChains; }
 
     std::vector<std::string> getChainIDs() {
-//        std::vector<std::string> chainIDs;
-//        for (auto const& pair: chainMap) {
-//            chainIDs.push_back(pair.first);
-//        }
         return chainOrder;
     }
 
     std::shared_ptr<Chain> getChain(std::string name_) { return chainMap[name_]; }
 
+    arma::mat calculate_KabschSander();
+
+    arma::mat predict_backboneHbonds();
+
+    void calculate_dssp();
+
     arma::mat getXYZ() { return xyz; }
+
+    int n_residues() { return nResidues; }
 
 private:
 
@@ -43,7 +49,10 @@ private:
     std::map<std::string, std::shared_ptr<Chain>> chainMap;
     int nAtoms;
     std::vector<std::string> chainOrder;
+    arma::uword nResidues;
 
+    void getBackboneAtoms(arma::mat&, arma::mat&, arma::mat&, arma::mat&);
+    void internalKS(arma::mat&);
 };
 
 
