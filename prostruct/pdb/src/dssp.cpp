@@ -79,7 +79,7 @@ void kabsch_sander(const arma::mat &C_coords, const arma::mat &O_coords, const a
 //    H_coords.insert_cols(0, zerosVec);
 
     predict_H_coords(H_coords, C_coords, O_coords, N_coords);
-
+#pragma omp parallel for collapse(2)
     for (arma::uword acceptor = 0; acceptor < n_residues; ++acceptor) {
         for (arma::uword donor = 0; donor < n_residues; ++donor) {
 
