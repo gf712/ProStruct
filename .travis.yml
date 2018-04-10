@@ -18,7 +18,7 @@ before_install:
 install:
   - mkdir build
   - cd build
-  - cmake -DBOOST_ROOT=$HOME/boost/ ..
+  - cmake -DBOOST_ROOT=$HOME/boost_1_61_0/ ..
   - make -j4
 
 # Run tests
