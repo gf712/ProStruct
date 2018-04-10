@@ -179,6 +179,11 @@ BOOST_AUTO_TEST_SUITE(ResidueTests)
         BOOST_TEST(CA->getNumberOfBonds() == 2);
         BOOST_TEST(C->getNumberOfBonds() == 2);
 
+        BOOST_TEST(C->getRadius() == 1.76);
+        BOOST_TEST(CA->getRadius() == 1.87);
+        BOOST_TEST(N->getRadius() == 1.65);
+        BOOST_TEST(O->getRadius() == 1.40);
+
     }
 
     BOOST_AUTO_TEST_CASE(Histidine) {

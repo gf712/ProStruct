@@ -45,6 +45,16 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
     }
 
+    BOOST_AUTO_TEST_CASE(ShrakeRupley) {
+
+        PDB pdb = PDB("test.pdb");
+
+        arma::vec asa = pdb.calculate_ASA(1.4);
+
+        BOOST_TEST(asa.at(0) == 43.953897152668652, tt::tolerance(10e-9));
+
+    }
+
     BOOST_AUTO_TEST_CASE(KabschSander) {
 
         PDB pdb = PDB("test.pdb");

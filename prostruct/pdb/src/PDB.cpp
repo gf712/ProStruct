@@ -27,8 +27,8 @@ PDB::PDB(std::string filename_) {
                 auto residue = std::make_shared<Residue>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first);
                 residues.emplace_back(residue);
                 xyz.insert_cols(nAtoms, residue->getXYZ());
+                radii.insert_rows(nAtoms, residue->getRadii());
                 nAtoms += residue->n_atoms();
-//                residue->getXYZ().print();
             }
             catch(const char* msg){
                 std::cout << "Residue: " << atomPair.first << std::endl;
@@ -104,6 +104,18 @@ arma::mat PDB::calculate_KabschSander() {
 
     return E;
 };
+
+
+arma::vec PDB::calculate_ASA(double probe) {
+
+    // calculates atom surface accessibility using the Shrake-Rupley algorithm
+
+    arma::vec asa(nAtoms);
+
+    shrake_rupley(xyz, radii, asa, nAtoms, probe);
+
+    return asa;
+}
 
 
 arma::mat PDB::predict_backboneHbonds() {

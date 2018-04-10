@@ -82,8 +82,12 @@ public:
         }
     }
 
+    atomVector getAtoms() { return atoms; }
+    arma::vec getRadii() { return radii; }
+
 private:
     arma::mat xyz;
+    arma::vec radii;
     std::vector<int> backbone; /**< A vector with the index number of the backbone atoms */
     std::vector<int> sidechain; /**< A vector with the index number of the sidechain atoms */
     std::string aminoAcidName; /**< Name of the amino acid, e.g. ALA */

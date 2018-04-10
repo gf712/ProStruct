@@ -10,6 +10,7 @@
 void dssp(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&);
 void kabsch_sander(const arma::mat&, const arma::mat&, const arma::mat&, const arma::mat&,
                    std::vector<bool>&, arma::mat&, const arma::uword);
+void shrake_rupley(const arma::mat &xyz, const arma::vec& radii, arma::vec &asa, int n_atoms, double probe);
 
 
 #endif //PROSTRUCT_GEOMETRY_H

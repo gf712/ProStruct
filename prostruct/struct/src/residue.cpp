@@ -102,6 +102,12 @@ Residue::Residue(std::vector<std::shared_ptr<Atom>> atoms_, std::string aminoAci
 
     backbone = std::vector<int>(4);
 
+    if (aminoAcidIndex.find(aminoAcidName_) != aminoAcidIndex.end()) {
+        aminoAcidName = aminoAcidName_;
+        aminoAcid = static_cast<AminoAcid>(aminoAcidIndex[aminoAcidName]);
+    }
+    else throw "Unknown amino acid!";
+
     // each atom is responsible to form a bond with the previous atom
     int i = 0;
     for (auto atom: atoms_) {
@@ -110,7 +116,7 @@ Residue::Residue(std::vector<std::shared_ptr<Atom>> atoms_, std::string aminoAci
         // amide group:
         // N -> CA <- C <- O
         // CA -> is bound to the sidechain
-        // CA -> CB -> CG
+        // CA ->Glycine CB -> CG
         // and atoms are passed in the same order as in PDBs:
         // N, CA, C, O, R (CB,..)
         // plus the special rules for the cyclic amino acids
@@ -131,21 +137,15 @@ Residue::Residue(std::vector<std::shared_ptr<Atom>> atoms_, std::string aminoAci
                 sidechain.push_back(i);
         }
 
-        atomMap[atom->getName()] = i;
+        atomMap[name] = i;
         atoms.emplace_back(atom);
+        atom->setRadius(aminoAcidRadii[static_cast<int>(aminoAcid)][name]);
         i++;
     }
 
     if (backbone.size() != 4) {
         throw "Expected four atoms in the backbone, got " + std::to_string(backbone.size());
     }
-
-    if (aminoAcidIndex.find(aminoAcidName_) != aminoAcidIndex.end()) {
-        aminoAcidName = aminoAcidName_;
-        aminoAcid = static_cast<AminoAcid>(aminoAcidIndex[aminoAcidName]);
-    }
-    else
-        throw "Unknown amino acid!";
 
     residueName = residueName_;
 
@@ -217,18 +217,21 @@ void Residue::createBonds() {
     }
 
     xyz.resize(3, atoms.size());
+    radii.resize(atoms.size());
 
     arma::uword i = 0;
     for (const auto& atom: getBackbone()) {
         xyz.at(0, i) = atom->getX();
         xyz.at(1, i) = atom->getY();
         xyz.at(2, i) = atom->getZ();
+        radii.at(i) = atom->getRadius();
         i++;
     }
     for (const auto& atom: getSidechain()) {
         xyz.at(0, i) = atom->getX();
         xyz.at(1, i) = atom->getY();
         xyz.at(2, i) = atom->getZ();
+        radii.at(i) = atom->getRadius();
         i++;
     }
 }

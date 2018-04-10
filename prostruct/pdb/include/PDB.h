@@ -9,8 +9,6 @@
 #include "PDBparser.h"
 #include "geometry.h"
 
-#include <armadillo>
-
 class PDB {
 
 public:
@@ -41,6 +39,12 @@ public:
 
     int n_residues() { return nResidues; }
 
+    int n_atoms() { return nAtoms; }
+
+    arma::vec getRadii() { return radii; }
+
+    arma::vec calculate_ASA(double probe);
+
 private:
 
     arma::mat xyz;
@@ -50,7 +54,7 @@ private:
     int nAtoms;
     std::vector<std::string> chainOrder;
     arma::uword nResidues;
-
+    arma::vec radii;
     void getBackboneAtoms(arma::mat&, arma::mat&, arma::mat&, arma::mat&);
     void internalKS(arma::mat&);
 };

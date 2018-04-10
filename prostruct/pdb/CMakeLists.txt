@@ -5,6 +5,7 @@ set(TARGET_NAME PDB_LIB)
 set(SOURCE_FILES
         src/PDB.cpp
         src/dssp.cpp
+        src/sasa.cpp
         )
 
 add_library(${TARGET_NAME} STATIC
