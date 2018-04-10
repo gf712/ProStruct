@@ -32,19 +32,6 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
     }
 
-    BOOST_AUTO_TEST_CASE(KabschSander) {
-
-        PDB pdb = PDB("test.pdb");
-
-        arma::mat E = pdb.calculate_KabschSander();
-
-        BOOST_TEST(E.n_rows == pdb.n_residues());
-        BOOST_TEST(E.n_cols == pdb.n_residues());
-
-        BOOST_TEST(E(2, 25) == -1.9515432974890459, tt::tolerance(10e-9));
-
-    }
-
     BOOST_AUTO_TEST_CASE(PredictBackboneHBonds) {
 
         PDB pdb = PDB("test.pdb");
@@ -55,6 +42,19 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
         BOOST_TEST(E(2, 25) == 1);
         BOOST_TEST(total == 159);
+
+    }
+
+    BOOST_AUTO_TEST_CASE(KabschSander) {
+
+        PDB pdb = PDB("test.pdb");
+
+        arma::mat E = pdb.calculate_KabschSander();
+
+        BOOST_TEST(E.n_rows == pdb.n_residues());
+        BOOST_TEST(E.n_cols == pdb.n_residues());
+
+        BOOST_TEST(E(2, 25) == -1.9515432974890459, tt::tolerance(10e-9));
 
     }
 
