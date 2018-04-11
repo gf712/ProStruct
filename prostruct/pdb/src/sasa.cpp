@@ -5,10 +5,9 @@
 #include "../include/geometry.h"
 #include "atom.h"
 
-
 constexpr double golden_angle = M_PI * (3 - std::sqrt(5.0));
 
-void generate_sphere(int N, arma::mat& result) {
+static void generate_sphere(int N, arma::mat& result) {
 
     double offset = 2.0 / N;
 
@@ -26,7 +25,7 @@ void generate_sphere(int N, arma::mat& result) {
 }
 
 
-void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, const arma::vec& neighbours,
+static void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, const arma::vec& neighbours,
                          const int current_atom_index, const double probe, const arma::mat &sphere_points,
                          const double adjustment, arma::vec& asa) {
 
@@ -64,7 +63,7 @@ void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, const ar
     asa.at(current_atom_index) = adjustment * accessiblePoints * atomRadius * atomRadius;
 }
 
-void get_neighbours(const arma::mat &xyz, arma::mat& neighbours, int n_atoms, const arma::vec &radii) {
+static void get_neighbours(const arma::mat &xyz, arma::mat& neighbours, int n_atoms, const arma::vec &radii) {
 #pragma omp parallel for
     for (arma::uword i = 0; i < n_atoms; ++i) {
         for (arma::uword j = + 1; j < n_atoms; ++j) {

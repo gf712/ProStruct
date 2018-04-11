@@ -32,7 +32,7 @@ enum SS_Types {
     Blank
 };
 
-void predict_H_coords(arma::mat &H_coords, const arma::mat &C_coords, const arma::mat &O_coords,
+static void predict_H_coords(arma::mat &H_coords, const arma::mat &C_coords, const arma::mat &O_coords,
                       const arma::mat &N_coords) {
 
 //    for (arma::uword j = 1; j < H_coords.n_cols; ++j) {
@@ -106,7 +106,7 @@ void kabsch_sander(const arma::mat &C_coords, const arma::mat &O_coords, const a
 }
 
 
-void predict_alpha_helix() {
+static void predict_alpha_helix() {
 
     //Based on this, eight types of secondary structure are assigned. The 310 helix, α helix and π helix have symbols G,
     // H and I and are recognized by having a repetitive sequence of hydrogen bonds in which the residues are three, four,
@@ -122,7 +122,7 @@ void predict_alpha_helix() {
 
 }
 
-void predict_beta_sheet() {
+static void predict_beta_sheet() {
 
 
 
