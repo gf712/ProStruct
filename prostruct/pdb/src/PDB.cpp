@@ -150,8 +150,14 @@ double PDB::calculate_RMSD(PDB &other) {
     }
 
     return rmsd(xyz, other.getXYZ());
-
 }
 
 
+arma::vec PDB::calculate_centroid() {
+
+    arma::vec result(3);
+
+    get_centroid(xyz, result);
+
+    return result;
 }

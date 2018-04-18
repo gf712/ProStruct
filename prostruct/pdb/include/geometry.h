@@ -12,6 +12,7 @@ void kabsch_sander(const arma::mat&, const arma::mat&, const arma::mat&, const a
                    std::vector<bool>&, arma::mat&, const arma::uword);
 void shrake_rupley(const arma::mat &xyz, const arma::vec& radii, arma::vec &asa, int n_atoms, double probe);
 double rmsd(const arma::mat& xyz, const arma::mat& xyz_other);
+void get_centroid(const arma::mat &xyz, arma::vec &centroid);
 
 
 #endif //PROSTRUCT_GEOMETRY_H

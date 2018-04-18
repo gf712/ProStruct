@@ -47,6 +47,8 @@ public:
 
     double calculate_RMSD(PDB& other);
 
+    arma::vec calculate_centroid();
+
 
 private:
 
