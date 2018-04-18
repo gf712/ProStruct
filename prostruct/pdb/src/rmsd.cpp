@@ -8,10 +8,10 @@ double rmsd(const arma::mat& xyz, const arma::mat& xyz_other) {
 
     double sum = 0.0;
 
-    for (int i = 0; i < xyz.n_cols; ++i) {
-        sum += arma::norm(xyz - xyz_other, 2);
+#pragma omp parallel for reduction(+: sum)
+    for (arma::uword i = 0; i < xyz.n_cols; ++i) {
+        sum += arma::norm(xyz.col(i) - xyz_other.col(i), 2);
     }
 
-    return sum / xyz.n_cols;
-
+    return std::sqrt(sum / xyz.n_cols);
 }
