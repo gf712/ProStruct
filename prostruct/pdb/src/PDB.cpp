@@ -142,13 +142,16 @@ void PDB::calculate_dssp() {
     dssp(C_coords, O_coords, N_coords, CA_coords);
 }
 
-arma::vec PDB::calculate_RMSD(PDB &other) {
+double PDB::calculate_RMSD(PDB &other) {
 
     // first check if the size is the same
     if (nAtoms != other.n_atoms()) {
         throw "Atom number mismatch";
     }
 
-    rmsd(xyz, other.getXYZ());
+    return rmsd(xyz, other.getXYZ());
+
+}
+
 
 }

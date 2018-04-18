@@ -45,7 +45,8 @@ public:
 
     arma::vec calculate_ASA(double probe);
 
-    arma::vec calculate_RMSD(PDB& other);
+    double calculate_RMSD(PDB& other);
+
 
 private:
 

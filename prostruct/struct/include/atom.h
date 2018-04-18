@@ -50,7 +50,7 @@ public:
     double getY() { return y; }
     double getZ() { return z; }
     double getRadius() { return radius; }
-
+    std::string getElement() { return name; }
     arma::vec getXYZ() {return arma::vec(std::vector<double>({x, y, z}));}
 
     std::string getName() { return name; }
@@ -64,6 +64,7 @@ private:
     void load_atom(std::string element, std::string name, double x, double y, double z);
     double atomicWeight;
     int atomicNumber;
+    std::string element;
     std::string name;
     std::vector<std::shared_ptr<Bond>> bonds;
 

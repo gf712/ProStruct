@@ -6,6 +6,12 @@
 
 double rmsd(const arma::mat& xyz, const arma::mat& xyz_other) {
 
-    return arma::sum(arma::norm(xyz - xyz_other, 2)) / xyz.n_cols;
+    double sum = 0.0;
+
+    for (int i = 0; i < xyz.n_cols; ++i) {
+        sum += arma::norm(xyz - xyz_other, 2);
+    }
+
+    return sum / xyz.n_cols;
 
 }

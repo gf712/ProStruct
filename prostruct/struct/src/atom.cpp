@@ -251,11 +251,13 @@ static std::map<std::string, std::vector<double>> elementDescription
                 {"Uo", {118, 294     }}
         };
 
-void Atom::load_atom(std::string element) {
+void Atom::load_atom(std::string element_) {
 
     /// Private method of Atom to load all the information
     /// of the given atom if it exists
     /// @param [std::string] name Name of the atom.
+
+    element = element_;
 
     // check if it is a valid element
     if (elementDescription.find(element) == elementDescription.end())
@@ -264,14 +266,15 @@ void Atom::load_atom(std::string element) {
     atomicNumber = static_cast<int>(elementDescription[element][0]);
     atomicWeight = elementDescription[element][1];
     name = elementName[element][0];
-
 }
 
-void Atom::load_atom(std::string element, std::string name_) {
+void Atom::load_atom(std::string element_, std::string name_) {
 
     /// Private method of Atom to load all the information
     /// of the given atom if it exists
     /// @param [std::string] name Name of the atom.
+
+    element = element_;
 
     // check if it is a valid element
     if (elementDescription.find(element) == elementDescription.end())
@@ -283,11 +286,13 @@ void Atom::load_atom(std::string element, std::string name_) {
 }
 
 
-void Atom::load_atom(std::string element, std::string name_, double x_, double y_, double z_) {
+void Atom::load_atom(std::string element_, std::string name_, double x_, double y_, double z_) {
 
     /// Private method of Atom to load all the information
     /// of the given atom if it exists
     /// @param [std::string] name Name of the atom.
+
+    element = element_;
 
     // check if it is a valid element
     if (elementDescription.find(element) == elementDescription.end())
