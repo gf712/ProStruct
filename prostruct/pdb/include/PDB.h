@@ -49,6 +49,7 @@ public:
 
     arma::vec calculate_centroid();
 
+    void recentre();
 
 private:
 

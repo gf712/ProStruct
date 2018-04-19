@@ -161,3 +161,9 @@ arma::vec PDB::calculate_centroid() {
 
     return result;
 }
+
+void PDB::recentre() {
+
+    recentre_molecule(xyz);
+
+}
