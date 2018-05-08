@@ -21,7 +21,7 @@ void get_centroid(const arma::mat &xyz, arma::vec &centroid) {
     // the centroid is just the average point in cartesian point
     // does not take into account anything but coordinates
 
-    int n_atoms = xyz.n_cols;
+    size_t n_atoms = xyz.n_cols;
 
     double sum_x = 0.0, sum_y = 0.0, sum_z = 0.0;
 #pragma omp simd reduction(+: sum_x, sum_y, sum_z)

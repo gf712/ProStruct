@@ -7,6 +7,7 @@ set(SOURCE_FILES
         src/dssp.cpp
         src/sasa.cpp
         src/rmsd.cpp
+        src/dihedrals.cpp
         )
 
 add_library(${TARGET_NAME} STATIC

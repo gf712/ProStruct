@@ -48,8 +48,11 @@ public:
     double calculate_RMSD(PDB& other);
 
     arma::vec calculate_centroid();
+    arma::mat select(std::string);
 
     void recentre();
+
+    arma::mat calculate_phi_psi();
 
 private:
 

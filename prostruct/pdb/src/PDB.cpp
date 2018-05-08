@@ -51,7 +51,7 @@ PDB::PDB(std::string filename_) {
 
 PDB PDB::fetch(std::string PDB_id) {
 
-    throw "Not impletemented";
+    throw "Not implemented";
 
 }
 
@@ -166,4 +166,64 @@ void PDB::recentre() {
 
     recentre_molecule(xyz);
 
+}
+
+arma::mat PDB::calculate_phi_psi() {
+
+    // calculate phi and psi dihedral angles along the protein backbone
+    // returns a matrix of shape (2, n_atoms):
+    //  - row 0: phi
+    //  - row 1: psi
+
+    arma::mat result(nResidues, 2);
+
+    arma::mat C_coords(3, nResidues);
+    arma::mat O_coords(3, nResidues);
+    arma::mat N_coords(3, nResidues);
+    arma::mat CA_coords(3, nResidues);
+
+    getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
+
+    arma::cube phiAtomCoords(3,4,nResidues-1);
+    arma::cube psiAtomCoords(3,4,nResidues-1);
+
+    // create a 3D tensor with all the relevant coordinates
+
+    arma::mat &phi_slice_ref = phiAtomCoords.slice(0);
+    phi_slice_ref(arma::span::all, 0) = C_coords.col(0);
+    phi_slice_ref(arma::span::all, 1) = N_coords.col(0);
+    phi_slice_ref(arma::span::all, 2) = CA_coords.col(1);
+    phi_slice_ref(arma::span::all, 3) = C_coords.col(1);
+
+    arma::mat &psi_slice_ref = psiAtomCoords.slice(nResidues-1);
+    psi_slice_ref(arma::span::all, 0) = N_coords.col(nResidues-1);
+    psi_slice_ref(arma::span::all, 1) = CA_coords.col(nResidues);
+    psi_slice_ref(arma::span::all, 2) = C_coords.col(nResidues);
+    psi_slice_ref(arma::span::all, 3) = N_coords.col(nResidues);
+
+    for (int i = 1; i < nResidues-1; ++i) {
+        // phi angle
+        phi_slice_ref = phiAtomCoords.slice(i);
+        phi_slice_ref(arma::span::all, 0) = C_coords.col(i);
+        phi_slice_ref(arma::span::all, 1) = N_coords.col(i);
+        phi_slice_ref(arma::span::all, 2) = CA_coords.col(i+1);
+        phi_slice_ref(arma::span::all, 3) = C_coords.col(i+1);
+
+        // psi angle
+        psi_slice_ref = psiAtomCoords.slice(i);
+        psi_slice_ref(arma::span::all, 0) = N_coords.col(i);
+        psi_slice_ref(arma::span::all, 1) = CA_coords.col(i+1);
+        psi_slice_ref(arma::span::all, 2) = C_coords.col(i+1);
+        psi_slice_ref(arma::span::all, 3) = N_coords.col(i+1);
+
+    }
+
+    arma::vec phi(nResidues-1);
+    arma::vec psi(nResidues-1);
+
+    dihedrals(phiAtomCoords, phi);
+    dihedrals(psiAtomCoords, psi);
+
+    result(arma::span(0, nResidues-1), 0) = phi;
+    result(arma::span(1, nResidues), 0) = psi;
 }
