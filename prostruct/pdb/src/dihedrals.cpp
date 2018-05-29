@@ -14,13 +14,35 @@ void dihedrals(const arma::cube &atoms, arma::vec &angles) {
         // access cube using slice -> returns matrix
         const arma::mat &atoms_i = atoms.slice(i);
 
-        arma::vec vec1 = atoms_i.col(0) - atoms_i.col(1);
-        arma::vec vec2 = atoms_i.col(2) - atoms_i.col(3);
+        arma::vec b1 = arma::normalise(atoms_i.col(0) - atoms_i.col(1));
+        arma::vec b2 = arma::normalise(atoms_i.col(1) - atoms_i.col(2));
+        arma::vec b3 = arma::normalise(atoms_i.col(2) - atoms_i.col(3));
 
-        double num = arma::dot(vec1, vec2);
-        double denom = arma::norm(vec1, 2) * arma::norm(vec2, 2);
-        angles.at(i) = std::acos(num /denom);
-        i++;
+//        std::cout << "Atom: " << i << std::endl;
+//        std::cout << "b1" << std::endl;
+//        b1.print();
+//        std::cout << "b2" << std::endl;
+//        b2.print();
+//        std::cout << "b3" << std::endl;
+//        b3.print();
+
+        arma::vec n1 = arma::cross(b1, b2);
+        arma::vec n2 = arma::cross(b2, b3);
+
+//        std::cout << "n1" << std::endl;
+//        n1.print();
+//
+//        std::cout << "n2" << std::endl;
+//        n2.print();
+
+//        std::cout << "x" << std::endl;
+//        n1.print();
+//
+//        std::cout << "y" << std::endl;
+//        n2.print();
+
+        angles.at(i) = std::atan2(arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2));
+
+//        std::cout << angles.at(i) * (180.0 / M_PI) << std::endl;
     }
-
 }

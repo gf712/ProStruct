@@ -57,6 +57,9 @@ public:
     void kabsch_rotation(PDB &other);
     double kabsch_rmsd(PDB &other);
 
+    void rotate(arma::vec &rotation); // rotation = [rotation_x, rotation_y, rotation_z]
+    void rotate(double rotation_angle, std::string axis); // axis = {"x", "y", "z"}
+
 private:
 
     arma::mat xyz;
