@@ -68,29 +68,24 @@ void recentre_molecule(arma::mat &xyz, arma::mat &result) {
 
     get_centroid(xyz, centroid);
 
-    double x = centroid.at(0);
-    double y = centroid.at(1);
-    double z = centroid.at(2);
+    // copy array
+    result = xyz;
 
-    for (arma::uword i = 0; i < xyz.n_cols; ++i) {
-        result.at(0, i) -= x;
-        result.at(1, i) -= y;
-        result.at(2, i) -= z;
-    }
+    reposition_molecule(result, centroid);
 }
 
 
-void kabsch_rotation(arma::mat &xyz, arma::mat &other_xyz) {
+void kabsch_rotation_(arma::mat &xyz, arma::mat &other_xyz) {
 
     // source: https://en.wikipedia.org/wiki/Kabsch_algorithm
 
-    arma::mat xyz_1(3, xyz.n_rows);
-    arma::mat xyz_2(3, xyz.n_rows);
+    arma::mat xyz_1(3, xyz.n_cols);
+    arma::mat xyz_2(3, xyz.n_cols);
 
     recentre_molecule(xyz, xyz_1);
     recentre_molecule(other_xyz, xyz_2);
 
-    arma::mat A = xyz_1.t() * xyz_2;
+    arma::mat A = xyz_1 * xyz_2.t();
 
     arma::mat U;
     arma::vec s;
@@ -100,21 +95,20 @@ void kabsch_rotation(arma::mat &xyz, arma::mat &other_xyz) {
     arma::svd(U, s, V, A);
 
     // Next, decide whether we need to correct our rotation matrix to ensure a right-handed coordinate system
-    double d = arma::det(V * U.t()) > 0 ? 1 : -1;
-
     arma::mat I = arma::eye(3, 3);
-
-    I.at(2, 2) = d;
+    I.at(2, 2) = arma::det(V * U.t()) > 0 ? 1 : -1;
 
     // Finally, calculate our optimal rotation matrix -> rotationMatrix
     arma::mat rotationMatrix = V * I * U.t();
 
-    arma::mat P = xyz * U;
+    // and apply rotation to the coordinate system
+    xyz = rotationMatrix * xyz;
+}
 
-    arma::vec centroid_other(3);
+double kabsch_rmsd_(arma::mat &xyz, arma::mat &other_xyz) {
 
-    get_centroid(other_xyz, centroid_other);
+    kabsch_rotation_(xyz, other_xyz);
 
-    // centre xyz on other_xyz
-    reposition_molecule(xyz, centroid_other);
+    return rmsd(xyz, other_xyz);
+
 }

@@ -13,6 +13,8 @@ void kabsch_sander(const arma::mat&, const arma::mat&, const arma::mat&, const a
 static void predict_H_coords(arma::mat &H_coords, const arma::mat &C_coords, const arma::mat &O_coords, const arma::mat &N_coords);
 void shrake_rupley(const arma::mat &xyz, const arma::vec& radii, arma::vec &asa, int n_atoms, double probe);
 double rmsd(const arma::mat& xyz, const arma::mat& xyz_other);
+double kabsch_rmsd_(arma::mat& xyz, arma::mat& xyz_other);
+void kabsch_rotation_(arma::mat& xyz, arma::mat& xyz_other);
 void get_centroid(const arma::mat &xyz, arma::vec &centroid);
 void recentre_molecule(arma::mat &xyz);
 void recentre_molecule(arma::mat &xyz, arma::mat &result);

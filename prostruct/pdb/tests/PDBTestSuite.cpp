@@ -68,4 +68,13 @@ BOOST_AUTO_TEST_SUITE(PDBTests)
 
     }
 
+    BOOST_AUTO_TEST_CASE(Kabsch_RMSD) {
+
+        PDB pdb = PDB("test.pdb");
+
+        double rmsd = pdb.kabsch_rmsd(pdb);
+
+        BOOST_TEST(rmsd == 0.0, tt::tolerance(10e-8));
+    }
+
 BOOST_AUTO_TEST_SUITE_END()

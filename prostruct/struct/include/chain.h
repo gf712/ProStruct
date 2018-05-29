@@ -7,6 +7,8 @@
 
 #include "residue.h"
 
+typedef std::vector<atomVector> chainAtomVector;
+
 class Chain {
 public:
     Chain(std::vector<std::shared_ptr<Residue>>, std::string);
@@ -15,7 +17,7 @@ public:
 
     std::vector<std::shared_ptr<Residue>> getResidues() { return residues; }
 
-    std::vector<std::vector<std::shared_ptr<Atom>>> getBackboneAtoms() {
+    chainAtomVector getBackboneAtoms() {
         std::vector<std::vector<std::shared_ptr<Atom>>> backboneAtoms;
         backboneAtoms.reserve((nResidues));
         for(auto const& residue: residues) {

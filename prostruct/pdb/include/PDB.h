@@ -54,6 +54,9 @@ public:
 
     arma::mat calculate_phi_psi();
 
+    void kabsch_rotation(PDB &other);
+    double kabsch_rmsd(PDB &other);
+
 private:
 
     arma::mat xyz;

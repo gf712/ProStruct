@@ -215,15 +215,21 @@ arma::mat PDB::calculate_phi_psi() {
         psi_slice_ref(arma::span::all, 1) = CA_coords.col(i+1);
         psi_slice_ref(arma::span::all, 2) = C_coords.col(i+1);
         psi_slice_ref(arma::span::all, 3) = N_coords.col(i+1);
+void PDB::kabsch_rotation(PDB &other) {
 
-    }
+    // make copy of xyz
+    auto xyz_copy = other.getXYZ();
 
-    arma::vec phi(nResidues-1);
-    arma::vec psi(nResidues-1);
+    kabsch_rotation_(xyz, xyz_copy);
 
-    dihedrals(phiAtomCoords, phi);
-    dihedrals(psiAtomCoords, psi);
+}
 
-    result(arma::span(0, nResidues-1), 0) = phi;
-    result(arma::span(1, nResidues), 0) = psi;
+double PDB::kabsch_rmsd(PDB &other) {
+
+    // make copy of xyz
+    auto xyz_copy = xyz;
+    auto xyz_other_copy = other.getXYZ();
+
+    return kabsch_rmsd_(xyz_copy, xyz_other_copy);
+
 }
