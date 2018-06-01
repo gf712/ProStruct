@@ -26,8 +26,8 @@ PDB::PDB(std::string filename_) {
             try {
                 auto residue = std::make_shared<Residue>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first);
                 residues.emplace_back(residue);
-                xyz.insert_cols(nAtoms, residue->getXYZ());
-                radii.insert_rows(nAtoms, residue->getRadii());
+                xyz.insert_cols(static_cast<const arma::uword>(nAtoms), residue->getXYZ());
+                radii.insert_rows(static_cast<const arma::uword>(nAtoms), residue->getRadii());
                 nAtoms += residue->n_atoms();
             }
             catch(const char* msg){
@@ -110,7 +110,7 @@ arma::vec PDB::calculate_ASA(double probe) {
 
     // calculates atom surface accessibility using the Shrake-Rupley algorithm
 
-    arma::vec asa(nAtoms);
+    arma::vec asa(static_cast<const arma::uword>(nAtoms));
 
     shrake_rupley(xyz, radii, asa, nAtoms, probe);
 
@@ -175,7 +175,11 @@ arma::mat PDB::calculate_phi_psi() {
     //  - row 0: phi
     //  - row 1: psi
 
-    arma::mat result(nResidues, 2);
+    // different chains are not connected, therefore need ignore the C and N terminus of consecutive chains
+
+    arma::mat result(nResidues-chainOrder.size()+1, 2, arma::fill::zeros);
+
+    arma::uword atomPosition = 0;
 
     arma::mat C_coords(3, nResidues);
     arma::mat O_coords(3, nResidues);
@@ -184,37 +188,68 @@ arma::mat PDB::calculate_phi_psi() {
 
     getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
 
-    arma::cube phiAtomCoords(3,4,nResidues-1);
-    arma::cube psiAtomCoords(3,4,nResidues-1);
+    for (const auto &chainName: chainOrder) {
+        std::cout << atomPosition;
+        auto chain = chainMap[chainName];
+        auto n_residues = static_cast<arma::uword>(chain->n_residues());
 
-    // create a 3D tensor with all the relevant coordinates
+        std::cout << n_residues;
 
-    arma::mat &phi_slice_ref = phiAtomCoords.slice(0);
-    phi_slice_ref(arma::span::all, 0) = C_coords.col(0);
-    phi_slice_ref(arma::span::all, 1) = N_coords.col(0);
-    phi_slice_ref(arma::span::all, 2) = CA_coords.col(1);
-    phi_slice_ref(arma::span::all, 3) = C_coords.col(1);
+        // create a 3D tensor with all the relevant coordinates
+        arma::cube phiAtomCoords(3,4, n_residues-1);
+        arma::cube psiAtomCoords(3,4, n_residues-1);
 
-    arma::mat &psi_slice_ref = psiAtomCoords.slice(nResidues-1);
-    psi_slice_ref(arma::span::all, 0) = N_coords.col(nResidues-1);
-    psi_slice_ref(arma::span::all, 1) = CA_coords.col(nResidues);
-    psi_slice_ref(arma::span::all, 2) = C_coords.col(nResidues);
-    psi_slice_ref(arma::span::all, 3) = N_coords.col(nResidues);
+        for (arma::uword i=atomPosition; i<n_residues-1; ++i) {
 
-    for (int i = 1; i < nResidues-1; ++i) {
-        // phi angle
-        phi_slice_ref = phiAtomCoords.slice(i);
-        phi_slice_ref(arma::span::all, 0) = C_coords.col(i);
-        phi_slice_ref(arma::span::all, 1) = N_coords.col(i);
-        phi_slice_ref(arma::span::all, 2) = CA_coords.col(i+1);
-        phi_slice_ref(arma::span::all, 3) = C_coords.col(i+1);
+            // phi angle
+            phiAtomCoords.slice(i)(arma::span::all, 0) = C_coords.col(i);
+            phiAtomCoords.slice(i)(arma::span::all, 1) = N_coords.col(i+1);
+            phiAtomCoords.slice(i)(arma::span::all, 2) = CA_coords.col(i+1);
+            phiAtomCoords.slice(i)(arma::span::all, 3) = C_coords.col(i+1);
 
-        // psi angle
-        psi_slice_ref = psiAtomCoords.slice(i);
-        psi_slice_ref(arma::span::all, 0) = N_coords.col(i);
-        psi_slice_ref(arma::span::all, 1) = CA_coords.col(i+1);
-        psi_slice_ref(arma::span::all, 2) = C_coords.col(i+1);
-        psi_slice_ref(arma::span::all, 3) = N_coords.col(i+1);
+            // psi angle
+            psiAtomCoords.slice(i)(arma::span::all, 0) = N_coords.col(i);
+            psiAtomCoords.slice(i)(arma::span::all, 1) = CA_coords.col(i);
+            psiAtomCoords.slice(i)(arma::span::all, 2) = C_coords.col(i);
+            psiAtomCoords.slice(i)(arma::span::all, 3) = N_coords.col(i+1);
+
+        }
+
+        arma::vec phi(n_residues-1);
+        arma::vec psi(n_residues-1);
+
+        std::cout << "Calculating phi/psi" << std::endl;
+
+        dihedrals(phiAtomCoords, phi);
+        dihedrals(psiAtomCoords, psi);
+
+        (phi * (180.0 / M_PI)).print();
+
+        result(arma::span(atomPosition, n_residues-2), 0) = phi * (180.0 / M_PI);
+        result(arma::span(atomPosition+1, n_residues-1), 1) = psi * (180.0 / M_PI);
+
+        atomPosition+=n_residues+1;
+
+        }
+
+    return result;
+}
+
+//void rotate(arma::vec &rotation) {
+//
+//    // first check which axes need to be rotated
+//    arma::uvec mask(3);
+//    for (int i = 0; i < 3; ++i) {
+//        mask[i] = rotation[i] != 0 ? 1 : 0;
+//    }
+//
+//    // then calculate the rotation matrices
+//    for (int i = 0; i < 3; ++i) {
+//
+//    }
+//
+//}
+
 void PDB::kabsch_rotation(PDB &other) {
 
     // make copy of xyz
