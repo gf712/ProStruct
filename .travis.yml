@@ -2,6 +2,9 @@ sudo: true
 dist: trusty
 language: cpp
 os: linux
+# Handle git submodules yourself
+git:
+  submodules: false
 
 addons:
   apt:
@@ -11,7 +14,8 @@ addons:
 before_install:
   - sudo apt-get update -y
   - cd $HOME/build/gf712/ProStruct
-  - git submodule update --init
+  - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+  - git submodule update --init --recursive
   - source devtools/travis-ci/install_libraries.sh
   - cd $HOME/build/gf712/ProStruct
 
