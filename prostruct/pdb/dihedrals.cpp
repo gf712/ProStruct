@@ -2,7 +2,7 @@
 // Created by gil on 09/04/18.
 //
 
-#include "../include/geometry.h"
+#include "prostruct/pdb/geometry.h"
 
 void dihedrals(const arma::cube &atoms, arma::vec &angles) {
 
