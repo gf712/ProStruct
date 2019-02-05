@@ -6,7 +6,7 @@
 
 #include "prostruct/pdb/PDB.h"
 
-TEST(PDBTests, LoadPDB) {
+TEST(PDBTest, LoadPDB) {
 
     PDB pdb = PDB("test.pdb");
 
@@ -26,7 +26,7 @@ TEST(PDBTests, LoadPDB) {
 
 }
 
-TEST(PDBTests, PredictBackboneHBonds) {
+TEST(PDBTest, PredictBackboneHBonds) {
 
     PDB pdb = PDB("test.pdb");
 
@@ -39,7 +39,7 @@ TEST(PDBTests, PredictBackboneHBonds) {
 
 }
 
-//TEST(PDBTests, ShrakeRupley) {
+//TEST(PDBTest, ShrakeRupley) {
 //
 //    PDB pdb = PDB("test.pdb");
 //
@@ -49,7 +49,7 @@ TEST(PDBTests, PredictBackboneHBonds) {
 //
 //}
 
-TEST(PDBTests, KabschSander) {
+TEST(PDBTest, KabschSander) {
 
     PDB pdb = PDB("test.pdb");
 
@@ -62,7 +62,7 @@ TEST(PDBTests, KabschSander) {
 
 }
 
-TEST(PDBTests, Kabsch_RMSD) {
+TEST(PDBTest, Kabsch_RMSD) {
 
     PDB pdb = PDB("test.pdb");
 

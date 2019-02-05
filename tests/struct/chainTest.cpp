@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 #include "prostruct/struct/chain.h"
 
-TEST(ResidueTests, SimpleTwoAASequence) {
+TEST(ResidueTest, SimpleTwoAASequence) {
 
         auto N1   = std::make_shared<Atom>("N", "N"  , 35.446, 51.519, 6.329);
         auto CA1  = std::make_shared<Atom>("C", "CA" , 35.098, 51.281, 4.896);

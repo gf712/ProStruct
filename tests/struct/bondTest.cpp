@@ -6,7 +6,7 @@
 
 #include "prostruct/struct/bond.h"
 
-TEST(BondTests, CreateBond1) {
+TEST(BondTest, CreateBond1) {
     auto bond = Bond(1., 1., 1., 1);
 
     ASSERT_EQ(bond.getBondVector()[0], 1.);

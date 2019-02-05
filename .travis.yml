@@ -23,4 +23,4 @@ install:
 
 # Run tests
 script:
-  - ./tests/prostruct-unit-tests
+  - env CTEST_OUTPUT_ON_FAILURE=1 make test

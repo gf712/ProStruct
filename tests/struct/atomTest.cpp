@@ -6,7 +6,7 @@
 
 #include "prostruct/struct/atom.h"
 
-TEST(AtomTests, LoadAtom)
+TEST(AtomTest, LoadAtom)
 {
   auto atom = Atom("H");
 

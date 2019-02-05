@@ -6,9 +6,9 @@
 
 #include "prostruct/struct/residue.h"
 
-TEST(ResidueTests, Alanine) {
+TEST(ResidueTest, Alanine) {
 
-    auto N = std::make_shared<Atom>("N", "N", 32.653, 52.210, 0.963);
+    auto N = std::make_shared<Atom>("N", "N", 3.653, 52.210, 0.963);
     auto CA = std::make_shared<Atom>("C", "CA", 32.975, 51.134, 0.036);
     auto C = std::make_shared<Atom>("C", "C", 33.489, 49.933, 0.818);
     auto O = std::make_shared<Atom>("O", "O", 34.699, 49.738, 0.953);
@@ -28,7 +28,7 @@ TEST(ResidueTests, Alanine) {
     ASSERT_EQ(CB->getNumberOfBonds(), 1);
 }
 
-TEST(ResidueTests, Argenine) {
+TEST(ResidueTest, Argenine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 32.964, 52.298, 5.433);
     auto CA  = std::make_shared<Atom>("C", "CA" , 31.521, 52.533, 5.366);
@@ -53,7 +53,7 @@ TEST(ResidueTests, Argenine) {
     ASSERT_EQ(NH2->getNumberOfBonds(), 1);
 }
 
-TEST(ResidueTests, Asparagine) {
+TEST(ResidueTest, Asparagine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 3.649, 51.692, -4.274);
     auto CA  = std::make_shared<Atom>("C", "CA" , 3.079, 51.607, -5.619);
@@ -73,7 +73,7 @@ TEST(ResidueTests, Asparagine) {
 
 }
 
-TEST(ResidueTests, Aspartate) {
+TEST(ResidueTest, Aspartate) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , -6.741, 72.216, -0.006);
     auto CA  = std::make_shared<Atom>("C", "CA" , -6.999, 72.347,  1.416);
@@ -93,7 +93,7 @@ TEST(ResidueTests, Aspartate) {
 
 }
 
-TEST(ResidueTests, Cysteine) {
+TEST(ResidueTest, Cysteine) {
 
     auto N   = std::make_shared<Atom>("N", "N" , -21.992, 79.723, 2.270);
     auto CA  = std::make_shared<Atom>("C", "CA", -23.340, 79.793, 2.814);
@@ -108,7 +108,7 @@ TEST(ResidueTests, Cysteine) {
     ASSERT_EQ(SG->getNumberOfBonds(), 1);
 }
 
-TEST(ResidueTests, Glutamine) {
+TEST(ResidueTest, Glutamine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , -20.534, 60.952, -3.420);
     auto CA  = std::make_shared<Atom>("C", "CA" , -19.881, 59.679, -3.725);
@@ -129,7 +129,7 @@ TEST(ResidueTests, Glutamine) {
     ASSERT_EQ(NE2->getNumberOfBonds(), 1);
 }
 
-TEST(ResidueTests, Glutamate) {
+TEST(ResidueTest, Glutamate) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , -22.195, 56.100, 5.1976);
     auto CA  = std::make_shared<Atom>("C", "CA" , -22.549, 55.061, 4.2346);
@@ -151,7 +151,7 @@ TEST(ResidueTests, Glutamate) {
 
 }
 
-TEST(ResidueTests, Glycine) {
+TEST(ResidueTest, Glycine) {
 
     auto CA = std::make_shared<Atom>("C", "CA", 24.891, 31.124, -1.374);
     auto C = std::make_shared<Atom>("C", "C", 25.888, 31.452, -2.472);
@@ -182,7 +182,7 @@ TEST(ResidueTests, Glycine) {
 
 }
 
-TEST(ResidueTests, Histidine) {
+TEST(ResidueTest, Histidine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 8.641, 40.445, 10.288);
     auto CA  = std::make_shared<Atom>("C", "CA" , 8.547, 41.617, 11.155);
@@ -206,7 +206,7 @@ TEST(ResidueTests, Histidine) {
 }
 
 
-TEST(ResidueTests, Isoleucine) {
+TEST(ResidueTest, Isoleucine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 20.710, 62.644,  1.319);
     auto CA  = std::make_shared<Atom>("C", "CA" , 19.376, 62.572,  1.899);
@@ -227,7 +227,7 @@ TEST(ResidueTests, Isoleucine) {
 }
 
 
-TEST(ResidueTests, Leucine) {
+TEST(ResidueTest, Leucine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 20.621, 54.814, -13.141);
     auto CA  = std::make_shared<Atom>("C", "CA" , 20.942, 54.764, -11.719);
@@ -247,7 +247,7 @@ TEST(ResidueTests, Leucine) {
 
 }
 
-TEST(ResidueTests, Lysine) {
+TEST(ResidueTest, Lysine) {
 
     auto N  = std::make_shared<Atom>("N", "N" ,  5.800, 40.909, -14.865);
     auto CA = std::make_shared<Atom>("C", "CA",  5.579, 42.240, -15.418);
@@ -269,7 +269,7 @@ TEST(ResidueTests, Lysine) {
 
 }
 
-TEST(ResidueTests, Methionine) {
+TEST(ResidueTest, Methionine) {
 
     auto N  = std::make_shared<Atom>("N", "N" ,  1.706, 59.788, 0.807);
     auto CA = std::make_shared<Atom>("C", "CA",  0.967, 60.974, 0.418);
@@ -289,7 +289,7 @@ TEST(ResidueTests, Methionine) {
 
 }
 
-TEST(ResidueTests, Phenylalanine) {
+TEST(ResidueTest, Phenylalanine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 3.325, 74.582, -1.218);
     auto CA  = std::make_shared<Atom>("C", "CA" , 3.355, 74.056, -2.568);
@@ -315,7 +315,7 @@ TEST(ResidueTests, Phenylalanine) {
 
 }
 
-TEST(ResidueTests, Proline) {
+TEST(ResidueTest, Proline) {
 
     auto N = std::make_shared<Atom>("N", "N", 29.627, 36.149, -5.045);
     auto CA = std::make_shared<Atom>("C", "CA", 28.814, 37.262, -5.534);
@@ -335,7 +335,7 @@ TEST(ResidueTests, Proline) {
     ASSERT_EQ(CD->getNumberOfBonds(), 2);
 }
 
-TEST(ResidueTests, Serine) {
+TEST(ResidueTest, Serine) {
 
     auto N  = std::make_shared<Atom>("N", "N",  -5.690, 69.889, -2.546);
     auto CA = std::make_shared<Atom>("C", "CA", -6.410, 71.066, -2.086);
@@ -350,7 +350,7 @@ TEST(ResidueTests, Serine) {
     ASSERT_EQ(OG->getNumberOfBonds(), 1);
 }
 
-TEST(ResidueTests, TerminalThreonine) {
+TEST(ResidueTest, TerminalThreonine) {
 
     auto N =   std::make_shared<Atom>("N", "N",   25.016, 52.737, 10.944);
     auto CA =  std::make_shared<Atom>("C", "CA",  26.274, 52.269, 10.375);
@@ -369,7 +369,7 @@ TEST(ResidueTests, TerminalThreonine) {
 
 }
 
-TEST(ResidueTests, Tryptophan) {
+TEST(ResidueTest, Tryptophan) {
 
     auto N   = std::make_shared<Atom>("N", "N",   23.018, 53.170, 13.888);
     auto CA  = std::make_shared<Atom>("C", "CA",  23.537, 53.665, 12.614);
@@ -402,7 +402,7 @@ TEST(ResidueTests, Tryptophan) {
     ASSERT_EQ(CH2->getNumberOfBonds(), 2);
 }
 
-TEST(ResidueTests, Tyrosine) {
+TEST(ResidueTest, Tyrosine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , -6.507, 82.172, -8.076);
     auto CA  = std::make_shared<Atom>("C", "CA" , -6.693, 82.879, -6.809);
@@ -431,7 +431,7 @@ TEST(ResidueTests, Tyrosine) {
 
 }
 
-TEST(ResidueTests, Valine) {
+TEST(ResidueTest, Valine) {
 
     auto N   = std::make_shared<Atom>("N", "N"  , 0.691, 78.404, 3.398);
     auto CA  = std::make_shared<Atom>("C", "CA" , 0.935, 78.627, 4.815);
