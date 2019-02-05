@@ -4,7 +4,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../include/residue.h"
+#include "prostruct/struct/residue.h"
 
 static stringIndexMap backboneIndexMap = {
         {"N",  0},

@@ -26,11 +26,6 @@ public:
         load_atom(element, name, x, y, z);
     };
 
-//
-//    Atom(std::string element, std::string name, double x, double y, double z) {
-//        load_atom(element, name, x, y, z);
-//    };
-
     void addBond(std::shared_ptr<Atom> atom, int bondType);
     void addBond(std::shared_ptr<Bond> bond);
     void destroyBond(int);

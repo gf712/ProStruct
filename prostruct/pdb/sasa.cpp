@@ -2,10 +2,29 @@
 // Created by gil on 09/04/18.
 //
 
-#include "../include/geometry.h"
-#include "atom.h"
+#include "prostruct/pdb/geometry.h"
+#include "prostruct/struct/atom.h"
 
-constexpr double golden_angle = M_PI * (3 - std::sqrt(5.0));
+// compile time sqrt from https://baptiste-wicht.com/posts/2014/07/compile-integer-square-roots-at-compile-time-in-cpp.html
+static constexpr std::size_t ct_sqrt(double res, std::size_t l, std::size_t r){
+    if(l == r){
+        return r;
+    } else {
+        const auto mid = (r + l) / 2;
+
+        if(mid * mid >= res){
+            return ct_sqrt(res, l, mid);
+        } else {
+            return ct_sqrt(res, mid + 1, r);
+        }
+    }
+}
+
+static constexpr std::size_t ct_sqrt(double res){
+    return ct_sqrt(res, 1, res);
+}
+
+constexpr double golden_angle = M_PI * (3 - ct_sqrt(5.0));
 
 static void generate_sphere(int N, arma::mat& result) {
 
@@ -66,7 +85,7 @@ static void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, c
 static void get_neighbours(const arma::mat &xyz, arma::mat& neighbours, int n_atoms, const arma::vec &radii) {
 #pragma omp parallel for
     for (arma::uword i = 0; i < n_atoms; ++i) {
-        for (arma::uword j = + 1; j < n_atoms; ++j) {
+        for (arma::uword j = 1; j < n_atoms; ++j) {
             arma::vec dist(3);
             double cutoff = radii.at(i) + radii.at(j);
             double cutoff_2 = cutoff * cutoff;
@@ -90,7 +109,7 @@ void shrake_rupley(const arma::mat &xyz, const arma::vec &radii, arma::vec &asa,
 
     get_neighbours(xyz, neighbours, n_atoms, radii);
 
-    const double adjustment = 4.0 * M_PI / 1000;
+    constexpr double adjustment = 4.0 * M_PI / 1000;
 
 #pragma omp parallel for
     for (int i = 0; i < n_atoms; ++i) {

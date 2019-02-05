@@ -3,7 +3,7 @@
 //
 
 #include <algorithm>
-#include "../include/atom.h"
+#include "prostruct/struct/atom.h"
 
 static std::map<std::string, std::vector<std::string>> elementName
         {

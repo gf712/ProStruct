@@ -2,15 +2,10 @@
 // Created by gil on 29/03/18.
 //
 
-#define BOOST_TEST_MODULE ResidueTestSuite
-#define BOOST_TEST_DYN_LINK
+#include <gtest/gtest.h>
+#include "prostruct/struct/chain.h"
 
-#include <boost/test/included/unit_test.hpp>
-#include "chain.h"
-
-BOOST_AUTO_TEST_SUITE(ResidueTests)
-
-    BOOST_AUTO_TEST_CASE(SimpleTwoAASequence) {
+TEST(ResidueTests, SimpleTwoAASequence) {
 
         auto N1   = std::make_shared<Atom>("N", "N"  , 35.446, 51.519, 6.329);
         auto CA1  = std::make_shared<Atom>("C", "CA" , 35.098, 51.281, 4.896);
@@ -41,11 +36,9 @@ BOOST_AUTO_TEST_SUITE(ResidueTests)
 
         auto chain = Chain(std::vector<std::shared_ptr<Residue>>({asp, arg}), "Chain1");
 
-        BOOST_TEST(asp->getBackbone()[2]->getName() == "C");
-        BOOST_TEST(arg->getBackbone()[0]->getName() == "N");
+        ASSERT_EQ(asp->getBackbone()[2]->getName(), "C");
+        ASSERT_EQ(arg->getBackbone()[0]->getName(), "N");
 
-        BOOST_TEST(asp->getBackbone()[2]->hasBond(arg->getBackbone()[0]));
+        ASSERT_TRUE(asp->getBackbone()[2]->hasBond(arg->getBackbone()[0]));
 
-    }
-
-BOOST_AUTO_TEST_SUITE_END()
+}

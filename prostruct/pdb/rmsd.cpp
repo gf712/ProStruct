@@ -2,7 +2,7 @@
 // Created by gil on 10/04/18.
 //
 
-#include "../include/geometry.h"
+#include "prostruct/pdb/geometry.h"
 
 double rmsd(const arma::mat& xyz, const arma::mat& xyz_other) {
 

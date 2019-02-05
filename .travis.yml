@@ -10,17 +10,17 @@ addons:
 
 before_install:
   - sudo apt-get update -y
-  # make sure this is the correct directory
   - cd $HOME/build/gf712/ProStruct
+  - git submodule update --init
   - source devtools/travis-ci/install_libraries.sh
   - cd $HOME/build/gf712/ProStruct
 
 install:
   - mkdir build
   - cd build
-  - cmake -DBOOST_ROOT=$HOME/boost_1_61_0/ ..
+  - cmake -DENABLE_TESTING=ON ..
   - make -j4
 
 # Run tests
 script:
-  - env CTEST_OUTPUT_ON_FAILURE=1 make test
+  - ./tests/prostruct-unit-tests

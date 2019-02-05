@@ -6,8 +6,8 @@
 #include <cmath>
 #include <iostream>
 
-#include "../include/bond.h"
-#include "../include/atom.h"
+#include "prostruct/struct/bond.h"
+#include "prostruct/struct/atom.h"
 
 Bond::Bond(std::shared_ptr<Atom> Atom1, std::shared_ptr<Atom> Atom2, int bondType_) {
 
@@ -19,21 +19,24 @@ Bond::Bond(std::shared_ptr<Atom> Atom1, std::shared_ptr<Atom> Atom2, int bondTyp
     initialiseBond(bondType_);
 }
 
-//Bond::Bond(double x, double y, double z, int bondType) {
-//
-//    atom1 = std::weak_ptr<Atom>("H", "Atom1", 0, 0, 0);
-//    atom2 = std::weak_ptr<Atom>("H", "Atom2", x, y, z);
-//
-//    initialiseBond(bondType);
-//}
-//
-//Bond::Bond(double x1, double y1, double z1, double x2, double y2, double z2, int bondType) {
-//
-//    atom1 = std::make_shared<Atom>("H", "Atom1", x1, y1, z1);
-//    atom2 = std::make_shared<Atom>("H", "Atom2", x2, y2, z2);
-//
-//    initialiseBond(bondType);
-//}
+Bond::Bond(double x, double y, double z, int bondType) {
+
+    auto atom1_ = std::make_shared<Atom>("H", "Atom1", 0., 0., 0.);
+    auto atom2_ = std::make_shared<Atom>("H", "Atom2", x, y, z);
+
+    atom1 = atom1_;
+    atom2 = atom2_;
+
+    initialiseBond(bondType);
+}
+
+Bond::Bond(double x1, double y1, double z1, double x2, double y2, double z2, int bondType) {
+
+    atom1 = std::make_shared<Atom>("H", "Atom1", x1, y1, z1);
+    atom2 = std::make_shared<Atom>("H", "Atom2", x2, y2, z2);
+
+    initialiseBond(bondType);
+}
 
 void Bond::initialiseBond(int bondType_) {
 

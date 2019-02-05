@@ -2,7 +2,7 @@
 // Created by gil on 27/03/18.
 //
 
-#include "../include/PDB.h"
+#include "prostruct/pdb/PDB.h"
 
 PDB::PDB(std::string filename_) {
 

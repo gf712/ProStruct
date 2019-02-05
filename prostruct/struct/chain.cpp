@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include "../include/chain.h"
+#include "prostruct/struct/chain.h"
 
 Chain::Chain(std::vector<std::shared_ptr<Residue>> residues_, std::string chainName_) {
 

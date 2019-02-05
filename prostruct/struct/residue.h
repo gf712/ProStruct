@@ -5,7 +5,7 @@
 #ifndef PROSTRUCT_RESIDUE_H
 #define PROSTRUCT_RESIDUE_H
 
-#include "atom.h"
+#include "prostruct/struct/atom.h"
 #include <armadillo>
 
 typedef std::vector<std::map<std::string, std::string>> aminoAcidAtomMap;

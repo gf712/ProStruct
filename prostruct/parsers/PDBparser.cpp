@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "../include/PDBparser.h"
+#include "prostruct/parsers/PDBparser.h"
 
 inline void remove_whitespace (std::string &str) {
 

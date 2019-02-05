@@ -5,7 +5,7 @@
 #ifndef PROSTRUCT_PDBPARSER_H
 #define PROSTRUCT_PDBPARSER_H
 
-#include "chain.h"
+#include "prostruct/struct/chain.h"
 
 struct AASequenceOrder
 {

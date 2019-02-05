@@ -5,9 +5,9 @@
 #ifndef PROSTRUCT_PDB_H
 #define PROSTRUCT_PDB_H
 
-#include "chain.h"
-#include "PDBparser.h"
-#include "geometry.h"
+#include "prostruct/struct/chain.h"
+#include "prostruct/parsers/PDBparser.h"
+#include "prostruct/pdb/geometry.h"
 
 class PDB {
 

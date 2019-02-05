@@ -14,8 +14,8 @@ class Bond {
 
 public:
 
-//    Bond(double x, double y, double z, int bondType);
-//    Bond(double x1, double y1, double z1, double x2, double y2, double z2, int bondType);
+    Bond(double x, double y, double z, int bondType);
+    Bond(double x1, double y1, double z1, double x2, double y2, double z2, int bondType);
     Bond(std::shared_ptr<Atom> Atom1, std::shared_ptr<Atom> Atom2, int bondType);
 
     void initialiseBond(int);
