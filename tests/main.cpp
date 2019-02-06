@@ -9,7 +9,7 @@ int main() {
 
     std::string file = "test.pdb";
 
-    auto pdb = PDB<float>(file);
+    auto pdb = PDB<double>(file);
 
 //    auto start = std::chrono::high_resolution_clock::now();
 
@@ -18,8 +18,8 @@ int main() {
 //        auto pdb = PDB(file);
 //    }
 
-//    for (int i = 0; i < 1000; ++i) {
-//        pdb.calculate_KabschSander();
+//    for (int i = 0; i < 10000; ++i) {
+        pdb.calculate_KabschSander();
 //    }
 
 //    arma::Mat<T> result(3, 1000);
@@ -60,7 +60,7 @@ int main() {
 //
 //    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
 //
-//    printf ("Elapsed time is %li microseconds.", duration/10000);
+//    printf ("Elapsed time is %lli microseconds.\n", duration/1000);
 
 }
 

@@ -6,7 +6,7 @@ configure_file(${PROJECT_SOURCE_DIR}/tests/test.pdb ${CMAKE_BINARY_DIR}/test.pdb
 macro(package_add_test TESTNAME)
     add_executable(${TESTNAME} gtest_suite.cpp ${ARGN})
     target_link_libraries(${TESTNAME} gtest prostruct)
-    target_include_directories(${TESTNAME} PRIVATE ${PROJECT_SOURCE_DIR})
+    target_include_directories(${TESTNAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
     foreach(TEST_FILE ${ARGN})
         get_filename_component(TEST_FILENAME ${TEST_FILE} NAME_WE)
         add_test(NAME ${TEST_FILENAME}

@@ -6,9 +6,34 @@
 
 #include "prostruct/prostruct.h"
 
-TEST(PDBTest, LoadPDB) {
+template <typename T>
+constexpr T get_epsilon()
+{
+    return std::numeric_limits<T>::epsilon();
+}
+template <>
+constexpr float get_epsilon()
+{
+    return 0.01; // rmsd gets quite imprecise when working with floats
+}
+template <>
+constexpr double get_epsilon()
+{
+    return 1e-05;
+}
 
-    auto pdb = PDB<double>("test.pdb");
+
+template <typename T>
+class PDBTest : public ::testing::Test {
+
+};
+using floatTypes = ::testing::Types<float, double>;
+
+TYPED_TEST_CASE(PDBTest, floatTypes);
+
+TYPED_TEST(PDBTest, LoadPDB) {
+
+    auto pdb = PDB<TypeParam>("test.pdb");
 
     ASSERT_EQ(pdb.n_chains(), 2);
 
@@ -26,9 +51,9 @@ TEST(PDBTest, LoadPDB) {
 
 }
 
-TEST(PDBTest, PredictBackboneHBonds) {
+TYPED_TEST(PDBTest, PredictBackboneHBonds) {
 
-    auto pdb = PDB<double>("test.pdb");
+    auto pdb = PDB<TypeParam>("test.pdb");
 
     auto E = pdb.predict_backboneHbonds();
 
@@ -49,24 +74,24 @@ TEST(PDBTest, PredictBackboneHBonds) {
 //
 //}
 
-TEST(PDBTest, KabschSander) {
+TYPED_TEST(PDBTest, KabschSander) {
 
-    auto pdb = PDB<double>("test.pdb");
+    auto pdb = PDB<TypeParam>("test.pdb");
 
     auto E = pdb.calculate_KabschSander();
 
     ASSERT_EQ(E.n_rows, pdb.n_residues());
     ASSERT_EQ(E.n_cols, pdb.n_residues());
 
-    EXPECT_NEAR(E(2, 25), -1.9515432974890459, 10e-9);
+    EXPECT_NEAR(E(2, 25), -1.9515432974890459, get_epsilon<TypeParam>());
 
 }
 
-TEST(PDBTest, Kabsch_RMSD) {
+TYPED_TEST(PDBTest, Kabsch_RMSD) {
 
-    auto pdb = PDB<double>("test.pdb");
+    auto pdb = PDB<TypeParam>("test.pdb");
 
     auto rmsd = pdb.kabsch_rmsd(pdb);
 
-    EXPECT_NEAR(rmsd, 0.0, 10e-7);
+    EXPECT_NEAR(rmsd, 0.0, get_epsilon<TypeParam>());
 }
