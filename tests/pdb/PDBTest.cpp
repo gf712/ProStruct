@@ -64,15 +64,13 @@ TYPED_TEST(PDBTest, PredictBackboneHBonds) {
 
 }
 
-//TEST(PDBTest, ShrakeRupley) {
-//
-//    PDB pdb = PDB("test.pdb");
-//
-//    arma::Col<T> asa = pdb.calculate_ASA(1.4);
-//
-//    EXPECT_NEAR(asa.at(0), 43.953897152668652, 10e-9);
-//
-//}
+TYPED_TEST(PDBTest, ShrakeRupley) {
+
+    auto pdb = PDB<TypeParam>("test.pdb");
+    auto asa = pdb.calculate_ASA(1.4);
+
+    EXPECT_NEAR(asa.at(0), 43.953897152668652, get_epsilon<TypeParam>());
+}
 
 TYPED_TEST(PDBTest, KabschSander) {
 

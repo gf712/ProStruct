@@ -5,26 +5,7 @@
 #include "prostruct/pdb/geometry.h"
 #include "prostruct/struct/atom.h"
 
-// compile time sqrt from https://baptiste-wicht.com/posts/2014/07/compile-integer-square-roots-at-compile-time-in-cpp.html
-static constexpr std::size_t ct_sqrt(double res, std::size_t l, std::size_t r){
-    if(l == r){
-        return r;
-    } else {
-        const auto mid = (r + l) / 2;
-
-        if(mid * mid >= res){
-            return ct_sqrt(res, l, mid);
-        } else {
-            return ct_sqrt(res, mid + 1, r);
-        }
-    }
-}
-
-static constexpr std::size_t ct_sqrt(double res){
-    return ct_sqrt(res, 1, res);
-}
-
-constexpr double golden_angle = M_PI * (3 - ct_sqrt(5.0));
+constexpr double golden_angle = 2.399963229728653;
 
 template <typename T>
 void generate_sphere(int N, arma::Mat<T>& result) {
@@ -33,8 +14,8 @@ void generate_sphere(int N, arma::Mat<T>& result) {
 
     for (arma::uword i = 0; i < N; ++i) {
 
-        T y = i * offset - 1 + (offset / 2);
-        T r = std::sqrt(1 - y*y);
+        T y = i * offset - 1.0 + (offset / 2.0);
+        T r = std::sqrt(1.0 - y*y);
 
         T t = i * golden_angle;
 
