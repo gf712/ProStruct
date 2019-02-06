@@ -1,4 +1,4 @@
-set(TARGET_NAME libprostruct)
+set(TARGET_NAME prostruct)
 
 file(GLOB_RECURSE SOURCE_FILES ${PROJECT_SOURCE_DIR}/prostruct/*.cpp)
 

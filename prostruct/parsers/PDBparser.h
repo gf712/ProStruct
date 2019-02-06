@@ -9,7 +9,7 @@
 
 struct AASequenceOrder
 {
-    bool operator()(std::string const& left, std::string const& right) const
+    bool operator()(const std::string& left, const std::string& right) const
     {
         std::string::size_type p_r  = right.find('-');
         std::string::size_type pp_r  = right.find('-', p_r+1);
@@ -29,8 +29,8 @@ struct AASequenceOrder
     }
 };
 
-void createMap(std::string &, std::map<std::string, std::map<std::string, std::vector<std::shared_ptr<Atom>>, AASequenceOrder>> &,
+template <typename T>
+void createMap(const std::string &, std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>> &,
                std::vector<std::string> &);
-
 
 #endif //PROSTRUCT_PDBPARSER_H

@@ -26,16 +26,17 @@ static constexpr std::size_t ct_sqrt(double res){
 
 constexpr double golden_angle = M_PI * (3 - ct_sqrt(5.0));
 
-static void generate_sphere(int N, arma::mat& result) {
+template <typename T>
+void generate_sphere(int N, arma::Mat<T>& result) {
 
-    double offset = 2.0 / N;
+    T offset = 2.0 / N;
 
     for (arma::uword i = 0; i < N; ++i) {
 
-        double y = i * offset - 1 + (offset / 2);
-        double r = std::sqrt(1 - y*y);
+        T y = i * offset - 1 + (offset / 2);
+        T r = std::sqrt(1 - y*y);
 
-        double t = i * golden_angle;
+        T t = i * golden_angle;
 
         result.at(0, i) = r * std::cos(t); // x
         result.at(1, i) = y; // y
@@ -43,12 +44,12 @@ static void generate_sphere(int N, arma::mat& result) {
     }
 }
 
+template <typename T>
+void calculate_atom_SASA(const arma::Mat<T>& xyz, const arma::Col<T>& radius, const arma::subview_col<T>& neighbours,
+                         const int current_atom_index, const T probe, const arma::Mat<T> &sphere_points,
+                         const T adjustment, arma::Col<T>& asa) {
 
-static void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, const arma::vec& neighbours,
-                         const int current_atom_index, const double probe, const arma::mat &sphere_points,
-                         const double adjustment, arma::vec& asa) {
-
-    arma::vec atom_XYZ = xyz.col(current_atom_index);
+    arma::Col<T> atom_XYZ = xyz.col(current_atom_index);
     arma::uvec neighbourIndices = arma::find(neighbours, 0);
 
     double atomRadius = probe + radius.at(current_atom_index);
@@ -57,7 +58,7 @@ static void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, c
 
     int k = 0;
     for (int i = 0; i < 1000; ++i) {
-        arma::vec current_sphere_point(3);
+        arma::Col<T> current_sphere_point(3);
         current_sphere_point.at(0) = sphere_points.at(0, i) * atomRadius + atom_XYZ.at(0);
         current_sphere_point.at(1) = sphere_points.at(1, i) * atomRadius + atom_XYZ.at(1);
         current_sphere_point.at(2) = sphere_points.at(2, i) * atomRadius + atom_XYZ.at(2);
@@ -82,11 +83,12 @@ static void calculate_atom_SASA(const arma::mat& xyz, const arma::vec& radius, c
     asa.at(current_atom_index) = adjustment * accessiblePoints * atomRadius * atomRadius;
 }
 
-static void get_neighbours(const arma::mat &xyz, arma::mat& neighbours, int n_atoms, const arma::vec &radii) {
+template <typename T>
+void get_neighbours(const arma::Mat<T> &xyz, arma::Mat<T>& neighbours, int n_atoms, const arma::Col<T> &radii) {
 #pragma omp parallel for
     for (arma::uword i = 0; i < n_atoms; ++i) {
         for (arma::uword j = 1; j < n_atoms; ++j) {
-            arma::vec dist(3);
+            arma::Col<T> dist(3);
             double cutoff = radii.at(i) + radii.at(j);
             double cutoff_2 = cutoff * cutoff;
             dist.at(0) = xyz.at(0, i) - xyz.at(0, j);
@@ -100,21 +102,28 @@ static void get_neighbours(const arma::mat &xyz, arma::mat& neighbours, int n_at
     }
 }
 
-void shrake_rupley(const arma::mat &xyz, const arma::vec &radii, arma::vec &asa, int n_atoms, double probe) {
+template <typename T>
+void shrake_rupley(const arma::Mat<T> &xyz, const arma::Col<T> &radii, arma::Col<T> &asa, int n_atoms, T probe) {
 
-    arma::mat sphere_points(3, 1000);
-    arma::mat neighbours(n_atoms, n_atoms, arma::fill::zeros);
+    arma::Mat<T> sphere_points(3, 1000);
+    arma::Mat<T> neighbours(n_atoms, n_atoms, arma::fill::zeros);
 
     generate_sphere(1000, sphere_points);
 
     get_neighbours(xyz, neighbours, n_atoms, radii);
 
-    constexpr double adjustment = 4.0 * M_PI / 1000;
+    constexpr T adjustment = 4.0 * M_PI / 1000;
 
 #pragma omp parallel for
     for (int i = 0; i < n_atoms; ++i) {
         calculate_atom_SASA(xyz, radii, neighbours.col(i), i, probe, sphere_points, adjustment, asa);
     }
-
-//    asa.t().print();
 }
+
+template void calculate_atom_SASA(const arma::Mat<float>&, const arma::Col<float>&, const arma::subview_col<float>&,
+                                  const int, const float, const arma::Mat<float>&, const float, arma::Col<float>&);
+template void calculate_atom_SASA(const arma::Mat<double>&, const arma::Col<double>&, const arma::subview_col<double>&,
+                                  const int, const double, const arma::Mat<double>&, const double, arma::Col<double>&);
+
+template void shrake_rupley(const arma::Mat<float>&, const arma::Col<float>&, arma::Col<float>&, int n_atoms, float probe);
+template void shrake_rupley(const arma::Mat<double>&, const arma::Col<double>&, arma::Col<double>&, int n_atoms, double probe);

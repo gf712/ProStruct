@@ -3,9 +3,10 @@
 //
 
 #include <algorithm>
+#include <memory>
 #include "prostruct/struct/atom.h"
 
-static std::map<std::string, std::vector<std::string>> elementName
+static const std::map<std::string, std::vector<std::string>> elementName
         {
                 //       name
                 {"H" , {"Hydrogen",    }},
@@ -128,7 +129,7 @@ static std::map<std::string, std::vector<std::string>> elementName
                 {"Uo", {"Ununoctium",  }}
         };
 
-static std::map<std::string, std::vector<double>> elementDescription
+static const std::map<std::string, std::vector<double>> elementDescription
         {
                 // atomic number, atomic weight
                 {"H" , {1,   1.0079  }},
@@ -251,7 +252,8 @@ static std::map<std::string, std::vector<double>> elementDescription
                 {"Uo", {118, 294     }}
         };
 
-void Atom::load_atom(std::string element_) {
+template <typename T>
+void Atom<T>::load_atom(const std::string& element_) {
 
     /// Private method of Atom to load all the information
     /// of the given atom if it exists
@@ -263,12 +265,13 @@ void Atom::load_atom(std::string element_) {
     if (elementDescription.find(element) == elementDescription.end())
         throw "Unknown element: " + element;
 
-    atomicNumber = static_cast<int>(elementDescription[element][0]);
-    atomicWeight = elementDescription[element][1];
-    name = elementName[element][0];
+    atomicNumber = static_cast<int>(elementDescription.at(element)[0]);
+    atomicWeight = elementDescription.at(element)[1];
+    name = elementName.at(element)[0];
 }
 
-void Atom::load_atom(std::string element_, std::string name_) {
+template <typename T>
+void Atom<T>::load_atom(const std::string& element_, const std::string& name_) {
 
     /// Private method of Atom to load all the information
     /// of the given atom if it exists
@@ -280,13 +283,13 @@ void Atom::load_atom(std::string element_, std::string name_) {
     if (elementDescription.find(element) == elementDescription.end())
         throw "Unknown element: " + element;
 
-    atomicNumber = static_cast<int>(elementDescription[element][0]);
-    atomicWeight = elementDescription[element][1];
+    atomicNumber = static_cast<int>(elementDescription.at(element)[0]);
+    atomicWeight = elementDescription.at(element)[1];
     name = name_;
 }
 
-
-void Atom::load_atom(std::string element_, std::string name_, double x_, double y_, double z_) {
+template <typename T>
+void Atom<T>::load_atom(const std::string& element_, const std::string& name_, T x_, T y_, T z_) {
 
     /// Private method of Atom to load all the information
     /// of the given atom if it exists
@@ -298,20 +301,20 @@ void Atom::load_atom(std::string element_, std::string name_, double x_, double 
     if (elementDescription.find(element) == elementDescription.end())
         throw "Unknown element: " + element;
 
-    atomicNumber = static_cast<int>(elementDescription[element][0]);
-    atomicWeight = elementDescription[element][1];
+    atomicNumber = static_cast<int>(elementDescription.at(element)[0]);
+    atomicWeight = elementDescription.at(element)[1];
     name = name_;
     x=x_;
     y=y_;
     z=z_;
 }
 
-
-void Atom::addBond(std::shared_ptr<Atom> atom, int atomType) {
+template <typename T>
+void Atom<T>::addBond(std::shared_ptr<Atom<T>> atom, int atomType) {
 
     // assumes that an atom can at most form 4 bonds
     if (bonds.size() < 4) {
-        auto newBond = std::make_shared<Bond>(shared_from_this(), atom, atomType);
+        auto newBond = std::make_shared<Bond<T>>(getAtom(), atom, atomType);
         bonds.emplace_back(newBond);
         // adds Bond to second Atom
         atom->addBond(newBond);
@@ -320,7 +323,8 @@ void Atom::addBond(std::shared_ptr<Atom> atom, int atomType) {
         throw "Atom can form at most 4 bonds";
 }
 
-void Atom::addBond(std::shared_ptr<Bond> bond) {
+template <typename T>
+void Atom<T>::addBond(std::shared_ptr<Bond<T>> bond) {
 
     // assumes that an atom can at most form 4 bonds
     if (bonds.size() < 4) {
@@ -330,15 +334,16 @@ void Atom::addBond(std::shared_ptr<Bond> bond) {
         throw "Atom can form at most 4 bonds";
 }
 
-
-void Atom::destroyBond(int bondIndex) {
+template <typename T>
+void Atom<T>::destroyBond(int bondIndex) {
     // destroy reference to this bond from pairing atom
     bonds[bondIndex]->getAtom1()->destroyBond(bonds[bondIndex]);
     // destroy reference to this bond from this atom
     bonds.erase(bonds.begin() + bondIndex);
 }
 
-void Atom::destroyBond(std::shared_ptr<Bond> bondP) {
+template <typename T>
+void Atom<T>::destroyBond(std::shared_ptr<Bond<T>> bondP) {
 
     auto iter = std::find(bonds.begin(), bonds.end(), bondP);
 
@@ -349,7 +354,8 @@ void Atom::destroyBond(std::shared_ptr<Bond> bondP) {
     bonds.erase(iter);
 }
 
-bool Atom::hasBond(const std::shared_ptr<Atom> &atom2) {
+template <typename T>
+bool Atom<T>::hasBond(const std::shared_ptr<Atom<T>> &atom2) {
 
     // Checks if there is a bond between this and atom2
     // Note that the bond has no direction, therefore need
@@ -360,3 +366,6 @@ bool Atom::hasBond(const std::shared_ptr<Atom> &atom2) {
     }
     return false;
 }
+
+template class Atom<float>;
+template class Atom<double>;

@@ -32,20 +32,21 @@ enum SS_Types {
     Blank
 };
 
-static void predict_H_coords(arma::mat &H_coords, const arma::mat &C_coords, const arma::mat &O_coords,
-                      const arma::mat &N_coords) {
+template <typename T>
+void predict_H_coords(arma::Mat<T> &H_coords, const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords,
+                      const arma::Mat<T> &N_coords) {
 
 //    for (arma::uword j = 1; j < H_coords.n_cols; ++j) {
 //        H_coords.at(0, j - 1) = j;
 //    }
 //
-//    H_coords.each_col([&](arma::vec &col) {col = (C_coords.col(static_cast<const arma::uword>(col[0])-1) -
+//    H_coords.each_col([&](arma::Col<T> &col) {col = (C_coords.col(static_cast<const arma::uword>(col[0])-1) -
 //                                                  O_coords.col(static_cast<const arma::uword>(col[0])-1)) /
 //                                                  arma::norm(C_coords.col(static_cast<const arma::uword>(col[0])-1) -
 //                                                             O_coords.col(static_cast<const arma::uword>(col[0])-1), 2) +
 //                                                  N_coords.col(static_cast<const arma::uword>(col[0]));});
 
-    arma::vec co(3);
+    arma::Col<T> co(3);
 
     for (arma::uword i = 1; i < H_coords.n_cols; ++i) {
 
@@ -54,7 +55,7 @@ static void predict_H_coords(arma::mat &H_coords, const arma::mat &C_coords, con
         co.at(2) = C_coords.at(2, i - 1) - O_coords.at(2, i - 1);
 
         // CO norm -> distance between C and O in backbone of residue i - 1
-        double co_norm = arma::norm(co, 2);
+        T co_norm = arma::norm(co, 2);
 
         co.at(0) /= co_norm;
         co.at(1) /= co_norm;
@@ -68,14 +69,14 @@ static void predict_H_coords(arma::mat &H_coords, const arma::mat &C_coords, con
     }
 }
 
+template <typename T>
+void kabsch_sander(const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords, const arma::Mat<T> &N_coords, const arma::Mat<T> &CA_coords,
+                   std::vector<bool> &hasHbond, arma::Mat<T> &E, const arma::uword n_residues) {
 
-void kabsch_sander(const arma::mat &C_coords, const arma::mat &O_coords, const arma::mat &N_coords, const arma::mat &CA_coords,
-                   std::vector<bool> &hasHbond, arma::mat &E, const arma::uword n_residues) {
+    T ca_dist_squared = 81;
+    static arma::Col<T> zerosVec = std::vector<T>({0,0,0});
 
-    double ca_dist_squared = 81;
-    static arma::vec zerosVec = std::vector<double>({0,0,0});
-
-    arma::mat H_coords(3, n_residues);
+    arma::Mat<T> H_coords(3, n_residues);
 //    H_coords.insert_cols(0, zerosVec);
 
     predict_H_coords(H_coords, C_coords, O_coords, N_coords);
@@ -121,21 +122,21 @@ static void predict_alpha_helix() {
 
 
 }
-
-static void predict_beta_sheet() {
+//template <typename T>
+void predict_beta_sheet() {
 
 
 
 }
 
-
-void dssp(const arma::mat &C_coords, const arma::mat &O_coords, const arma::mat &N_coords, const arma::mat &CA_coords) {
+template <typename T>
+void dssp(const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords, const arma::Mat<T> &N_coords, const arma::Mat<T> &CA_coords) {
 
     arma::uword n_residues = C_coords.n_cols;
     std::vector<bool> has_Hbond(n_residues, false);
 
     // All the code is in column major -> each cartesian point is stored in a column (rather than a row)
-    arma::mat E(n_residues, n_residues);
+    arma::Mat<T> E(n_residues, n_residues);
 
     kabsch_sander(C_coords, O_coords, N_coords, CA_coords, has_Hbond, E, n_residues);
 
@@ -146,3 +147,11 @@ void dssp(const arma::mat &C_coords, const arma::mat &O_coords, const arma::mat 
     predict_beta_sheet();
 
 }
+
+template void kabsch_sander(const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&,
+        std::vector<bool>&, arma::Mat<float>&, const arma::uword);
+template void kabsch_sander(const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&,
+        std::vector<bool>&, arma::Mat<double>&, const arma::uword);
+
+template void dssp(const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&);
+template void dssp(const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&);

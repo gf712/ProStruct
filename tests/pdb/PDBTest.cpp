@@ -4,11 +4,11 @@
 
 #include "gtest/gtest.h"
 
-#include "prostruct/pdb/PDB.h"
+#include "prostruct/prostruct.h"
 
 TEST(PDBTest, LoadPDB) {
 
-    PDB pdb = PDB("test.pdb");
+    auto pdb = PDB<double>("test.pdb");
 
     ASSERT_EQ(pdb.n_chains(), 2);
 
@@ -28,9 +28,9 @@ TEST(PDBTest, LoadPDB) {
 
 TEST(PDBTest, PredictBackboneHBonds) {
 
-    PDB pdb = PDB("test.pdb");
+    auto pdb = PDB<double>("test.pdb");
 
-    arma::mat E = pdb.predict_backboneHbonds();
+    auto E = pdb.predict_backboneHbonds();
 
     int total = std::accumulate(E.begin(), E.end(), 0);
 
@@ -43,7 +43,7 @@ TEST(PDBTest, PredictBackboneHBonds) {
 //
 //    PDB pdb = PDB("test.pdb");
 //
-//    arma::vec asa = pdb.calculate_ASA(1.4);
+//    arma::Col<T> asa = pdb.calculate_ASA(1.4);
 //
 //    EXPECT_NEAR(asa.at(0), 43.953897152668652, 10e-9);
 //
@@ -51,9 +51,9 @@ TEST(PDBTest, PredictBackboneHBonds) {
 
 TEST(PDBTest, KabschSander) {
 
-    PDB pdb = PDB("test.pdb");
+    auto pdb = PDB<double>("test.pdb");
 
-    arma::mat E = pdb.calculate_KabschSander();
+    auto E = pdb.calculate_KabschSander();
 
     ASSERT_EQ(E.n_rows, pdb.n_residues());
     ASSERT_EQ(E.n_cols, pdb.n_residues());
@@ -64,9 +64,9 @@ TEST(PDBTest, KabschSander) {
 
 TEST(PDBTest, Kabsch_RMSD) {
 
-    PDB pdb = PDB("test.pdb");
+    auto pdb = PDB<double>("test.pdb");
 
-    double rmsd = pdb.kabsch_rmsd(pdb);
+    auto rmsd = pdb.kabsch_rmsd(pdb);
 
     EXPECT_NEAR(rmsd, 0.0, 10e-7);
 }

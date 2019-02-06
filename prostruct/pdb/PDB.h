@@ -9,6 +9,7 @@
 #include "prostruct/parsers/PDBparser.h"
 #include "prostruct/pdb/geometry.h"
 
+template <typename T>
 class PDB {
 
 public:
@@ -27,52 +28,53 @@ public:
         return chainOrder;
     }
 
-    std::shared_ptr<Chain> getChain(std::string name_) { return chainMap[name_]; }
+    std::shared_ptr<Chain<T>> getChain(std::string name_) { return chainMap[name_]; }
 
-    arma::mat calculate_KabschSander();
+    arma::Mat<T> calculate_KabschSander();
 
-    arma::mat predict_backboneHbonds();
+    arma::Mat<T> predict_backboneHbonds();
 
     void calculate_dssp();
 
-    arma::mat getXYZ() { return xyz; }
+    arma::Mat<T> getXYZ() { return xyz; }
 
     int n_residues() { return nResidues; }
 
     int n_atoms() { return nAtoms; }
 
-    arma::vec getRadii() { return radii; }
+    arma::Col<T> getRadii() { return radii; }
 
-    arma::vec calculate_ASA(double probe);
+    arma::Col<T> calculate_ASA(T probe);
 
     double calculate_RMSD(PDB& other);
 
-    arma::vec calculate_centroid();
-    arma::mat select(std::string);
+    arma::Col<T> calculate_centroid();
+    arma::Mat<T> select(std::string);
 
     void recentre();
 
-    arma::mat calculate_phi_psi();
+    arma::Mat<T> calculate_phi_psi();
 
-    void kabsch_rotation(PDB &other);
-    double kabsch_rmsd(PDB &other);
+    void kabsch_rotation(PDB<T> &other);
+    T kabsch_rmsd(PDB<T> &other);
 
-    void rotate(arma::vec &rotation); // rotation = [rotation_x, rotation_y, rotation_z]
-    void rotate(double rotation_angle, std::string axis); // axis = {"x", "y", "z"}
+    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x, rotation_y, rotation_z]
+    void rotate(T rotation_angle, std::string axis); // axis = {"x", "y", "z"}
 
 private:
 
-    arma::mat xyz;
+    arma::Mat<T> xyz;
     std::string filename;
     int numberOfChains;
-    std::map<std::string, std::shared_ptr<Chain>> chainMap;
+    std::map<std::string, std::shared_ptr<Chain<T>>> chainMap;
     int nAtoms;
     std::vector<std::string> chainOrder;
     arma::uword nResidues;
-    arma::vec radii;
-    void getBackboneAtoms(arma::mat&, arma::mat&, arma::mat&, arma::mat&);
-    void internalKS(arma::mat&);
+    arma::Col<T> radii;
+    void getBackboneAtoms(arma::Mat<T>&, arma::Mat<T>&, arma::Mat<T>&, arma::Mat<T>&);
+    void internalKS(arma::Mat<T>&);
 };
+
 
 
 #endif //PROSTRUCT_PDB_H

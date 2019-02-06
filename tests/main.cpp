@@ -2,17 +2,16 @@
 // Created by gil on 29/03/18.
 //
 
-#include "PDB.h"
-#include "geometry.h"
+#include "prostruct/prostruct.h"
 #include <armadillo>
 
 int main() {
 
     std::string file = "test.pdb";
 
-    auto pdb = PDB(file);
+    auto pdb = PDB<float>(file);
 
-    auto start = std::chrono::high_resolution_clock::now();
+//    auto start = std::chrono::high_resolution_clock::now();
 
 //    for (int i = 0; i < 100; ++i) {
 //
@@ -23,12 +22,12 @@ int main() {
 //        pdb.calculate_KabschSander();
 //    }
 
-//    arma::mat result(3, 1000);
+//    arma::Mat<T> result(3, 1000);
 //    generate_sphere(1000, result);
 
 //    std::cout << std::accumulate(pdb.predict_backboneHbonds().begin(), pdb.predict_backboneHbonds().end(), 0) << std::endl;
 
-//    arma::vec test;
+//    arma::Col<T> test;
 
 //    for (int i = 0; i < 100; ++i) {
 
@@ -37,16 +36,16 @@ int main() {
 //    }
 
 //    pdb.getXYZ().col(1).print();
-    arma::mat xyz = pdb.getXYZ();
-    for (int j = 0; j < 10000; ++j) {
+//    arma::Mat<T> xyz = pdb.getXYZ();
+//    for (int j = 0; j < 10000; ++j) {
+//
+//        double sum = 0.0;
 
-        double sum = 0.0;
-
-//    arma::mat::col_iterator col_it     = xyz.begin_col(0);  // start of column 1
-//    arma::mat::col_iterator col_it_end = xyz.end_col(xyz.n_cols);    //   end of column 3
+//    arma::Mat<T>::col_iterator col_it     = xyz.begin_col(0);  // start of column 1
+//    arma::Mat<T>::col_iterator col_it_end = xyz.end_col(xyz.n_cols);    //   end of column 3
 
 
-    }
+//    }
 
 
 //    std::cout << sum;
@@ -57,11 +56,11 @@ int main() {
 
 //    calculate_SASA(pdb.getXYZ(), pdb.n_atoms(), 2);
 
-    auto end = std::chrono::high_resolution_clock::now();
-
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
-
-    printf ("Elapsed time is %li microseconds.", duration/10000);
+//    auto end = std::chrono::high_resolution_clock::now();
+//
+//    auto duration = std::chrono::duration_cast<std::chrono::microseconds>( end - start ).count();
+//
+//    printf ("Elapsed time is %li microseconds.", duration/10000);
 
 }
 

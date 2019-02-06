@@ -5,6 +5,6 @@
 #ifndef PROSTRUCT_PROSTRUCT_H
 #define PROSTRUCT_PROSTRUCT_H
 
-#include "pdb/include/PDB.h"
+#include "pdb/PDB.h"
 
 #endif //PROSTRUCT_PROSTRUCT_H
