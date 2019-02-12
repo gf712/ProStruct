@@ -158,7 +158,6 @@ const static aminoAcidAtomMap aminoAcidAtoms
                 {{"N", "-C"}, {"C", "CA"}, {"O", "C"}, {"OXT", "C"}, {"CB", "CA"}, {"HA", "CA"}, {"CA", "N"}, {"CG1","CB"}, {"CG2", "CB"}, {"HB" , "CB"}, {"CG1", "HG11"}, {"CG1", "HG12"}, {"CG1", "HG13"}, {"CG2", "HG21"},{"CG2", "HG22"},{"CG2", "HG23"},{"H", "N"},{"H2", "N"},{"H3", "N"},{"HXT", "OXT"}}
         };
 
-
 const static stringIndexMap aminoAcidIndex
         {
                 {"ARG",  0},

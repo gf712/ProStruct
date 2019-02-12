@@ -5,7 +5,7 @@
 #include "prostruct/pdb/PDB.h"
 
 template <typename T>
-PDB<T>::PDB(std::string filename_) {
+PDB<T>::PDB(const std::string& filename_) {
 
     filename = filename_;
 

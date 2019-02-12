@@ -6,7 +6,9 @@ add_library(${TARGET_NAME} SHARED
         ${SOURCE_FILES}
         )
 
-target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
+set(PROSTRUCT_INCLUDE ${PROJECT_SOURCE_DIR}/src)
+
+target_include_directories(${TARGET_NAME} PUBLIC ${PROSTRUCT_INCLUDE})
 
 target_link_libraries(${TARGET_NAME} PUBLIC
         ${ARMADILLO_LIBRARIES}

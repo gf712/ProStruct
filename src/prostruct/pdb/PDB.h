@@ -14,7 +14,7 @@ class PDB {
 
 public:
 
-    PDB(std::string filename);
+    PDB(const std::string& filename);
 
     ~PDB() = default;
 
@@ -49,7 +49,7 @@ public:
     double calculate_RMSD(PDB& other);
 
     arma::Col<T> calculate_centroid();
-    arma::Mat<T> select(std::string);
+//    arma::Mat<T> select(std::string);
 
     void recentre();
 
@@ -58,8 +58,8 @@ public:
     void kabsch_rotation(PDB<T> &other);
     T kabsch_rmsd(PDB<T> &other);
 
-    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x, rotation_y, rotation_z]
-    void rotate(T rotation_angle, std::string axis); // axis = {"x", "y", "z"}
+//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x, rotation_y, rotation_z]
+//    void rotate(T rotation_angle, std::string axis); // axis = {"x", "y", "z"}
 
 private:
 
