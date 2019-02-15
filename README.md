@@ -1,10 +1,17 @@
 [![Build Status](https://travis-ci.org/gf712/ProStruct.svg?branch=master)](https://travis-ci.org/gf712/ProStruct)
 
 # ProStruct
-ProStruct is a protein structure analysis tool with the end goal of becoming a solution for protein structure analysis with high performance computing. Got a long way to go!
+ProStruct is a protein structure analysis tool with the end goal of becoming a solution for protein structure analysis
+with high performance computing.
 
-This is a C++ library, because it's fast and becoming quite accessible. Ultimately I will write CUDA code to cover the heavy lifting.
+To achieve fast speeds and maximise performance given the available linear algebra libraries ProStruct uses
+Armadillo. Armadillo can currently use BLAS/LAPACK, OpenBLAS, MKL and NVBLAS. In addition the code is parallelised
+where possible using OpenMP (with intra and intercore optimisations).
 
-There are no concrete plans at the moment to what it will be able to do, it will primarily depend on my needs during my PhD and integration with [AbPyTools-Qt](https://github.com/gf712/AbPyTools-Qt/).
+In addition, ProStruct is available in Python (currently limited) using SWIG. Hopefully the list of interfaces will
+continue to grow.
 
-It will initially focus mainly on finding local clusters of residues.
+I also try to write C++ code using the latest standards, so you might need a relatively recent compiler to build
+Prostruct.
+
+Contributions are welcome!
