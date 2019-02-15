@@ -5,6 +5,8 @@
 #include <iostream>
 #include "prostruct/struct/chain.h"
 
+using namespace prostruct;
+
 template <typename T>
 Chain<T>::Chain(std::vector<std::shared_ptr<Residue<T>>> residues_, std::string chainName_) {
 

@@ -115,6 +115,9 @@ T kabsch_rmsd_(arma::Mat<T> &xyz, arma::Mat<T> &other_xyz) {
 
 }
 
+template float rmsd(const arma::Mat<float>&, const arma::Mat<float>&);
+template double rmsd(const arma::Mat<double>&, const arma::Mat<double>&);
+
 template void get_centroid(const arma::Mat<float>&, arma::Col<float>&);
 template void get_centroid(const arma::Mat<double>&, arma::Col<double>&);
 

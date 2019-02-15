@@ -1,5 +1,9 @@
+cmake_minimum_required(VERSION 3.13)
+
 set(TARGET_NAME prostruct_interface)
 cmake_policy(SET CMP0078 NEW)
+cmake_policy(SET CMP0086 NEW)
+
 
 include(${SWIG_USE_FILE})
 

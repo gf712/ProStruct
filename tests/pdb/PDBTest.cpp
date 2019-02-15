@@ -6,6 +6,8 @@
 
 #include "prostruct/prostruct.h"
 
+using namespace prostruct;
+
 template <typename T>
 constexpr T get_epsilon()
 {

@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 #include "prostruct/struct/chain.h"
 
+using namespace prostruct;
 
 TEST(ResidueTest, SimpleTwoAASequence) {
 

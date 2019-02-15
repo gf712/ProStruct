@@ -5,6 +5,8 @@
 #include "prostruct/prostruct.h"
 #include <armadillo>
 
+using namespace prostruct;
+
 int main() {
 
     std::string file = "test.pdb";

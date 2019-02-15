@@ -4,6 +4,8 @@
 
 #include "prostruct/pdb/PDB.h"
 
+using namespace prostruct;
+
 template <typename T>
 PDB<T>::PDB(const std::string& filename_) {
 
@@ -185,14 +187,16 @@ arma::Mat<T> PDB<T>::calculate_phi_psi() {
 
     arma::Mat<T> result(nResidues-chainOrder.size()+1, 2, arma::fill::zeros);
 
-    arma::uword atomPosition = 0;
+//	arma::Mat<T> result(3, nResidues*4, arma::fill::zeros);
 
-    arma::Mat<T> C_coords(3, nResidues);
-    arma::Mat<T> O_coords(3, nResidues);
-    arma::Mat<T> N_coords(3, nResidues);
-    arma::Mat<T> CA_coords(3, nResidues);
+	arma::uword atomPosition = 0;
 
-    getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
+    arma::Mat<T> C_coords(3, nResidues, arma::fill::zeros);
+    arma::Mat<T> O_coords(3, nResidues, arma::fill::zeros);
+    arma::Mat<T> N_coords(3, nResidues, arma::fill::zeros);
+    arma::Mat<T> CA_coords(3, nResidues, arma::fill::zeros);
+
+	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
 
     for (const auto &chainName: chainOrder) {
         std::cout << atomPosition;
@@ -235,8 +239,8 @@ arma::Mat<T> PDB<T>::calculate_phi_psi() {
         result(arma::span(atomPosition+1, n_residues-1), 1) = psi * (180.0 / M_PI);
 
         atomPosition+=n_residues+1;
-
-        }
+		return result;
+	}
 
     return result;
 }

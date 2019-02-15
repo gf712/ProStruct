@@ -36,37 +36,11 @@ template <typename T>
 void predict_H_coords(arma::Mat<T> &H_coords, const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords,
                       const arma::Mat<T> &N_coords) {
 
-//    for (arma::uword j = 1; j < H_coords.n_cols; ++j) {
-//        H_coords.at(0, j - 1) = j;
-//    }
-//
-//    H_coords.each_col([&](arma::Col<T> &col) {col = (C_coords.col(static_cast<const arma::uword>(col[0])-1) -
-//                                                  O_coords.col(static_cast<const arma::uword>(col[0])-1)) /
-//                                                  arma::norm(C_coords.col(static_cast<const arma::uword>(col[0])-1) -
-//                                                             O_coords.col(static_cast<const arma::uword>(col[0])-1), 2) +
-//                                                  N_coords.col(static_cast<const arma::uword>(col[0]));});
+	auto co = (C_coords(arma::span::all, arma::span(0, H_coords.n_cols-2)) - O_coords(arma::span::all, arma::span(0, H_coords.n_cols-2))).eval();
+	auto co_norm = arma::sqrt(arma::sum(arma::square(co), 0));
+	co.each_row() /= co_norm;
 
-    arma::Col<T> co(3);
-
-    for (arma::uword i = 1; i < H_coords.n_cols; ++i) {
-
-        co.at(0) = C_coords.at(0, i - 1) - O_coords.at(0, i - 1);
-        co.at(1) = C_coords.at(1, i - 1) - O_coords.at(1, i - 1);
-        co.at(2) = C_coords.at(2, i - 1) - O_coords.at(2, i - 1);
-
-        // CO norm -> distance between C and O in backbone of residue i - 1
-        T co_norm = arma::norm(co, 2);
-
-        co.at(0) /= co_norm;
-        co.at(1) /= co_norm;
-        co.at(2) /= co_norm;
-
-        // calculate coordinates of H bound to N in backbone of residue i
-        H_coords.at(0, i) = co.at(0) + N_coords.at(0, i);
-        H_coords.at(1, i) = co.at(1) + N_coords.at(1, i);
-        H_coords.at(2, i) = co.at(2) + N_coords.at(2, i);
-
-    }
+	H_coords(arma::span::all, arma::span(1,  H_coords.n_cols-1)) = co + N_coords(arma::span::all, arma::span(1,  H_coords.n_cols-1));
 }
 
 template <typename T>
