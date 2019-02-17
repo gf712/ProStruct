@@ -5,19 +5,36 @@ set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_CXX_FLAGS "-O3 -march=native") # -fopenmp -fopenmp-simd ")
 
-option(ENABLE_TESTS "Enable tests" OFF)
+option(ENABLE_TESTING "Enable tests" OFF)
 option(ENABLE_INTERFACE "Enable interface" OFF)
-
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 find_package(Armadillo 7.9 REQUIRED)
 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+option(USE_OPENMP "Enable OpenMP" ON)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND (NOT APPLE) AND USE_OPENMP)
+    set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
+    set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")
+    set(OpenMP_CXX_LIB_NAMES "libomp" "libgomp" "libiomp5")
+    set(OpenMP_libomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    set(OpenMP_libgomp_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+    set(OpenMP_libiomp5_LIBRARY ${OpenMP_CXX_LIB_NAMES})
+endif()
+
+if ((NOT APPLE) AND USE_OPENMP)
+    find_package(OpenMP)
+    if (OPENMP_FOUND AND USE_OPENMP)
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    endif()
+elseif(APPLE AND USE_OPENMP)
+    MESSAGE(STATUS "OpenMP not supported")
+    set(USE_OPENMP OFF)
+elseif(NOT USE_OPENMP)
+    MESSAGE(STATUS "OpenMP disabled")
 endif()
 
 add_subdirectory(src/prostruct)

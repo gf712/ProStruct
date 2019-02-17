@@ -46,5 +46,5 @@ chainAtomVector<T> Chain<T>::getBackboneAtoms() {
     return backboneAtoms;
 }
 
-template class Chain<float>;
-template class Chain<double>;
+template class prostruct::Chain<float>;
+template class prostruct::Chain<double>;

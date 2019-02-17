@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.13)
 
 set(TARGET_NAME prostruct_interface)
 cmake_policy(SET CMP0078 NEW)
-cmake_policy(SET CMP0086 NEW)
+
+if(${CMAKE_VERSION} GREATER "3.14.0")
+    cmake_policy(SET CMP0086 NEW)
+endif()
 
 
 include(${SWIG_USE_FILE})
@@ -18,7 +21,6 @@ target_include_directories(${TARGET_NAME} PUBLIC ${PYTHON_INCLUDE_DIRS} PUBLIC $
 if (APPLE)
     target_link_libraries(${TARGET_NAME} PUBLIC "-undefined dynamic_lookup")
 endif()
-
 target_link_libraries(${TARGET_NAME} PUBLIC prostruct ${ARMADILLO_LIBRARIES})
 target_include_directories(${TARGET_NAME} PUBLIC ${NUMPY_INCLUDE_DIRS})
 set_target_properties(${TARGET_NAME} PROPERTIES SWIG_DEPENDS prostruct)

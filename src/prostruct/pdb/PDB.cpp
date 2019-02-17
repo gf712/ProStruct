@@ -281,5 +281,5 @@ T PDB<T>::kabsch_rmsd(PDB &other) {
 
 }
 
-template class PDB<float>;
-template class PDB<double>;
+template class prostruct::PDB<float>;
+template class prostruct::PDB<double>;
