@@ -5,9 +5,16 @@
 #ifndef PROSTRUCT_PDB_H
 #define PROSTRUCT_PDB_H
 
+#ifndef NDEBUG
+#define FMT_STRING_ALIAS 1
+#endif
+
 #include "prostruct/struct/chain.h"
 #include "prostruct/parsers/PDBparser.h"
 #include "prostruct/pdb/geometry.h"
+#include "prostruct/utils/io.h"
+
+#include <fmt/format.h>
 
 namespace prostruct {
 	template<typename T>
@@ -21,7 +28,10 @@ namespace prostruct {
 
 		static PDB fetch(std::string);
 
-		std::string getFilename() { return filename; }
+        std::string to_string() {
+            return format(fmt("<prostruct.PDB {} precision, with {} atoms, {} residues at {}>"),
+                          demangled_type<T>(), m_natoms, m_nresidues, fmt::ptr(this));
+        }
 
 		int n_chains() { return numberOfChains; }
 
