@@ -91,7 +91,7 @@ void PDB<T>::internalKS(arma::Mat<T>& E)
 
 	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
 
-	kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, m_nresidues);
+    geometry::kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, m_nresidues);
 }
 
 template <typename T>
@@ -105,13 +105,14 @@ arma::Mat<T> PDB<T>::compute_kabsch_sander()
 };
 
 template <typename T>
-arma::Col<T> PDB<T>::compute_asa(T probe)
+arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points)
 {
 	// calculates atom surface accessibility using the Shrake-Rupley algorithm
 
 	arma::Col<T> asa(static_cast<const arma::uword>(m_natoms));
 
-	shrake_rupley(m_xyz, m_radii, asa, m_natoms, probe);
+    geometry::shrake_rupley(m_xyz, m_radii, asa, static_cast<arma::uword>(m_natoms), probe,
+            static_cast<arma::uword>(n_sphere_points));
 
 	return asa;
 }
@@ -123,7 +124,7 @@ arma::Mat<T> PDB<T>::predict_backbone_hbonds()
 
 	internalKS(E);
 
-	E.for_each([](typename arma::Mat<T>::elem_type& elem) { elem = elem < -0.5; });
+	E.for_each([](T& elem) { elem = elem < -0.5; });
 
 	return E;
 }
@@ -138,7 +139,7 @@ void PDB<T>::compute_dssp()
 
 	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
 
-	dssp(C_coords, O_coords, N_coords, CA_coords);
+    geometry::dssp(C_coords, O_coords, N_coords, CA_coords);
 }
 
 template <typename T>
@@ -150,7 +151,7 @@ T PDB<T>::calculate_RMSD(PDB& other)
 		throw "Atom number mismatch";
 	}
 
-	return rmsd(m_xyz, other.get_xyz());
+	return geometry::rmsd(m_xyz, other.get_xyz());
 }
 
 template <typename T>
@@ -159,7 +160,7 @@ arma::Col<T> PDB<T>::calculate_centroid()
 
 	arma::Col<T> result(3);
 
-	get_centroid(m_xyz, result);
+	geometry::get_centroid(m_xyz, result);
 
 	return result;
 }
@@ -168,7 +169,7 @@ template <typename T>
 void PDB<T>::recentre()
 {
 
-	recentre_molecule(m_xyz);
+    geometry::recentre_molecule(m_xyz);
 }
 
 template <typename T>
@@ -226,8 +227,8 @@ arma::Mat<T> PDB<T>::calculate_phi_psi()
 
 		std::cout << "Calculating phi/psi" << std::endl;
 
-		dihedrals(phiAtomCoords, phi);
-		dihedrals(psiAtomCoords, psi);
+        geometry::dihedrals(phiAtomCoords, phi);
+        geometry::dihedrals(psiAtomCoords, psi);
 
 		(phi * (180.0 / M_PI)).print();
 
@@ -262,7 +263,7 @@ void PDB<T>::kabsch_rotation(PDB<T>& other)
 	// make copy of xyz
 	auto xyz_copy = other.get_xyz();
 
-	kabsch_rotation_(m_xyz, xyz_copy);
+    geometry::kabsch_rotation_(m_xyz, xyz_copy);
 }
 
 template <typename T>
@@ -272,7 +273,7 @@ T PDB<T>::kabsch_rmsd(PDB& other)
 	auto xyz_copy = m_xyz;
 	auto xyz_other_copy = other.get_xyz();
 
-	return kabsch_rmsd_(xyz_copy, xyz_other_copy);
+	return geometry::kabsch_rmsd_(xyz_copy, xyz_other_copy);
 }
 
 template class prostruct::PDB<float>;

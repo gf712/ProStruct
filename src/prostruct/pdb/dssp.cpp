@@ -19,104 +19,114 @@
 
 #include "prostruct/pdb/geometry.h"
 
-enum SS_Types {
-	Helix_310,
-	Helix_alpha,
-	Helix_pi,
-	Bridge_beta,
-	Bridge_beta_buldge,
-	Loop_turn,
-	Loop_high_curvature,
-	Blank
-};
+namespace prostruct {
+    namespace geometry {
 
-template <typename T>
-void predict_H_coords(arma::Mat<T>& H_coords, const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords,
-	const arma::Mat<T>& N_coords)
-{
+        enum SS_Types {
+            Helix_310,
+            Helix_alpha,
+            Helix_pi,
+            Bridge_beta,
+            Bridge_beta_buldge,
+            Loop_turn,
+            Loop_high_curvature,
+            Blank
+        };
 
-	auto co = (C_coords(arma::span::all, arma::span(0, H_coords.n_cols - 2)) - O_coords(arma::span::all, arma::span(0, H_coords.n_cols - 2))).eval();
-	auto co_norm = arma::sqrt(arma::sum(arma::square(co), 0));
-	co.each_row() /= co_norm;
+        template<typename T>
+        void predict_H_coords(arma::Mat<T> &H_coords, const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords,
+                              const arma::Mat<T> &N_coords) {
 
-	H_coords(arma::span::all, arma::span(1, H_coords.n_cols - 1)) = co + N_coords(arma::span::all, arma::span(1, H_coords.n_cols - 1));
-}
+            auto co = (C_coords(arma::span::all, arma::span(0, H_coords.n_cols - 2)) -
+                       O_coords(arma::span::all, arma::span(0, H_coords.n_cols - 2))).eval();
+            auto co_norm = arma::sqrt(arma::sum(arma::square(co), 0));
+            co.each_row() /= co_norm;
 
-template <typename T>
-void kabsch_sander(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma::Mat<T>& N_coords,
-		const arma::Mat<T>& CA_coords, arma::Mat<T>& E, const arma::uword n_residues)
-{
+            H_coords(arma::span::all, arma::span(1, H_coords.n_cols - 1)) =
+                    co + N_coords(arma::span::all, arma::span(1, H_coords.n_cols - 1));
+        }
 
-	T ca_dist_squared = 81;
-	static arma::Col<T> zerosVec = std::vector<T>({ 0, 0, 0 });
+        template<typename T>
+        void kabsch_sander(const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords, const arma::Mat<T> &N_coords,
+                           const arma::Mat<T> &CA_coords, arma::Mat<T> &E, const arma::uword n_residues) {
 
-	arma::Mat<T> H_coords(3, n_residues, arma::fill::zeros);
-	//    H_coords.insert_cols(0, zerosVec);
+            T ca_dist_squared = 81;
+            static arma::Col<T> zerosVec = std::vector<T>({0, 0, 0});
 
-	predict_H_coords(H_coords, C_coords, O_coords, N_coords);
+            arma::Mat<T> H_coords(3, n_residues, arma::fill::zeros);
+            //    H_coords.insert_cols(0, zerosVec);
+
+            predict_H_coords(H_coords, C_coords, O_coords, N_coords);
 #pragma omp parallel for collapse(2)
-	for (arma::uword acceptor = 0; acceptor < n_residues; ++acceptor) {
-		for (arma::uword donor = 0; donor < n_residues; ++donor) {
+            for (arma::uword acceptor = 0; acceptor < n_residues; ++acceptor) {
+                for (arma::uword donor = 0; donor < n_residues; ++donor) {
 
-			if (std::abs(static_cast<int>(acceptor - donor)) != 1 && acceptor != donor) {
+                    if (std::abs(static_cast<int>(acceptor - donor)) != 1 && acceptor != donor) {
 
-				if (arma::dot(CA_coords.col(donor) - CA_coords.col(acceptor),
-						CA_coords.col(donor) - CA_coords.col(acceptor))
-					< ca_dist_squared) {
-					// E = 0.084 { 1 / rON + 1 / rCH − 1 / rOH − 1 / rCN } ⋅ 332 kcal/mol
-					// where r is the distance between A and B sqrt(dot(A-B, A-B)
-					// and we do this for each possible combination -> gives a matrix residue x residue
-					T rev_rON = 1 / arma::norm(N_coords.col(donor) - O_coords.col(acceptor), 2);
-					T rev_rCH = 1 / arma::norm(H_coords.col(donor) - C_coords.col(acceptor), 2);
-					T rev_rOH = 1 / arma::norm(H_coords.col(donor) - O_coords.col(acceptor), 2);
-					T rev_rCN = 1 / arma::norm(N_coords.col(donor) - C_coords.col(acceptor), 2);
-					E.at(acceptor, donor) = (rev_rON + rev_rCH - rev_rOH - rev_rCN) * 27.88;
-				}
-			}
-		}
-	}
-}
+                        if (arma::dot(CA_coords.col(donor) - CA_coords.col(acceptor),
+                                      CA_coords.col(donor) - CA_coords.col(acceptor))
+                            < ca_dist_squared) {
+                            // E = 0.084 { 1 / rON + 1 / rCH − 1 / rOH − 1 / rCN } ⋅ 332 kcal/mol
+                            // where r is the distance between A and B sqrt(dot(A-B, A-B)
+                            // and we do this for each possible combination -> gives a matrix residue x residue
+                            T rev_rON = 1 / arma::norm(N_coords.col(donor) - O_coords.col(acceptor), 2);
+                            T rev_rCH = 1 / arma::norm(H_coords.col(donor) - C_coords.col(acceptor), 2);
+                            T rev_rOH = 1 / arma::norm(H_coords.col(donor) - O_coords.col(acceptor), 2);
+                            T rev_rCN = 1 / arma::norm(N_coords.col(donor) - C_coords.col(acceptor), 2);
+                            E.at(acceptor, donor) = (rev_rON + rev_rCH - rev_rOH - rev_rCN) * 27.88;
+                        }
+                    }
+                }
+            }
+        }
 
-static void predict_alpha_helix()
-{
+        static void predict_alpha_helix() {
 
-	//Based on this, eight types of secondary structure are assigned. The 310 helix, α helix and π helix have symbols G,
-	// H and I and are recognized by having a repetitive sequence of hydrogen bonds in which the residues are three, four,
-	// or five residues apart respectively. Two types of beta sheet structures exist; a beta bridge has symbol B while
-	// longer sets of hydrogen bonds and beta bulges have symbol E. T is used for turns, featuring hydrogen bonds typical
-	// of helices, S is used for regions of high curvature (where the angle between
-	// Ciα C(i+2)α and C(i−2)α Ciα is at least 70°), and a blank (or space) is used if no other rule applies,
-	// referring to loops.[2] These eight types are usually grouped into three larger classes: helix (G, H and I),
-	// strand (E and B) and loop (S, T, and C, where C sometimes is represented also as blank space).
-}
+            //Based on this, eight types of secondary structure are assigned. The 310 helix, α helix and π helix have symbols G,
+            // H and I and are recognized by having a repetitive sequence of hydrogen bonds in which the residues are three, four,
+            // or five residues apart respectively. Two types of beta sheet structures exist; a beta bridge has symbol B while
+            // longer sets of hydrogen bonds and beta bulges have symbol E. T is used for turns, featuring hydrogen bonds typical
+            // of helices, S is used for regions of high curvature (where the angle between
+            // Ciα C(i+2)α and C(i−2)α Ciα is at least 70°), and a blank (or space) is used if no other rule applies,
+            // referring to loops.[2] These eight types are usually grouped into three larger classes: helix (G, H and I),
+            // strand (E and B) and loop (S, T, and C, where C sometimes is represented also as blank space).
+        }
+
 //template <typename T>
-void predict_beta_sheet()
-{
+        void predict_beta_sheet() {
+        }
+
+        template<typename T>
+        void dssp(const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords, const arma::Mat<T> &N_coords,
+                  const arma::Mat<T> &CA_coords) {
+
+            arma::uword n_residues = C_coords.n_cols;
+            std::vector<bool> has_Hbond(n_residues, false);
+
+            // All the code is in column major -> each cartesian point is stored in a column (rather than a row)
+            arma::Mat<T> E(n_residues, n_residues);
+
+            kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, n_residues);
+
+            std::vector<SS_Types> secondaryStructure(n_residues);
+
+            predict_alpha_helix();
+
+            predict_beta_sheet();
+        }
+
+        template void kabsch_sander(const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &,
+                                    const arma::Mat<float> &,
+                                    arma::Mat<float> &, const arma::uword);
+
+        template void kabsch_sander(const arma::Mat<double> &, const arma::Mat<double> &, const arma::Mat<double> &,
+                                    const arma::Mat<double> &,
+                                    arma::Mat<double> &, const arma::uword);
+
+        template void
+        dssp(const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &);
+
+        template void dssp(const arma::Mat<double> &, const arma::Mat<double> &, const arma::Mat<double> &,
+                           const arma::Mat<double> &);
+    }
 }
-
-template <typename T>
-void dssp(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma::Mat<T>& N_coords, const arma::Mat<T>& CA_coords)
-{
-
-	arma::uword n_residues = C_coords.n_cols;
-	std::vector<bool> has_Hbond(n_residues, false);
-
-	// All the code is in column major -> each cartesian point is stored in a column (rather than a row)
-	arma::Mat<T> E(n_residues, n_residues);
-
-	kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, n_residues);
-
-	std::vector<SS_Types> secondaryStructure(n_residues);
-
-	predict_alpha_helix();
-
-	predict_beta_sheet();
-}
-
-template void kabsch_sander(const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&,
-	arma::Mat<float>&, const arma::uword);
-template void kabsch_sander(const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&,
-	arma::Mat<double>&, const arma::uword);
-
-template void dssp(const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&);
-template void dssp(const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&);

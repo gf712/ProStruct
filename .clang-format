@@ -2,4 +2,5 @@
 BasedOnStyle: WebKit
 TabWidth: '4'
 UseTab: Always
+NamespaceIndentation: All
 ...
