@@ -5,9 +5,7 @@
 #ifndef PROSTRUCT_PDB_H
 #define PROSTRUCT_PDB_H
 
-#ifndef NDEBUG
 #define FMT_STRING_ALIAS 1
-#endif
 
 #include "prostruct/parsers/PDBparser.h"
 #include "prostruct/pdb/geometry.h"

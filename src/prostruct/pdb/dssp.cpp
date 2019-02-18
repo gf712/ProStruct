@@ -19,8 +19,6 @@
 
 #include "prostruct/pdb/geometry.h"
 
-#define ARMA_NO_DEBUG
-
 enum SS_Types {
 	Helix_310,
 	Helix_alpha,

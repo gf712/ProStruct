@@ -3,10 +3,9 @@ project(ProStruct)
 
 set(CMAKE_CXX_STANDARD 14)
 
-set(CMAKE_CXX_FLAGS "-O3 -march=native") # -fopenmp -fopenmp-simd ")
-
 option(ENABLE_TESTING "Enable tests" OFF)
 option(ENABLE_INTERFACE "Enable interface" OFF)
+option(OPTIMIZE_FOR_NATIVE "Build with -march=native" ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 

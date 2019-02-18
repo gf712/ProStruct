@@ -7,6 +7,10 @@
 
 #include <armadillo>
 
+#ifndef DNDEBUG
+#define ARMA_NO_DEBUG
+#endif
+
 template <typename T>
 void dssp(const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&);
 
