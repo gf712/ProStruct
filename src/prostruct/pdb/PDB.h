@@ -56,7 +56,7 @@ public:
 
 	arma::Col<T> getRadii() { return m_radii; }
 
-	arma::Col<T> compute_asa(T probe);
+	arma::Col<T> compute_shrake_rupley(T probe=0.14, int n_sphere_points=960);
 
 	T calculate_RMSD(PDB& other);
 

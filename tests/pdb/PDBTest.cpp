@@ -68,9 +68,9 @@ TYPED_TEST(PDBTest, ShrakeRupley)
 {
 
 	auto pdb = PDB<TypeParam>("test.pdb");
-	auto asa = pdb.compute_asa(1.4);
+	auto asa = pdb.compute_shrake_rupley(1.4, 960);
 
-	EXPECT_NEAR(asa.at(0), 43.953897152668652, get_epsilon<TypeParam>());
+	EXPECT_NEAR(asa.at(0), 43.593459609528409, get_epsilon<TypeParam>());
 }
 
 TYPED_TEST(PDBTest, KabschSander)
