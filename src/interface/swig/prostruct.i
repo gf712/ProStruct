@@ -1,6 +1,6 @@
 %module prostruct
 %{
-    #include "prostruct/prostruct.h"
+	#include "prostruct/prostruct.h"
 %}
 
 %include "std_string.i"
@@ -20,19 +20,11 @@
 %include "prostruct/struct/chain.h"
 
 namespace prostruct {
-//    %extend PDB
-//        {
-//            std::string to_string()
-//            {
-//                return "TEST";
-//            }
-//        };
+	%template(PDB_float) PDB<float>;
+	%template(PDB_double) PDB<double>;
 
-    %template(PDB_float) PDB<float>;
-    %template(PDB_double) PDB<double>;
-
-    %template(Chain_float) Chain<float>;
-    %template(Chain_double) Chain<double>;
+	%template(Chain_float) Chain<float>;
+	%template(Chain_double) Chain<double>;
 }
 
 %init %{

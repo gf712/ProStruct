@@ -9,87 +9,89 @@
 #define FMT_STRING_ALIAS 1
 #endif
 
-#include "prostruct/struct/chain.h"
 #include "prostruct/parsers/PDBparser.h"
 #include "prostruct/pdb/geometry.h"
+#include "prostruct/struct/chain.h"
 #include "prostruct/utils/io.h"
 
 #include <fmt/format.h>
 
 namespace prostruct {
-	template<typename T>
-	class PDB {
+template <typename T>
+class PDB {
+public:
+	PDB(const std::string& filename);
 
-	public:
+	~PDB() = default;
 
-		PDB(const std::string &filename);
+	static PDB fetch(std::string);
 
-		~PDB() = default;
+	std::string to_string()
+	{
+		return format(
+			fmt("<prostruct.PDB {} precision, with {} atoms, {} residues at {}>"),
+			demangled_type<T>(), m_natoms, m_nresidues, fmt::ptr(this));
+	}
 
-		static PDB fetch(std::string);
+	std::string get_filename() { return m_filename; }
 
-        std::string to_string() {
-            return format(fmt("<prostruct.PDB {} precision, with {} atoms, {} residues at {}>"),
-                          demangled_type<T>(), m_natoms, m_nresidues, fmt::ptr(this));
-        }
+	int n_chains() { return m_number_of_chains; }
 
-		std::string get_filename() { return m_filename; }
+	std::vector<std::string> get_chain_names() { return m_chain_order; }
 
-		int n_chains() { return m_number_of_chains; }
+	std::shared_ptr<Chain<T>> get_chain(std::string name_)
+	{
+		return m_chain_map[name_];
+	}
 
-		std::vector<std::string> get_chain_names() {
-			return m_chain_order;
-		}
+	arma::Mat<T> compute_kabsch_sander();
 
-		std::shared_ptr<Chain<T>> get_chain(std::string name_) { return m_chain_map[name_]; }
+	arma::Mat<T> predict_backbone_hbonds();
 
-		arma::Mat<T> compute_kabsch_sander();
+	void compute_dssp();
 
-		arma::Mat<T> predict_backbone_hbonds();
+	arma::Mat<T> get_xyz() { return m_xyz; }
 
-		void compute_dssp();
+	int n_residues() { return m_nresidues; }
 
-		arma::Mat<T> get_xyz() { return m_xyz; }
+	int n_atoms() { return m_natoms; }
 
-		int n_residues() { return m_nresidues; }
+	arma::Col<T> getRadii() { return m_radii; }
 
-		int n_atoms() { return m_natoms; }
+	arma::Col<T> compute_asa(T probe);
 
-		arma::Col<T> getRadii() { return m_radii; }
+	T calculate_RMSD(PDB& other);
 
-		arma::Col<T> compute_asa(T probe);
+	arma::Col<T> calculate_centroid();
+	//    arma::Mat<T> select(std::string);
 
-		T calculate_RMSD(PDB &other);
+	void recentre();
 
-		arma::Col<T> calculate_centroid();
-//    arma::Mat<T> select(std::string);
+	arma::Mat<T> calculate_phi_psi();
 
-		void recentre();
+	void kabsch_rotation(PDB<T>& other);
 
-		arma::Mat<T> calculate_phi_psi();
+	T kabsch_rmsd(PDB<T>& other);
 
-		void kabsch_rotation(PDB<T> &other);
+	//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x,
+	//    rotation_y, rotation_z] void rotate(T rotation_angle, std::string axis);
+	//    // axis = {"x", "y", "z"}
 
-		T kabsch_rmsd(PDB<T> &other);
+private:
+	arma::Mat<T> m_xyz;
+	std::string m_filename;
+	int m_number_of_chains;
+	std::map<std::string, std::shared_ptr<Chain<T>>> m_chain_map;
+	int m_natoms;
+	std::vector<std::string> m_chain_order;
+	arma::uword m_nresidues;
+	arma::Col<T> m_radii;
 
-//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x, rotation_y, rotation_z]
-//    void rotate(T rotation_angle, std::string axis); // axis = {"x", "y", "z"}
+	void internalKS(arma::Mat<T>&);
+	void getBackboneAtoms(arma::Mat<T>&, arma::Mat<T>&, arma::Mat<T>&,
+		arma::Mat<T>&);
+};
 
-	private:
+} // namespace prostruct
 
-		arma::Mat<T> m_xyz;
-		std::string m_filename;
-		int m_number_of_chains;
-		std::map<std::string, std::shared_ptr<Chain<T>>> m_chain_map;
-		int m_natoms;
-		std::vector<std::string> m_chain_order;
-		arma::uword m_nresidues;
-		arma::Col<T> m_radii;
-
-		void internalKS(arma::Mat<T> &);
-		void getBackboneAtoms(arma::Mat<T> &, arma::Mat<T> &, arma::Mat<T> &, arma::Mat<T> &);
-	};
-
-}
-
-#endif //PROSTRUCT_PDB_H
+#endif // PROSTRUCT_PDB_H
