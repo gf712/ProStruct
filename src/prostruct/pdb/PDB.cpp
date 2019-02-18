@@ -9,7 +9,6 @@ using namespace prostruct;
 template <typename T>
 PDB<T>::PDB(const std::string& filename_)
 {
-
 	m_filename = filename_;
 
 	std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>> chainAtomMap;
@@ -54,14 +53,12 @@ PDB<T>::PDB(const std::string& filename_)
 template <typename T>
 PDB<T> PDB<T>::fetch(std::string PDB_id)
 {
-
 	throw "Not implemented";
 }
 
 template <typename T>
 void PDB<T>::getBackboneAtoms(arma::Mat<T>& C_coords, arma::Mat<T>& O_coords, arma::Mat<T>& N_coords, arma::Mat<T>& CA_coords)
 {
-
 	// get all C, O, N atoms positions
 	arma::uword i = 0;
 	arma::uword pos = 0;
@@ -87,7 +84,6 @@ void PDB<T>::getBackboneAtoms(arma::Mat<T>& C_coords, arma::Mat<T>& O_coords, ar
 template <typename T>
 void PDB<T>::internalKS(arma::Mat<T>& E)
 {
-
 	arma::Mat<T> C_coords(3, m_nresidues);
 	arma::Mat<T> O_coords(3, m_nresidues);
 	arma::Mat<T> N_coords(3, m_nresidues);
@@ -95,16 +91,13 @@ void PDB<T>::internalKS(arma::Mat<T>& E)
 
 	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
 
-	std::vector<bool> hasHbond(m_nresidues, false);
-
-	kabsch_sander(C_coords, O_coords, N_coords, CA_coords, hasHbond, E, m_nresidues);
+	kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, m_nresidues);
 }
 
 template <typename T>
 arma::Mat<T> PDB<T>::compute_kabsch_sander()
 {
-
-	arma::Mat<T> E(m_nresidues, m_nresidues);
+	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
 	internalKS(E);
 
@@ -114,7 +107,6 @@ arma::Mat<T> PDB<T>::compute_kabsch_sander()
 template <typename T>
 arma::Col<T> PDB<T>::compute_asa(T probe)
 {
-
 	// calculates atom surface accessibility using the Shrake-Rupley algorithm
 
 	arma::Col<T> asa(static_cast<const arma::uword>(m_natoms));
@@ -127,8 +119,7 @@ arma::Col<T> PDB<T>::compute_asa(T probe)
 template <typename T>
 arma::Mat<T> PDB<T>::predict_backbone_hbonds()
 {
-
-	arma::Mat<T> E(m_nresidues, m_nresidues);
+	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
 	internalKS(E);
 
@@ -140,7 +131,6 @@ arma::Mat<T> PDB<T>::predict_backbone_hbonds()
 template <typename T>
 void PDB<T>::compute_dssp()
 {
-
 	arma::Mat<T> C_coords(3, m_nresidues);
 	arma::Mat<T> O_coords(3, m_nresidues);
 	arma::Mat<T> N_coords(3, m_nresidues);
@@ -269,7 +259,6 @@ arma::Mat<T> PDB<T>::calculate_phi_psi()
 template <typename T>
 void PDB<T>::kabsch_rotation(PDB<T>& other)
 {
-
 	// make copy of xyz
 	auto xyz_copy = other.get_xyz();
 
@@ -279,7 +268,6 @@ void PDB<T>::kabsch_rotation(PDB<T>& other)
 template <typename T>
 T PDB<T>::kabsch_rmsd(PDB& other)
 {
-
 	// make copy of xyz
 	auto xyz_copy = m_xyz;
 	auto xyz_other_copy = other.get_xyz();

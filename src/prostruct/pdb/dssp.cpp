@@ -45,14 +45,14 @@ void predict_H_coords(arma::Mat<T>& H_coords, const arma::Mat<T>& C_coords, cons
 }
 
 template <typename T>
-void kabsch_sander(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma::Mat<T>& N_coords, const arma::Mat<T>& CA_coords,
-	std::vector<bool>& hasHbond, arma::Mat<T>& E, const arma::uword n_residues)
+void kabsch_sander(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma::Mat<T>& N_coords,
+		const arma::Mat<T>& CA_coords, arma::Mat<T>& E, const arma::uword n_residues)
 {
 
 	T ca_dist_squared = 81;
 	static arma::Col<T> zerosVec = std::vector<T>({ 0, 0, 0 });
 
-	arma::Mat<T> H_coords(3, n_residues);
+	arma::Mat<T> H_coords(3, n_residues, arma::fill::zeros);
 	//    H_coords.insert_cols(0, zerosVec);
 
 	predict_H_coords(H_coords, C_coords, O_coords, N_coords);
@@ -68,12 +68,11 @@ void kabsch_sander(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, c
 					// E = 0.084 { 1 / rON + 1 / rCH − 1 / rOH − 1 / rCN } ⋅ 332 kcal/mol
 					// where r is the distance between A and B sqrt(dot(A-B, A-B)
 					// and we do this for each possible combination -> gives a matrix residue x residue
-					E.at(acceptor, donor) = (1 / arma::norm(N_coords.col(donor) - O_coords.col(acceptor), 2) + 1 / arma::norm(H_coords.col(donor) - C_coords.col(acceptor), 2) - 1 / arma::norm(H_coords.col(donor) - O_coords.col(acceptor), 2) - 1 / arma::norm(N_coords.col(donor) - C_coords.col(acceptor), 2)) * 27.88;
-				}
-
-				if (E.at(acceptor, donor) < -0.5) {
-					hasHbond[acceptor] = true;
-					hasHbond[donor] = true;
+					T rev_rON = 1 / arma::norm(N_coords.col(donor) - O_coords.col(acceptor), 2);
+					T rev_rCH = 1 / arma::norm(H_coords.col(donor) - C_coords.col(acceptor), 2);
+					T rev_rOH = 1 / arma::norm(H_coords.col(donor) - O_coords.col(acceptor), 2);
+					T rev_rCN = 1 / arma::norm(N_coords.col(donor) - C_coords.col(acceptor), 2);
+					E.at(acceptor, donor) = (rev_rON + rev_rCH - rev_rOH - rev_rCN) * 27.88;
 				}
 			}
 		}
@@ -107,7 +106,7 @@ void dssp(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma
 	// All the code is in column major -> each cartesian point is stored in a column (rather than a row)
 	arma::Mat<T> E(n_residues, n_residues);
 
-	kabsch_sander(C_coords, O_coords, N_coords, CA_coords, has_Hbond, E, n_residues);
+	kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, n_residues);
 
 	std::vector<SS_Types> secondaryStructure(n_residues);
 
@@ -117,9 +116,9 @@ void dssp(const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma
 }
 
 template void kabsch_sander(const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&,
-	std::vector<bool>&, arma::Mat<float>&, const arma::uword);
+	arma::Mat<float>&, const arma::uword);
 template void kabsch_sander(const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&,
-	std::vector<bool>&, arma::Mat<double>&, const arma::uword);
+	arma::Mat<double>&, const arma::uword);
 
 template void dssp(const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&, const arma::Mat<float>&);
 template void dssp(const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&, const arma::Mat<double>&);

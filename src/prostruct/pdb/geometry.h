@@ -12,7 +12,7 @@ void dssp(const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&, const a
 
 template <typename T>
 void kabsch_sander(const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&,
-	std::vector<bool>&, arma::Mat<T>&, const arma::uword);
+	arma::Mat<T>&, const arma::uword);
 
 template <typename T>
 void predict_H_coords(arma::Mat<T>& H_coords, const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords, const arma::Mat<T>& N_coords);
