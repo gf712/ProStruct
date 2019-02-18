@@ -33,31 +33,33 @@ namespace prostruct {
                           demangled_type<T>(), m_natoms, m_nresidues, fmt::ptr(this));
         }
 
-		int n_chains() { return numberOfChains; }
+		std::string get_filename() { return m_filename; }
 
-		std::vector<std::string> getChainIDs() {
-			return chainOrder;
+		int n_chains() { return m_number_of_chains; }
+
+		std::vector<std::string> get_chain_names() {
+			return m_chain_order;
 		}
 
-		std::shared_ptr<Chain<T>> getChain(std::string name_) { return chainMap[name_]; }
+		std::shared_ptr<Chain<T>> get_chain(std::string name_) { return m_chain_map[name_]; }
 
-		arma::Mat<T> calculate_KabschSander();
+		arma::Mat<T> compute_kabsch_sander();
 
-		arma::Mat<T> predict_backboneHbonds();
+		arma::Mat<T> predict_backbone_hbonds();
 
-		void calculate_dssp();
+		void compute_dssp();
 
-		arma::Mat<T> getXYZ() { return xyz; }
+		arma::Mat<T> get_xyz() { return m_xyz; }
 
-		int n_residues() { return nResidues; }
+		int n_residues() { return m_nresidues; }
 
-		int n_atoms() { return nAtoms; }
+		int n_atoms() { return m_natoms; }
 
-		arma::Col<T> getRadii() { return radii; }
+		arma::Col<T> getRadii() { return m_radii; }
 
-		arma::Col<T> calculate_ASA(T probe);
+		arma::Col<T> compute_asa(T probe);
 
-		double calculate_RMSD(PDB &other);
+		T calculate_RMSD(PDB &other);
 
 		arma::Col<T> calculate_centroid();
 //    arma::Mat<T> select(std::string);
@@ -75,14 +77,14 @@ namespace prostruct {
 
 	private:
 
-		arma::Mat<T> xyz;
-		std::string filename;
-		int numberOfChains;
-		std::map<std::string, std::shared_ptr<Chain<T>>> chainMap;
-		int nAtoms;
-		std::vector<std::string> chainOrder;
-		arma::uword nResidues;
-		arma::Col<T> radii;
+		arma::Mat<T> m_xyz;
+		std::string m_filename;
+		int m_number_of_chains;
+		std::map<std::string, std::shared_ptr<Chain<T>>> m_chain_map;
+		int m_natoms;
+		std::vector<std::string> m_chain_order;
+		arma::uword m_nresidues;
+		arma::Col<T> m_radii;
 
 		void internalKS(arma::Mat<T> &);
 		void getBackboneAtoms(arma::Mat<T> &, arma::Mat<T> &, arma::Mat<T> &, arma::Mat<T> &);

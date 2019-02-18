@@ -19,11 +19,21 @@
 %include "prostruct/pdb/PDB.h"
 %include "prostruct/struct/chain.h"
 
-%template(PDB_float) prostruct::PDB<float>;
-%template(PDB_double) prostruct::PDB<double>;
+namespace prostruct {
+//    %extend PDB
+//        {
+//            std::string to_string()
+//            {
+//                return "TEST";
+//            }
+//        };
 
-%template(Chain_float) prostruct::Chain<float>;
-%template(Chain_double) prostruct::Chain<double>;
+    %template(PDB_float) PDB<float>;
+    %template(PDB_double) PDB<double>;
+
+    %template(Chain_float) Chain<float>;
+    %template(Chain_double) Chain<double>;
+}
 
 %init %{
 #ifdef SWIGPYTHON

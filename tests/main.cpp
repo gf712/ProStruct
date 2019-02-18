@@ -21,7 +21,7 @@ int main() {
 //    }
 
 //    for (int i = 0; i < 10000; ++i) {
-        pdb.calculate_KabschSander();
+        pdb.compute_kabsch_sander();
 //    }
 
 //    arma::Mat<T> result(3, 1000);

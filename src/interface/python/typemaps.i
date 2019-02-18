@@ -4,6 +4,8 @@
 #include "numpy/ndarrayobject.h"
 %}
 
+%feature("python:slot", "tp_repr", functype="reprfunc") prostruct::PDB::to_string;
+
 %typemap(out) std::vector<std::string>
 {
 	$result = PyList_New($1.size());
