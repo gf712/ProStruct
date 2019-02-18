@@ -36,6 +36,18 @@ elseif(NOT USE_OPENMP)
     MESSAGE(STATUS "OpenMP disabled")
 endif()
 
+# from https://stackoverflow.com/a/34317588
+find_program(CCACHE_EXECUTABLE ccache)
+mark_as_advanced(CCACHE_EXECUTABLE)
+if(CCACHE_EXECUTABLE)
+    foreach(LANG C CXX)
+        if(NOT DEFINED CMAKE_${LANG}_COMPILER_LAUNCHER AND NOT CMAKE_${LANG}_COMPILER MATCHES ".*/ccache$")
+            message(STATUS "Enabling ccache for ${LANG}")
+            set(CMAKE_${LANG}_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE} CACHE STRING "")
+        endif()
+    endforeach()
+endif()
+
 include(CheckCompilerFeatures)
 
 add_subdirectory(src/prostruct)
