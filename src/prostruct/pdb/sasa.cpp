@@ -102,10 +102,6 @@ namespace prostruct {
 			}
 		}
 
-		template void get_neighbours(const arma::Mat<float>&, arma::Mat<float>&, int, const arma::Col<float>&);
-
-		template void get_neighbours(const arma::Mat<double>&, arma::Mat<double>&, int, const arma::Col<double>&);
-
 		template void shrake_rupley(const arma::Mat<float>&, const arma::Col<float>&, arma::Col<float>&,
 		        arma::uword n_atoms, float probe, arma::uword n_sphere_points);
 

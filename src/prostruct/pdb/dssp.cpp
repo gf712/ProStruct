@@ -48,7 +48,7 @@ namespace prostruct {
 
         template<typename T>
         void kabsch_sander(const arma::Mat<T> &C_coords, const arma::Mat<T> &O_coords, const arma::Mat<T> &N_coords,
-                           const arma::Mat<T> &CA_coords, arma::Mat<T> &E, const arma::uword n_residues) {
+                           const arma::Mat<T> &CA_coords, arma::Mat<T> &E, arma::uword n_residues) {
 
             T ca_dist_squared = 81;
             static arma::Col<T> zerosVec = std::vector<T>({0, 0, 0});
@@ -69,10 +69,10 @@ namespace prostruct {
                             // E = 0.084 { 1 / rON + 1 / rCH − 1 / rOH − 1 / rCN } ⋅ 332 kcal/mol
                             // where r is the distance between A and B sqrt(dot(A-B, A-B)
                             // and we do this for each possible combination -> gives a matrix residue x residue
-                            T rev_rON = 1 / arma::norm(N_coords.col(donor) - O_coords.col(acceptor), 2);
-                            T rev_rCH = 1 / arma::norm(H_coords.col(donor) - C_coords.col(acceptor), 2);
-                            T rev_rOH = 1 / arma::norm(H_coords.col(donor) - O_coords.col(acceptor), 2);
-                            T rev_rCN = 1 / arma::norm(N_coords.col(donor) - C_coords.col(acceptor), 2);
+                            T rev_rON = 1 / std::sqrt(arma::dot(N_coords.col(donor) - O_coords.col(acceptor), N_coords.col(donor) - O_coords.col(acceptor)));
+                            T rev_rCH = 1 / std::sqrt(arma::dot(H_coords.col(donor) - C_coords.col(acceptor), H_coords.col(donor) - C_coords.col(acceptor)));
+                            T rev_rOH = 1 / std::sqrt(arma::dot(H_coords.col(donor) - O_coords.col(acceptor), H_coords.col(donor) - O_coords.col(acceptor)));
+                            T rev_rCN = 1 / std::sqrt(arma::dot(N_coords.col(donor) - C_coords.col(acceptor), N_coords.col(donor) - C_coords.col(acceptor)));
                             E.at(acceptor, donor) = (rev_rON + rev_rCH - rev_rOH - rev_rCN) * 27.88;
                         }
                     }
