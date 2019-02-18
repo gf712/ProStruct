@@ -37,6 +37,8 @@ elseif(NOT USE_OPENMP)
     MESSAGE(STATUS "OpenMP disabled")
 endif()
 
+include(CheckCompilerFeatures)
+
 add_subdirectory(src/prostruct)
 
 IF(ENABLE_INTERFACE)
