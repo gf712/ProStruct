@@ -14,6 +14,18 @@ inline void remove_whitespace(std::string& str)
 }
 
 template <typename T>
+inline T scalar_from_buffer(const std::string& buffer)
+{
+	return std::stod(buffer);
+}
+
+template <>
+inline float scalar_from_buffer(const std::string& buffer)
+{
+	return std::stof(buffer);
+}
+
+template <typename T>
 void createMap(
 	const std::string& fname,
 	std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>>& chainResMap,
@@ -44,9 +56,9 @@ void createMap(
 			auto resSeqStr = line.substr(22, 4);
 			//            int resSeq = std::stoi(resSeqStr);
 			auto insCode = line.substr(26, 1);
-			T x = std::stod(line.substr(30, 8));
-			T y = std::stod(line.substr(38, 8));
-			T z = std::stod(line.substr(46, 8));
+			T x = scalar_from_buffer<T>(line.substr(30, 8));
+			T y = scalar_from_buffer<T>(line.substr(38, 8));
+			T z = scalar_from_buffer<T>(line.substr(46, 8));
 			//            double occupancy = std::stod(line.substr(54, 6));
 			//            double tempFactor = std::stod(line.substr(60, 6));
 			std::string element = line.substr(76, 2);
