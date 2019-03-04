@@ -12,21 +12,21 @@
 #endif
 
 namespace prostruct {
-template <typename T>
-std::string demangled_type()
-{
-	const char* name = typeid(T).name();
+	template <typename T>
+	std::string demangled_type()
+	{
+		const char* name = typeid(T).name();
 #ifdef HAVE_CXA_DEMANGLE
-	size_t length;
-	int status;
-	char* demangled = abi::__cxa_demangle(name, nullptr, &length, &status);
-	std::string demangled_string(demangled);
-	free(demangled);
+		size_t length;
+		int status;
+		char* demangled = abi::__cxa_demangle(name, nullptr, &length, &status);
+		std::string demangled_string(demangled);
+		free(demangled);
 #else
-	std::string demangled_string(name);
+		std::string demangled_string(name);
 #endif
-	return demangled_string;
-}
+		return demangled_string;
+	}
 }
 
 #endif //PROSTRUCT_IO_H

@@ -36,8 +36,12 @@
 
 ARMA_COL_OUT(float, NPY_FLOAT);
 ARMA_COL_OUT(double, NPY_DOUBLE);
+ARMA_COL_OUT(arma::uword, NPY_ULONGLONG);
+ARMA_COL_OUT(unsigned long long, NPY_ULONGLONG);
+
 
 ARMA_MAT_OUT(float, NPY_FLOAT);
 ARMA_MAT_OUT(double, NPY_DOUBLE);
+ARMA_MAT_OUT(arma::uword, NPY_ULONGLONG);
 
 %include "prostruct.i"

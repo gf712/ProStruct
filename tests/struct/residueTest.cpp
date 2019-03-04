@@ -6,8 +6,21 @@
 
 #include "prostruct/struct/residue.h"
 
-TEST(ResidueTest, Alanine)
+using namespace prostruct;
+
+template <typename T>
+class ResidueTestClass: public Residue<T>
 {
+public:
+    template <class... Args>
+    ResidueTestClass(Args... m): Residue<T>(m...) {};
+
+    auto get_atom_indices(const std::string& name) {
+        return Residue<T>::get_atom_indices(name);
+    }
+};
+
+TEST(ResidueTest, Alanine) {
 
 	auto N = std::make_shared<Atom<double>>("N", "N", 3.653, 52.210, 0.963);
 	auto CA = std::make_shared<Atom<double>>("C", "CA", 32.975, 51.134, 0.036);
@@ -15,7 +28,7 @@ TEST(ResidueTest, Alanine)
 	auto O = std::make_shared<Atom<double>>("O", "O", 34.699, 49.738, 0.953);
 	auto CB = std::make_shared<Atom<double>>("C", "CB", 34.026, 51.601, -0.964);
 
-	auto ala = Residue<double>(atomVector<double>({ N, CA, C, O, CB }), "ALA", "ALA1");
+	auto ala = ResidueTestClass<double>(atomVector<double>({N, CA, C, O, CB}), "ALA", "ALA1");
 
 	ASSERT_EQ(CA->getNumberOfBonds(), 3);
 	ASSERT_EQ(N->getNumberOfBonds(), 1);
@@ -27,6 +40,11 @@ TEST(ResidueTest, Alanine)
 	ala.createBonds();
 	ASSERT_EQ(CA->getNumberOfBonds(), 3);
 	ASSERT_EQ(CB->getNumberOfBonds(), 1);
+
+	ASSERT_EQ(ala.get_atom_indices("N")(0), 0);
+	ASSERT_EQ(ala.get_atom_indices("N").size(), 1);
+    ASSERT_EQ(ala.get_atom_indices("C")(0), 2);
+    ASSERT_EQ(ala.get_atom_indices("C").size(), 1);
 }
 
 TEST(ResidueTest, Argenine)

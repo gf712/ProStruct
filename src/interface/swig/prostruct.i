@@ -3,6 +3,18 @@
 	#include "prostruct/prostruct.h"
 %}
 
+%include "exception.i" 
+
+%exception { 
+  try { 
+    $action 
+  } catch (const std::exception& e) { 
+    SWIG_exception(SWIG_RuntimeError, e.what()); 
+  } catch (const std::string& e) { 
+    SWIG_exception(SWIG_RuntimeError, e.c_str()); 
+  } 
+}
+
 %include "std_string.i"
 %include "std_vector.i"
 
@@ -12,12 +24,15 @@
 
 %include <std_shared_ptr.i>
 
+%shared_ptr(prostruct::Residue<float>)
+%shared_ptr(prostruct::Residue<double>)
 %shared_ptr(prostruct::Chain<float>)
 %shared_ptr(prostruct::Chain<double>)
 //%shared_ptr(prostruct::PDB)
 
 %include "prostruct/pdb/PDB.h"
 %include "prostruct/struct/chain.h"
+%include "prostruct/struct/residue.h"
 
 namespace prostruct {
 	%template(PDB_float) PDB<float>;
@@ -25,6 +40,9 @@ namespace prostruct {
 
 	%template(Chain_float) Chain<float>;
 	%template(Chain_double) Chain<double>;
+
+	%template(Residue_float) Residue<float>;
+	%template(Residue_double) Residue<double>;
 }
 
 %init %{

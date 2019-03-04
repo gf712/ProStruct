@@ -61,7 +61,7 @@ TYPED_TEST(PDBTest, PredictBackboneHBonds)
 	int total = std::accumulate(E.begin(), E.end(), 0);
 
 	ASSERT_EQ(E(2, 25), 1);
-	ASSERT_EQ(total, 159);
+	ASSERT_EQ(total, 160);
 }
 
 TYPED_TEST(PDBTest, ShrakeRupley)
@@ -83,7 +83,7 @@ TYPED_TEST(PDBTest, KabschSander)
 	ASSERT_EQ(E.n_rows, pdb.n_residues());
 	ASSERT_EQ(E.n_cols, pdb.n_residues());
 
-	EXPECT_NEAR(E(2, 25), -1.9515432974890459, get_epsilon<TypeParam>());
+	EXPECT_NEAR(E(2, 25), -1.9521032812185981, get_epsilon<TypeParam>());
 }
 
 TYPED_TEST(PDBTest, Kabsch_RMSD)

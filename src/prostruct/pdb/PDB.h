@@ -12,9 +12,12 @@
 #include "prostruct/struct/chain.h"
 #include "prostruct/utils/io.h"
 
+#include <set>
+
 #include <fmt/format.h>
 
 namespace prostruct {
+    std::set<std::string> backbone_atom_names = {"C", "CA", "N", "O"};
 template <typename T>
 class PDB {
 public:
@@ -74,6 +77,26 @@ public:
 	//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x,
 	//    rotation_y, rotation_z] void rotate(T rotation_angle, std::string axis);
 	//    // axis = {"x", "y", "z"}
+#ifndef SWIG
+	template <typename...Args>
+	arma::Col<arma::uword> get_atom_indices(Args... patterns) 
+	{
+		arma::Col<arma::uword> max_result(m_nresidues*m_natoms);
+		arma::uword i = 0;
+	    arma::uword position_in_pdb = 0;
+	    
+		for(const auto& chain_name: m_chain_order) {
+			arma::Col<arma::uword> residue_atoms = m_chain_map[chain_name]->get_atom_indices(std::forward<Args>(patterns)...);
+			max_result(arma::span(i, i+residue_atoms.n_rows-1)) = residue_atoms + position_in_pdb;
+			i+=residue_atoms.n_rows;
+			position_in_pdb += m_chain_map[chain_name]->m_natoms;
+		}
+
+		arma::Col<arma::uword> result = max_result.head(i);
+
+		return result;
+	}
+#endif
 
 private:
 	arma::Mat<T> m_xyz;
@@ -86,8 +109,7 @@ private:
 	arma::Col<T> m_radii;
 
 	void internalKS(arma::Mat<T>&);
-	void getBackboneAtoms(arma::Mat<T>&, arma::Mat<T>&, arma::Mat<T>&,
-		arma::Mat<T>&);
+	arma::Mat<T> get_backbone_atoms();
 };
 
 } // namespace prostruct

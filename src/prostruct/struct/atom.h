@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <regex>
 
 #include "prostruct/struct/bond.h"
 #include <armadillo>

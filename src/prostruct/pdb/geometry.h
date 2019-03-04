@@ -17,8 +17,7 @@ namespace prostruct {
 		void dssp(const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&);
 
 		template <typename T>
-		void kabsch_sander(const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&, const arma::Mat<T>&,
-			arma::Mat<T>&, arma::uword);
+		void kabsch_sander(const arma::Mat<T>&, arma::Mat<T>&);
 
 		template <typename T>
 		void predict_H_coords(arma::Mat<T>& H_coords, const arma::Mat<T>& C_coords, const arma::Mat<T>& O_coords,

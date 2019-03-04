@@ -3,6 +3,8 @@
 //
 
 #include "prostruct/pdb/PDB.h"
+#include "PDB.h"
+
 
 using namespace prostruct;
 
@@ -57,41 +59,27 @@ PDB<T> PDB<T>::fetch(std::string PDB_id)
 }
 
 template <typename T>
-void PDB<T>::getBackboneAtoms(arma::Mat<T>& C_coords, arma::Mat<T>& O_coords, arma::Mat<T>& N_coords, arma::Mat<T>& CA_coords)
+arma::Mat<T> PDB<T>::get_backbone_atoms()
 {
-	// get all C, O, N atoms positions
-	arma::uword i = 0;
+	arma::Mat<T> result(3, m_nresidues * 4);
 	arma::uword pos = 0;
+	arma::uword i = 0;
 
 	for (auto const& chain : m_chain_order) {
-
 		for (auto const& residue : m_chain_map[chain]->getResidues()) {
-
-			for (arma::uword coord = 0; coord < 3; ++coord) {
-
-				N_coords.at(coord, i) = m_xyz.at(coord, pos);
-				CA_coords.at(coord, i) = m_xyz.at(coord, pos + 1);
-				C_coords.at(coord, i) = m_xyz.at(coord, pos + 2);
-				O_coords.at(coord, i) = m_xyz.at(coord, pos + 3);
-			}
-
-			pos += residue->n_atoms();
-			i++;
+			result(arma::span::all, arma::span(i, i+3)) = m_xyz(arma::span::all, arma::span(pos, pos+3));
+			pos+=residue->n_atoms();
+			i+=4;
 		}
 	}
+	return result;
 }
 
 template <typename T>
 void PDB<T>::internalKS(arma::Mat<T>& E)
 {
-	arma::Mat<T> C_coords(3, m_nresidues);
-	arma::Mat<T> O_coords(3, m_nresidues);
-	arma::Mat<T> N_coords(3, m_nresidues);
-	arma::Mat<T> CA_coords(3, m_nresidues);
-
-	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
-
-    geometry::kabsch_sander(C_coords, O_coords, N_coords, CA_coords, E, m_nresidues);
+	auto backbone_atom_coords = get_backbone_atoms();
+    geometry::kabsch_sander(backbone_atom_coords, E);
 }
 
 template <typename T>
@@ -132,20 +120,22 @@ arma::Mat<T> PDB<T>::predict_backbone_hbonds()
 template <typename T>
 void PDB<T>::compute_dssp()
 {
-	arma::Mat<T> C_coords(3, m_nresidues);
-	arma::Mat<T> O_coords(3, m_nresidues);
-	arma::Mat<T> N_coords(3, m_nresidues);
-	arma::Mat<T> CA_coords(3, m_nresidues);
+	// arma::Mat<T> C_coords(3, m_nresidues);
+	// arma::Mat<T> O_coords(3, m_nresidues);
+	// arma::Mat<T> N_coords(3, m_nresidues);
+	// arma::Mat<T> CA_coords(3, m_nresidues);
 
-	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
+	// get_backbone_atoms(C_coords, O_coords, N_coords, CA_coords);
 
-    geometry::dssp(C_coords, O_coords, N_coords, CA_coords);
+	auto backbone_atoms = get_backbone_atoms();
+
+    // geometry::dssp(C_coords, O_coords, N_coords, CA_coords);
+	// geometry::dssp(xyz, backbone_atoms);
 }
 
 template <typename T>
 T PDB<T>::calculate_RMSD(PDB& other)
 {
-
 	// first check if the size is the same
 	if (m_natoms != other.n_atoms()) {
 		throw "Atom number mismatch";
@@ -157,7 +147,6 @@ T PDB<T>::calculate_RMSD(PDB& other)
 template <typename T>
 arma::Col<T> PDB<T>::calculate_centroid()
 {
-
 	arma::Col<T> result(3);
 
 	geometry::get_centroid(m_xyz, result);
@@ -168,7 +157,6 @@ arma::Col<T> PDB<T>::calculate_centroid()
 template <typename T>
 void PDB<T>::recentre()
 {
-
     geometry::recentre_molecule(m_xyz);
 }
 
@@ -189,56 +177,45 @@ arma::Mat<T> PDB<T>::calculate_phi_psi()
 
 	arma::uword atomPosition = 0;
 
-	arma::Mat<T> C_coords(3, m_nresidues, arma::fill::zeros);
-	arma::Mat<T> O_coords(3, m_nresidues, arma::fill::zeros);
-	arma::Mat<T> N_coords(3, m_nresidues, arma::fill::zeros);
-	arma::Mat<T> CA_coords(3, m_nresidues, arma::fill::zeros);
-
-	getBackboneAtoms(C_coords, O_coords, N_coords, CA_coords);
+	auto backbone_atoms = get_backbone_atoms();
 
 	for (const auto& chainName : m_chain_order) {
-		std::cout << atomPosition;
 		auto chain = m_chain_map[chainName];
 		arma::uword n_residues = chain->n_residues();
-
-		std::cout << n_residues;
 
 		// create a 3D tensor with all the relevant coordinates
 		arma::Cube<T> phiAtomCoords(3, 4, n_residues - 1);
 		arma::Cube<T> psiAtomCoords(3, 4, n_residues - 1);
 
 		for (arma::uword i = atomPosition; i < n_residues - 1; ++i) {
-
+			// C|O|N|CA
 			// phi angle
-			phiAtomCoords.slice(i)(arma::span::all, 0) = C_coords.col(i);
-			phiAtomCoords.slice(i)(arma::span::all, 1) = N_coords.col(i + 1);
-			phiAtomCoords.slice(i)(arma::span::all, 2) = CA_coords.col(i + 1);
-			phiAtomCoords.slice(i)(arma::span::all, 3) = C_coords.col(i + 1);
+			phiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4);
+			phiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col((i + 1)*4+2);
+			phiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col((i + 1)*4+3);
+			phiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4);
 
 			// psi angle
-			psiAtomCoords.slice(i)(arma::span::all, 0) = N_coords.col(i);
-			psiAtomCoords.slice(i)(arma::span::all, 1) = CA_coords.col(i);
-			psiAtomCoords.slice(i)(arma::span::all, 2) = C_coords.col(i);
-			psiAtomCoords.slice(i)(arma::span::all, 3) = N_coords.col(i + 1);
+			psiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4+2);
+			psiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col(i*4+3);
+			psiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col(i*4);
+			psiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4+2);
 		}
 
 		arma::Col<T> phi(n_residues - 1);
 		arma::Col<T> psi(n_residues - 1);
 
-		std::cout << "Calculating phi/psi" << std::endl;
-
         geometry::dihedrals(phiAtomCoords, phi);
         geometry::dihedrals(psiAtomCoords, psi);
-
-		(phi * (180.0 / M_PI)).print();
 
 		result(arma::span(atomPosition, n_residues - 2), 0) = phi * (180.0 / M_PI);
 		result(arma::span(atomPosition + 1, n_residues - 1), 1) = psi * (180.0 / M_PI);
 
 		atomPosition += n_residues + 1;
-		return result;
+        result.print();
+        return result;
 	}
-
+    result.print();
 	return result;
 }
 
@@ -262,7 +239,6 @@ void PDB<T>::kabsch_rotation(PDB<T>& other)
 {
 	// make copy of xyz
 	auto xyz_copy = other.get_xyz();
-
     geometry::kabsch_rotation_(m_xyz, xyz_copy);
 }
 

@@ -3,6 +3,8 @@
 //
 
 #include "prostruct/struct/atom.h"
+#include "atom.h"
+
 #include <algorithm>
 #include <memory>
 
