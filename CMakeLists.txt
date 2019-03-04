@@ -52,10 +52,7 @@ include(CheckCompilerFeatures)
 
 add_subdirectory(src/prostruct)
 
-IF(ENABLE_INTERFACE)
-    find_package(SWIG 3.0 REQUIRED)
-    find_package(PythonLibs 3.6 REQUIRED)
-    find_package(Numpy 1.7 REQUIRED)
+IF(${ENABLE_PYTHON} OR ${ENABLE_R})
     add_subdirectory(src/interface)
 ENDIF()
 

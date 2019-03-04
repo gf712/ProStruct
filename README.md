@@ -22,7 +22,7 @@ C++:
 ```cpp
 #include <prostruct/prostruct.h>
 
-auto pdb = PDB<float>("test.pdb");
+auto pdb = PDB<float>("mypdb.pdb");
 auto ks = pdb.compute_kabsch_sander() // arma::Mat<float>
 ```
 
@@ -32,6 +32,16 @@ import prostruct
 
 pdb = prostruct.PDB_float("mypdb.pdb")
 ks = pdb.compute_kabsch_sander() # numpy array
+```
+
+R:
+```R
+dyn.load(paste("prostruct", .Platform$dynlib.ext, sep=""))
+source("prostruct.R")
+cacheMetaData(1)
+
+pdb <- PDB_float("mypdb.pdb")
+ks = pdb$compute_kabsch_sander() # R matrix
 ```
 
 ## Build with CMake
