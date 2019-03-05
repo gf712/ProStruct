@@ -23,6 +23,7 @@ C++:
 #include <prostruct/prostruct.h>
 
 auto pdb = PDB<float>("mypdb.pdb");
+auto radii = pdb.get_radii(); // arma::Col<float>
 auto ks = pdb.compute_kabsch_sander() // arma::Mat<float>
 ```
 
@@ -31,6 +32,7 @@ Python:
 import prostruct
 
 pdb = prostruct.PDB_float("mypdb.pdb")
+radii = pdb.get_radii() # numpy array
 ks = pdb.compute_kabsch_sander() # numpy array
 ```
 
@@ -41,14 +43,16 @@ source("prostruct.R")
 cacheMetaData(1)
 
 pdb <- PDB_float("mypdb.pdb")
+radii = pdb$get_radii() # R vector
 ks = pdb$compute_kabsch_sander() # R matrix
 ```
 
-Perl (float and double vectors only):
+Perl:
 ```perl
 use prostruct;
 my $pdb = new prostruct::PDB_float("mypdb.pdb");
-my $radii = $a->getRadii(); # Perl array
+my $radii = $pdb->get_radii(); # Perl array of scalars
+my $ks = $pdb->compute_kabsch_sander(); # Perl array of references to arrays of scalars
 ```
 
 ## Build with CMake

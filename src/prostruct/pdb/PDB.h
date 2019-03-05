@@ -57,14 +57,13 @@ public:
 
 	int n_atoms() { return m_natoms; }
 
-	arma::Col<T> getRadii() { return m_radii; }
+	arma::Col<T> get_radii() { return m_radii; }
 
 	arma::Col<T> compute_shrake_rupley(T probe=1.4, int n_sphere_points=960);
 
 	T calculate_RMSD(PDB& other);
 
 	arma::Col<T> calculate_centroid();
-	//    arma::Mat<T> select(std::string);
 
 	void recentre();
 

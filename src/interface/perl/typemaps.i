@@ -37,18 +37,14 @@
 	AV* av_outer = newAV();    
     for (int i = 0; i < $1.n_cols; ++i) 
     {
-    	SV* first = PERL_TYPE(0);
     	AV* av_inner = newAV();
-
     	for (int j = 0; j < $1.n_rows; ++j) 
     	{
 	        SV* perlval = PERL_TYPE(0);
-			if (j==0)
-    			first = perlval;
-	        PERL_SETTER(perlval, $1(i));
+	        PERL_SETTER(perlval, $1(j, i));
 	        av_push(av_inner, perlval);
     	}
-    	av_push(av_outer, first);
+    	av_push(av_outer, newRV_inc((SV*) av_inner));
 	}
     $result = newRV_noinc((SV*) av_outer );
     sv_2mortal( $result );
