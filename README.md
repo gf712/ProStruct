@@ -22,6 +22,8 @@ C++:
 ```cpp
 #include <prostruct/prostruct.h>
 
+using namespace prostruct;
+
 auto pdb = PDB<float>("mypdb.pdb");
 auto radii = pdb.get_radii(); // arma::Col<float>
 auto ks = pdb.compute_kabsch_sander() // arma::Mat<float>
@@ -50,6 +52,7 @@ ks = pdb$compute_kabsch_sander() # R matrix
 Perl:
 ```perl
 use prostruct;
+
 my $pdb = new prostruct::PDB_float("mypdb.pdb");
 my $radii = $pdb->get_radii(); # Perl array of scalars
 my $ks = $pdb->compute_kabsch_sander(); # Perl array of references to arrays of scalars
