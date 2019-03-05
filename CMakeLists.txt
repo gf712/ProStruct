@@ -4,8 +4,12 @@ project(ProStruct)
 set(CMAKE_CXX_STANDARD 14)
 
 option(ENABLE_TESTING "Enable tests" OFF)
-option(ENABLE_INTERFACE "Enable interface" OFF)
 option(OPTIMIZE_FOR_NATIVE "Build with -march=native" ON)
+
+option(ENABLE_PYTHON "Enable Python interface" OFF)
+option(ENABLE_R "Enable R interface" OFF)
+option(ENABLE_PERL "Enable Perl interface" OFF)
+
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 

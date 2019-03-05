@@ -44,6 +44,13 @@ pdb <- PDB_float("mypdb.pdb")
 ks = pdb$compute_kabsch_sander() # R matrix
 ```
 
+Perl (float and double vectors only):
+```perl
+use prostruct;
+my $pdb = new prostruct::PDB_float("mypdb.pdb");
+my $radii = $a->getRadii(); # Perl array
+```
+
 ## Build with CMake
 
 Currently ProStruct is only available from source.

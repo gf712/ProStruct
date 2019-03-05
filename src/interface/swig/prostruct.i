@@ -26,25 +26,16 @@
 
 #ifdef SWIGPYTHON
 %include <std_shared_ptr.i>
-#else 
+#elif SWIGR
 %include <boost_shared_ptr.i>
 #endif
 
-//#ifdef SWIGPYTHON
-%define ADD_SHARED_PTR(class_name)
-%shared_ptr(class_name)
-%enddef
-// #else 
-// %define ADD_SHARED_PTR(class_name)
-// %boost_shared_ptr(class_name)
-// %enddef
-// #endif
-
-ADD_SHARED_PTR(prostruct::Residue<float>)
-ADD_SHARED_PTR(prostruct::Residue<double>)
-ADD_SHARED_PTR(prostruct::Chain<float>)
-ADD_SHARED_PTR(prostruct::Chain<double>)
-
+#ifndef SWIGPERL
+%shared_ptr(prostruct::Residue<float>)
+%shared_ptr(prostruct::Residue<double>)
+%shared_ptr(prostruct::Chain<float>)
+%shared_ptr(prostruct::Chain<double>)
+#endif
 //%shared_ptr(prostruct::Residue<float>)
 //%shared_ptr(prostruct::Residue<double>)
 //%shared_ptr(prostruct::Chain<float>)

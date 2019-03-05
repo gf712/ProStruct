@@ -8,7 +8,6 @@
 #include <regex>
 
 #include "prostruct/struct/atom.h"
-#include <armadillo>
 
 namespace prostruct {
 
