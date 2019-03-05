@@ -1,3 +1,4 @@
+
 [![Build Status](https://travis-ci.org/gf712/ProStruct.svg?branch=master)](https://travis-ci.org/gf712/ProStruct)
 
 # ProStruct
@@ -69,7 +70,23 @@ cmake ..
 make
 ```
 
+To build code with full compiler optimisations run cmake in Release mode:
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release ..
+```
+
 With Python interface:
 ```bash
 cmake -DPYTHON_EXECUTABLE=/my/path/to/python -DPYTHON_LIBRARY=/my/path/python/to/lib/libpython3.6m.so -DPYTHON_INCLUDE_DIR=/my/path/to/include/python3.6m/ ..
 ```
+
+Known issues:
+
+* On some platforms you might have to compile with -fPIC due to the fmt static library. The compiler will throw an error like this:
+    ```bash
+   /usr/bin/ld: extern/fmt/libfmt.a(format.cc.o): relocation R_X86_64_PC32 against symbol `_ZN3fmt2v58internal12basic_bufferIcE6resizeEm' can not be used when making a shared object; recompile with -fPIC
+  ```
+  To do this just re-run cmake with this:
+  ```bash
+  cmake -DCMAKE_POSITION_INDEPENDENT_CODE=ON ...
+  ```
