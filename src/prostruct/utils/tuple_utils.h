@@ -44,7 +44,6 @@ namespace prostruct {
 		const std::tuple<LambdaArgs...>& lambda_args,
 		ResultType&& result)
 	{
-		//static_assert(result.size() == sizeof...(Args), "Expected result array to be the same size as lambda tuple");
 		return execute_tuple_helper(lambda_tuple, lambda_args, std::index_sequence_for<Args...>{}, std::forward<ResultType>(result));
 	}
 

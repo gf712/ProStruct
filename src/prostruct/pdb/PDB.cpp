@@ -222,24 +222,28 @@ arma::Col<T> PDB<T>::calculate_phi_psi()
 template <typename T>
 arma::Col<T> PDB<T>::calculate_phi()
 {
+	// convert from radians to degrees
+	constexpr T coef = (180.0 / M_PI);
 	// the Phi kernel as a C++ lambda
-	auto lambda = [](const auto& residue,
+	auto lambda = [coef](const auto& residue,
 					 const auto& residue_next
 					 ) {
 		auto atom_coords_this = residue->get_backbone_atoms();
 		auto atom_coords_next = residue_next->get_backbone_atoms();
 		
+		// N_i - C_{i+1}
 		arma::Col<T> b1 = arma::normalise(atom_coords_this.col(2) - atom_coords_next.col(0));
+		// C_{i+1} - O_{i+1}
 		arma::Col<T> b2 = arma::normalise(atom_coords_next.col(0) - atom_coords_next.col(1));
+		// O_{i+1} - N_{i+1}
 		arma::Col<T> b3 = arma::normalise(atom_coords_next.col(1) - atom_coords_next.col(2));
 		arma::Col<T> n1 = arma::cross(b1, b2);
 		arma::Col<T> n2 = arma::cross(b2, b3);
-		return std::atan2(arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2)) * (180.0 / M_PI);
+		return std::atan2(arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2)) * coef;
 	};
-	
-	arma::Row<T> result = geometry::atom_calculation_engine<2>(m_residues, lambda).row(0);
-	// for convenience construct a Col vector	
-	return arma::Col<T>(result.memptr(), result.size());
+
+	// result is a matrix where each row has the lambda/kernel result for each residue, so transform it into column vector
+	return arma::Col<T>(geometry::atom_calculation_engine<2>(m_residues, lambda).memptr(), m_residues.size());
 }
 
 template <typename T>
