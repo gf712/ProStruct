@@ -20,7 +20,7 @@ namespace prostruct {
 		Chain(std::vector<std::shared_ptr<Residue<T>>>, std::string);
 		int n_residues() { return m_nresidues; };
 		int n_atoms() { return m_natoms; };
-		std::vector<std::shared_ptr<Residue<T>>> getResidues() { return residues; }
+		residueVector<T> getResidues() { return residues; }
 		chainAtomVector<T> getBackboneAtoms();
 
 	private:

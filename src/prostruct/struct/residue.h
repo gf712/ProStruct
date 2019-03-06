@@ -61,6 +61,11 @@ namespace prostruct {
 			return backboneAtoms;
 		}
 
+		arma::Mat<T> get_backbone_atoms()
+		{
+			return xyz(arma::span::all, arma::span(0, 3));
+		}
+
 		atomVector<T> getSidechain()
 		{
 			std::vector<std::shared_ptr<Atom<T>>> sidechainAtoms;
@@ -132,7 +137,7 @@ namespace prostruct {
 		std::map<std::string, int> atomMap; /**< Map atom name to internal index */
 	};
 
-	template <typename T>
+		template <typename T>
 	using residueVector = std::vector<std::shared_ptr<Residue<T>>>;
 }
 

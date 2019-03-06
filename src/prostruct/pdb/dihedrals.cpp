@@ -51,7 +51,6 @@ namespace prostruct {
 		}
 
 		template void dihedrals(const arma::Cube<float> &, arma::Col<float> &);
-
 		template void dihedrals(const arma::Cube<double> &, arma::Col<double> &);
 	}
 }

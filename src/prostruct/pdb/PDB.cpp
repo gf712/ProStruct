@@ -29,11 +29,10 @@ PDB<T>::PDB(const std::string& filename_)
 		for (auto const& atomPair : chainAtomMap[chain]) {
 
 			try {
-				auto residue = std::make_shared<Residue<T>>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first);
-				residues.emplace_back(residue);
-				m_xyz.insert_cols(static_cast<const arma::uword>(m_natoms), residue->getXYZ());
-				m_radii.insert_rows(static_cast<const arma::uword>(m_natoms), residue->getRadii());
-				m_natoms += residue->n_atoms();
+				residues.emplace_back(std::make_shared<Residue<T>>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first));
+				m_xyz.insert_cols(static_cast<const arma::uword>(m_natoms), residues.back()->getXYZ());
+				m_radii.insert_rows(static_cast<const arma::uword>(m_natoms), residues.back()->getRadii());
+				m_natoms += residues.back()->n_atoms();
 			} catch (const char* msg) {
 				std::cout << "Residue: " << atomPair.first << std::endl;
 				std::cout << msg << std::endl;
@@ -47,6 +46,7 @@ PDB<T>::PDB(const std::string& filename_)
 			std::cout << "Chain: " << chain << std::endl;
 			std::cout << msg << std::endl;
 		}
+		m_residues.insert(m_residues.end(), residues.begin(), residues.end());
 	}
 
 	m_number_of_chains = static_cast<int>(m_chain_map.size());
@@ -161,7 +161,7 @@ void PDB<T>::recentre()
 }
 
 template <typename T>
-arma::Mat<T> PDB<T>::calculate_phi_psi()
+arma::Col<T> PDB<T>::calculate_phi_psi()
 {
 
 	// calculate phi and psi dihedral angles along the protein backbone
@@ -171,7 +171,7 @@ arma::Mat<T> PDB<T>::calculate_phi_psi()
 
 	// different chains are not connected, therefore need ignore the C and N terminus of consecutive chains
 
-	arma::Mat<T> result(m_nresidues - m_chain_order.size() + 1, 2, arma::fill::zeros);
+	arma::Col<T> result(m_nresidues - m_chain_order.size() + 1, arma::fill::zeros);
 
 	//	arma::Mat<T> result(3, nResidues*4, arma::fill::zeros);
 
@@ -185,40 +185,68 @@ arma::Mat<T> PDB<T>::calculate_phi_psi()
 
 		// create a 3D tensor with all the relevant coordinates
 		arma::Cube<T> phiAtomCoords(3, 4, n_residues - 1);
-		arma::Cube<T> psiAtomCoords(3, 4, n_residues - 1);
+		// arma::Cube<T> psiAtomCoords(3, 4, n_residues - 1);
 
 		for (arma::uword i = atomPosition; i < n_residues - 1; ++i) {
 			// C|O|N|CA
 			// phi angle
-			phiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4);
-			phiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col((i + 1)*4+2);
-			phiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col((i + 1)*4+3);
-			phiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4);
+			phiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4+2);
+			phiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col((i + 1)*4);
+			phiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col((i + 1)*4+1);
+			phiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4+2);
 
 			// psi angle
-			psiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4+2);
-			psiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col(i*4+3);
-			psiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col(i*4);
-			psiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4+2);
+			// psiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4);
+			// psiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col(i*4+1);
+			// psiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col(i*4+2);
+			// psiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4);
 		}
 
 		arma::Col<T> phi(n_residues - 1);
-		arma::Col<T> psi(n_residues - 1);
+		// arma::Col<T> psi(n_residues - 1);
 
         geometry::dihedrals(phiAtomCoords, phi);
-        geometry::dihedrals(psiAtomCoords, psi);
+        // geometry::dihedrals(psiAtomCoords, psi);
 
-		result(arma::span(atomPosition, n_residues - 2), 0) = phi * (180.0 / M_PI);
-		result(arma::span(atomPosition + 1, n_residues - 1), 1) = psi * (180.0 / M_PI);
+		result(arma::span(atomPosition, n_residues - 2)) = phi * (180.0 / M_PI);
+		// result(arma::span(atomPosition + 1, n_residues - 1), 1) = psi * (180.0 / M_PI);
 
-		atomPosition += n_residues + 1;
-        result.print();
+		// atomPosition += n_residues + 1;
+  //       result.print();
         return result;
 	}
     result.print();
 	return result;
 }
 
+template <typename T>
+arma::Col<T> PDB<T>::calculate_phi()
+{
+	// the Phi kernel as a C++ lambda
+	auto lambda = [](const auto& residue,
+					 const auto& residue_next
+					 ) {
+		auto atom_coords_this = residue->get_backbone_atoms();
+		auto atom_coords_next = residue_next->get_backbone_atoms();
+		
+		arma::Col<T> b1 = arma::normalise(atom_coords_this.col(2) - atom_coords_next.col(0));
+		arma::Col<T> b2 = arma::normalise(atom_coords_next.col(0) - atom_coords_next.col(1));
+		arma::Col<T> b3 = arma::normalise(atom_coords_next.col(1) - atom_coords_next.col(2));
+		arma::Col<T> n1 = arma::cross(b1, b2);
+		arma::Col<T> n2 = arma::cross(b2, b3);
+		return std::atan2(arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2)) * (180.0 / M_PI);
+	};
+	
+	arma::Row<T> result = geometry::atom_calculation_engine<2>(m_residues, lambda).row(0);
+	// for convenience construct a Col vector	
+	return arma::Col<T>(result.memptr(), result.size());
+}
+
+template <typename T>
+arma::Col<T> PDB<T>::calculate_psi()
+{
+	return arma::Col<T>({0});
+}
 //void rotate(arma::Col<T> &rotation) {
 //
 //    // first check which axes need to be rotated

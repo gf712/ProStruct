@@ -6,6 +6,11 @@
 #define PROSTRUCT_GEOMETRY_H
 
 #include <armadillo>
+#include <array>
+#include <cmath>
+#include "prostruct/struct/residue.h"
+#include "prostruct/utils/tuple_utils.h"
+
 
 #ifndef DNDEBUG
 #define ARMA_NO_DEBUG
@@ -38,7 +43,6 @@ namespace prostruct {
 
 		template <typename T>
 		void kabsch_rotation_(arma::Mat<T>& xyz, arma::Mat<T>& xyz_other);
-
 		template <typename T>
 		void get_centroid(const arma::Mat<T>& xyz, arma::Col<T>& centroid);
 
@@ -46,10 +50,34 @@ namespace prostruct {
 		void recentre_molecule(arma::Mat<T>& xyz);
 
 		template <typename T>
-		void recentre_molecule(arma::Mat<T>& xyz, arma::Mat<T>& result);
+		void recentre_molecule(const arma::Mat<T>& xyz, arma::Mat<T>& result);
 
 		template <typename T>
 		void dihedrals(const arma::Cube<T>& atoms, arma::Col<T>& angles);
+
+		/** 
+		  *	A near zero cost abstraction engine to execute multiple lambdas
+		  * per residue in a loop.
+		  *
+		  */
+		template<size_t window_size, typename T, typename ...Args>
+		arma::Mat<T> atom_calculation_engine(const prostruct::residueVector<T>& residues, Args... computations)
+		{
+			constexpr int n_computations = sizeof...(computations);
+			auto result = arma::Mat<T>(n_computations, residues.size(), arma::fill::zeros);
+
+			std::tuple<Args...> comp {computations...};
+
+			int offset = std::ceil((window_size-1.0) / 2.0);
+			int remainder = window_size - offset;
+
+			for (int i = offset; i < residues.size() - remainder; ++i)
+			{
+				execute_tuple(comp, vector_to_tuple_helper(residues, std::make_index_sequence<window_size>{}, i - offset), result.col(i - offset));
+			}
+
+			return result;
+		}
 	}
 }
 #endif //PROSTRUCT_GEOMETRY_H

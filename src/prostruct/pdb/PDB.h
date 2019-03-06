@@ -67,11 +67,14 @@ public:
 
 	void recentre();
 
-	arma::Mat<T> calculate_phi_psi();
+	arma::Col<T> calculate_phi_psi();
 
 	void kabsch_rotation(PDB<T>& other);
 
 	T kabsch_rmsd(PDB<T>& other);
+
+	arma::Col<T> calculate_phi();
+	arma::Col<T> calculate_psi();
 
 	//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x,
 	//    rotation_y, rotation_z] void rotate(T rotation_angle, std::string axis);
@@ -106,6 +109,7 @@ private:
 	std::vector<std::string> m_chain_order;
 	arma::uword m_nresidues;
 	arma::Col<T> m_radii;
+	residueVector<T> m_residues;
 
 	void internalKS(arma::Mat<T>&);
 	arma::Mat<T> get_backbone_atoms();
