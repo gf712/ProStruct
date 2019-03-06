@@ -220,10 +220,10 @@ arma::Col<T> PDB<T>::calculate_phi_psi()
 }
 
 template <typename T>
-arma::Col<T> PDB<T>::calculate_phi()
+arma::Col<T> PDB<T>::calculate_phi(bool use_radians)
 {
 	// convert from radians to degrees
-	constexpr T coef = (180.0 / M_PI);
+	T coef = use_radians ? 1.0 : to_rad_constant;
 	// the Phi kernel as a C++ lambda
 	auto lambda = [coef](const auto& residue,
 					 const auto& residue_next
@@ -243,7 +243,7 @@ arma::Col<T> PDB<T>::calculate_phi()
 	};
 
 	// result is a matrix where each row has the lambda/kernel result for each residue, so transform it into column vector
-	return arma::Col<T>(geometry::atom_calculation_engine<2>(m_residues, lambda).memptr(), m_residues.size());
+	return arma::Col<T>(geometry::atom_calculation_engine<2>(m_residues, 0, lambda).memptr(), m_residues.size());
 }
 
 template <typename T>

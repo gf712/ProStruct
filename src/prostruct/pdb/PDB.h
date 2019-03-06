@@ -73,7 +73,7 @@ public:
 
 	T kabsch_rmsd(PDB<T>& other);
 
-	arma::Col<T> calculate_phi();
+	arma::Col<T> calculate_phi(bool use_radians = false);
 	arma::Col<T> calculate_psi();
 
 	//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x,
@@ -110,6 +110,7 @@ private:
 	arma::uword m_nresidues;
 	arma::Col<T> m_radii;
 	residueVector<T> m_residues;
+	static constexpr T to_rad_constant = 180.0 / M_PI;
 
 	void internalKS(arma::Mat<T>&);
 	arma::Mat<T> get_backbone_atoms();

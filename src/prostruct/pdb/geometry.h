@@ -61,7 +61,7 @@ namespace prostruct {
 		  *
 		  */
 		template<size_t window_size, typename T, typename ...Args>
-		arma::Mat<T> atom_calculation_engine(const prostruct::residueVector<T>& residues, Args... computations)
+		arma::Mat<T> atom_calculation_engine(const prostruct::residueVector<T>& residues, int start, Args... computations)
 		{
 			constexpr int n_computations = sizeof...(computations);
 			auto result = arma::Mat<T>(n_computations, residues.size(), arma::fill::zeros);
@@ -69,11 +69,10 @@ namespace prostruct {
 			std::tuple<Args...> comp {computations...};
 
 			int offset = std::ceil((window_size-1.0) / 2.0);
-			int remainder = window_size - offset;
 
-			for (int i = offset; i < residues.size() - remainder; ++i)
+			for (int i = start; i < residues.size() - offset; ++i)
 			{
-				execute_tuple(comp, vector_to_tuple_helper(residues, std::make_index_sequence<window_size>{}, i - offset), result.col(i - offset));
+				execute_tuple(comp, vector_to_tuple_helper(residues, std::make_index_sequence<window_size>{}, i - start), result.col(i - start));
 			}
 
 			return result;
