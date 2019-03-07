@@ -6,9 +6,9 @@
  *
  */
 
-#include <prostruct/pdb/PDB.h>
 #include <prostruct/core/engine.h>
 #include <prostruct/core/kernels.h>
+#include <prostruct/pdb/PDB.h>
 
 using namespace prostruct;
 
@@ -163,7 +163,8 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 	T coef = use_radians ? 1.0 : to_rad_constant;
 
 	// the Phi kernel as a C++ lambda
-	auto phi_kernel = [coef](const auto& residue, const auto& residue_next) {
+	auto phi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
+						  const std::shared_ptr<Residue<T>>& residue_next) {
 		if (residue->is_c_terminus())
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
@@ -174,7 +175,8 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 	};
 
 	// the Psi kernel as a C++ lambda
-	auto psi_kernel = [coef](const auto& residue, const auto& residue_next) {
+	auto psi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
+						  const std::shared_ptr<Residue<T>>& residue_next) {
 		if (residue_next->is_n_terminus())
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
@@ -184,8 +186,7 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 			atom_coords_next.col(0), coef);
 	};
 
-	return core::atom_calculation_engine<2>(
-		m_residues, 0, phi_kernel, psi_kernel);
+	return core::residue_kernel_engine(m_residues, 0, phi_kernel, psi_kernel);
 }
 
 template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
@@ -193,7 +194,8 @@ template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
 	// the Phi kernel as a C++ lambda
-	auto phi_kernel = [coef](const auto& residue, const auto& residue_next) {
+	auto phi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
+						  const std::shared_ptr<Residue<T>>& residue_next) {
 		if (residue->is_c_terminus())
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
@@ -206,8 +208,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 	// result is a matrix where each row has the lambda/kernel result for each
 	// residue, so transform it into column vector
 	return arma::Col<T>(
-		core::atom_calculation_engine<2>(m_residues, 0, phi_kernel)
-			.memptr(),
+		core::residue_kernel_engine(m_residues, 0, phi_kernel).memptr(),
 		m_nresidues);
 }
 
@@ -216,7 +217,8 @@ template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
 	// the Psi kernel as a C++ lambda
-	auto psi_kernel = [coef](const auto& residue, const auto& residue_next) {
+	auto psi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
+						  const std::shared_ptr<Residue<T>>& residue_next) {
 		if (residue_next->is_n_terminus())
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
@@ -229,8 +231,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 	// result is a matrix where each row has the lambda/kernel result for each
 	// residue, so transform it into column vector
 	return arma::Col<T>(
-		core::atom_calculation_engine<2>(m_residues, 0, psi_kernel)
-			.memptr(),
+		core::residue_kernel_engine(m_residues, 0, psi_kernel).memptr(),
 		m_nresidues);
 }
 // void rotate(arma::Col<T> &rotation) {

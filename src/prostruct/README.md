@@ -13,11 +13,10 @@ Therefore I started working on a friendlier library API, that requires fewer int
   This is what the computation engine does: it takes a kernel and slides it along the residue vector.
   The kernel is a C++ lambda that receives Residue object(s) as parameter(s) and returns a scalar value.
   For example, the phi dihedral angle:
-  	The computation requires the C atom coordinates of the current residue and the coordinates for the N, CA and C in the following residue. The four atoms form two planes (i.e. C-N-CA and N-CA-C) and the angle of the intersection is calculated ([see](https://en.wikipedia.org/wiki/Dihedral_angle)).
+  	The computation requires the C atom coordinates of the current residue and the coordinates for the N, CA and C in the following residue. The four atoms form two planes (i.e. C<sub>i</sub>-N<sub>i+1</sub>-CA<sub>i+1</sub> and N<sub>i+1</sub>-CA<sub>i+1</sub>-C<sub>i+1</sub>) and the angle of the intersection is the dihedral angle ([see](https://en.wikipedia.org/wiki/Dihedral_angle)).
   	In C++:
   	```cpp
-	auto phi_kernel = [coef](const auto& residue, const auto& residue_next) {
-		// residue and residue_next are std::shared_ptr<Residue<T>>
+	auto phi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue, const std::shared_ptr<Residue<T>>& residue_next) {
 		if (residue->is_c_terminus())
 			return static_cast<T>(0.0);
 		// backbone atoms are in this order: N | CA | C | O
@@ -35,13 +34,14 @@ Therefore I started working on a friendlier library API, that requires fewer int
   	```
   	The kernel can then be passed to the engine which slides along the sequence:
   	```cpp
-  	geometry::atom_calculation_engine<2>(m_residues, 0, phi_kernel);
+  	geometry::residue_kernel_engine(m_residues, 0, phi_kernel);
   	```
-  	The `<2>` tells engine that the window size is 2, i.e. current residue and next one is required. This is needed at compile time.
-  	The result is a matrix 1 x N_{residues}, i.e. a row vector.
-  	`geometry::atom_calculation_engine` can take an arbitrary number of kernels. The following would return a 2 x N_{residues} where the first row has the phi angles and the second psi angles.
+  	The compiler determines at compile time the window size required given the number of arguments of the lambda, i.e. 2.
+  	The 0 just indicates that we want to start at position 0 in the sequence (N-terminus).
+  	The result is a matrix 1 x N<sub>residues</sub>, i.e. a row vector.
+  	`geometry::residue_kernel_engine` can take an arbitrary number of kernels. The following would return a 2 x N<sub>residues</sub> where the first row has the phi angles and the second psi angles.
   	```cpp
-  	geometry::atom_calculation_engine<2>(m_residues, 0, phi_kernel, psi_kernel);`
+  	geometry::residue_kernel_engine(m_residues, 0, phi_kernel, psi_kernel);`
   	```
   	The advantage of this approach is that the runtime is sublinear as more kernels are added because the compiler can optimise each operation on a residue, rather than two for loops which would (probably?) lead to more cache misses.
   	It also looks very cool (in my opinion)!
