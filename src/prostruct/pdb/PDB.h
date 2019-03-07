@@ -1,6 +1,11 @@
-//
-// Created by gil on 27/03/18.
-//
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Authors: Gil Hoben
+ *
+ */
+
 
 #ifndef PROSTRUCT_PDB_H
 #define PROSTRUCT_PDB_H

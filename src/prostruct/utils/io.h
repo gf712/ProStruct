@@ -1,6 +1,10 @@
-//
-// Created by Gil Hoben on 2019-02-18.
-//
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Authors: Gil Hoben
+ *
+ */
 
 #ifndef PROSTRUCT_IO_H
 #define PROSTRUCT_IO_H

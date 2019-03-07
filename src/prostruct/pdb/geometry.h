@@ -1,6 +1,10 @@
-//
-// Created by gil on 06/04/18.
-//
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Authors: Gil Hoben
+ *
+ */
 
 #ifndef PROSTRUCT_GEOMETRY_H
 #define PROSTRUCT_GEOMETRY_H
@@ -56,50 +60,6 @@ namespace prostruct {
 		template <typename T>
 		T dihedrals(const arma::Col<T>& atom1, const arma::Col<T>& atom2,
 			const arma::Col<T>& atom3, const arma::Col<T>& atom4, T coef);
-
-		/**
-		 *	A near zero cost abstraction engine to execute multiple lambdas
-		 * per residue in a loop.
-		 *
-		 */
-		template <size_t window_size, typename T, typename... Args>
-		arma::Mat<T> atom_calculation_engine(
-			const prostruct::residueVector<T>& residues, std::size_t start,
-			Args... computations)
-		{
-			constexpr int n_computations = sizeof...(computations);
-			auto result = arma::Mat<T>(
-				n_computations, residues.size(), arma::fill::zeros);
-
-			std::tuple<Args...> comp { computations... };
-#pragma omp parallel for
-			for (std::size_t i = start; i < residues.size() - window_size + 1;
-				 ++i) {
-				execute_tuple(comp,
-					vector_to_tuple_helper(residues,
-						std::make_index_sequence<window_size> {}, i - start),
-					result.col(i - start));
-			}
-
-			return result;
-		}
-
-		/**
-		 * An untyped version of dihedrals for armadillo optimisations
-		 */
-		template <typename T1, typename T2>
-		inline T2 dihedrals_lazy(
-			T1&& atom1, T1&& atom2, T1&& atom3, T1&& atom4, T2 coef)
-		{
-			arma::Col<T2> b1 = arma::normalise(atom1 - atom2);
-			arma::Col<T2> b2 = arma::normalise(atom2 - atom3);
-			arma::Col<T2> b3 = arma::normalise(atom3 - atom4);
-			arma::Col<T2> n1 = arma::cross(b1, b2);
-			arma::Col<T2> n2 = arma::cross(b2, b3);
-			return std::atan2(
-					   arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2))
-				* coef;
-		}
 	}
 }
 #endif // PROSTRUCT_GEOMETRY_H

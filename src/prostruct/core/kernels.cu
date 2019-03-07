@@ -5,5 +5,3 @@
  * Authors: Gil Hoben
  *
  */
-
-#include "prostruct/struct/model.h"

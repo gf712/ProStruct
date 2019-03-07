@@ -1,7 +1,11 @@
-//
-// Created by gil on 06/04/18.
-//
-//
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Authors: Gil Hoben
+ *
+ */
+
 //The DSSP algorithm is the standard method for assigning secondary structure to the amino acids of a protein, given the
 // atomic-resolution coordinates of the protein. The abbreviation is only mentioned once in the 1983 paper describing
 // this algorithm,[1] where it is the name of the Pascal program that implements the algorithm Define Secondary Structure of Proteins.

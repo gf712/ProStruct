@@ -1,6 +1,10 @@
-//
-// Created by gil on 09/04/18.
-//
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Authors: Gil Hoben
+ *
+ */
 
 #include "prostruct/pdb/geometry.h"
 #include "prostruct/struct/atom.h"

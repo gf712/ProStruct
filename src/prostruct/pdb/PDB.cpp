@@ -1,9 +1,14 @@
-//
-// Created by gil on 27/03/18.
-//
+/*
+ * This file is subject to the terms and conditions defined in
+ * file 'LICENSE', which is part of this source code package.
+ *
+ * Authors: Gil Hoben
+ *
+ */
 
-#include "prostruct/pdb/PDB.h"
-#include "PDB.h"
+#include <prostruct/pdb/PDB.h>
+#include <prostruct/core/engine.h>
+#include <prostruct/core/kernels.h>
 
 using namespace prostruct;
 
@@ -163,7 +168,7 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
 		auto atom_coords_next = residue_next->get_backbone_atoms();
-		return geometry::dihedrals_lazy(atom_coords_this.col(2),
+		return kernels::dihedrals_lazy(atom_coords_this.col(2),
 			atom_coords_next.col(0), atom_coords_next.col(1),
 			atom_coords_next.col(2), coef);
 	};
@@ -174,12 +179,12 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
 		auto atom_coords_next = residue_next->get_backbone_atoms();
-		return geometry::dihedrals_lazy(atom_coords_this.col(0),
+		return kernels::dihedrals_lazy(atom_coords_this.col(0),
 			atom_coords_this.col(1), atom_coords_this.col(2),
 			atom_coords_next.col(0), coef);
 	};
 
-	return geometry::atom_calculation_engine<2>(
+	return core::atom_calculation_engine<2>(
 		m_residues, 0, phi_kernel, psi_kernel);
 }
 
@@ -193,7 +198,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
 		auto atom_coords_next = residue_next->get_backbone_atoms();
-		return geometry::dihedrals_lazy(atom_coords_this.col(2),
+		return kernels::dihedrals_lazy(atom_coords_this.col(2),
 			atom_coords_next.col(0), atom_coords_next.col(1),
 			atom_coords_next.col(2), coef);
 	};
@@ -201,7 +206,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 	// result is a matrix where each row has the lambda/kernel result for each
 	// residue, so transform it into column vector
 	return arma::Col<T>(
-		geometry::atom_calculation_engine<2>(m_residues, 0, phi_kernel)
+		core::atom_calculation_engine<2>(m_residues, 0, phi_kernel)
 			.memptr(),
 		m_nresidues);
 }
@@ -216,7 +221,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
 		auto atom_coords_next = residue_next->get_backbone_atoms();
-		return geometry::dihedrals_lazy(atom_coords_this.col(0),
+		return kernels::dihedrals_lazy(atom_coords_this.col(0),
 			atom_coords_this.col(1), atom_coords_this.col(2),
 			atom_coords_next.col(0), coef);
 	};
@@ -224,7 +229,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 	// result is a matrix where each row has the lambda/kernel result for each
 	// residue, so transform it into column vector
 	return arma::Col<T>(
-		geometry::atom_calculation_engine<2>(m_residues, 0, psi_kernel)
+		core::atom_calculation_engine<2>(m_residues, 0, psi_kernel)
 			.memptr(),
 		m_nresidues);
 }
