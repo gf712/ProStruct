@@ -72,7 +72,7 @@ namespace prostruct {
 				n_computations, residues.size(), arma::fill::zeros);
 
 			std::tuple<Args...> comp { computations... };
-
+#pragma omp parallel for
 			for (std::size_t i = start; i < residues.size() - window_size + 1;
 				 ++i) {
 				execute_tuple(comp,
