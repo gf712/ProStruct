@@ -75,9 +75,7 @@ void createMap(
 			}
 
 			auto residueID = residue + "-" + resSeqStr + "-" + insCode;
-			auto atom = std::make_shared<Atom<T>>(element, name, x, y, z);
-
-			chainResMap[chainID][residueID].emplace_back(atom);
+			chainResMap[chainID][residueID].emplace_back(std::make_shared<Atom<T>>(element, name, x, y, z));
 		}
 	}
 }

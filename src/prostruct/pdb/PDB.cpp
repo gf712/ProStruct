@@ -5,85 +5,81 @@
 #include "prostruct/pdb/PDB.h"
 #include "PDB.h"
 
-
 using namespace prostruct;
 
-template <typename T>
-PDB<T>::PDB(const std::string& filename_)
+template <typename T> PDB<T>::PDB(const std::string& filename_)
 {
 	m_filename = filename_;
 
-	std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>> chainAtomMap;
+	std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>>
+		chainAtomMap;
 
 	createMap(m_filename, chainAtomMap, m_chain_order);
 
 	m_natoms = 0;
 	m_nresidues = 0;
-
-	m_xyz.resize(3, 0);
+	m_xyz.set_size(3, 0);
 
 	for (const auto& chain : m_chain_order) {
-
 		residueVector<T> residues;
-
-		for (auto const& atomPair : chainAtomMap[chain]) {
-
-			try {
-				residues.emplace_back(std::make_shared<Residue<T>>(atomPair.second, atomPair.first.substr(0, 3), atomPair.first));
-				m_xyz.insert_cols(static_cast<const arma::uword>(m_natoms), residues.back()->getXYZ());
-				m_radii.insert_rows(static_cast<const arma::uword>(m_natoms), residues.back()->getRadii());
-				m_natoms += residues.back()->n_atoms();
-			} catch (const char* msg) {
-				std::cout << "Residue: " << atomPair.first << std::endl;
-				std::cout << msg << std::endl;
-			}
+		const std::map<std::string, atomVector<T>, AASequenceOrder> chain_i
+			= chainAtomMap.at(chain);
+		append_new_residue(*chain_i.cbegin(), residues, true, false);
+		for (auto atomPair = std::next(chain_i.cbegin());
+			 atomPair != std::prev(chain_i.cend()); ++atomPair) {
+			append_new_residue(*atomPair, residues, false, false);
 		}
-
-		try {
-			m_chain_map[chain] = std::make_shared<Chain<T>>(residues, chain);
-			m_nresidues += static_cast<arma::uword>(residues.size());
-		} catch (const char* msg) {
-			std::cout << "Chain: " << chain << std::endl;
-			std::cout << msg << std::endl;
-		}
+		append_new_residue(*std::prev(chain_i.cend()), residues, false, true);
+		m_chain_map[chain] = std::make_shared<Chain<T>>(residues, chain);
+		m_nresidues += static_cast<arma::uword>(residues.size());
 		m_residues.insert(m_residues.end(), residues.begin(), residues.end());
 	}
-
 	m_number_of_chains = static_cast<int>(m_chain_map.size());
 }
 
 template <typename T>
-PDB<T> PDB<T>::fetch(std::string PDB_id)
+void PDB<T>::append_new_residue(
+	const std::pair<const std::string, atomVector<T>>& atom_pair,
+	residueVector<T>& residues, bool n_terminus, bool c_terminus)
+{
+	residues.emplace_back(std::make_shared<Residue<T>>(atom_pair.second,
+		atom_pair.first.substr(0, 3), atom_pair.first, n_terminus, c_terminus));
+	m_xyz.insert_cols(
+		static_cast<arma::uword>(m_natoms), residues.back()->getXYZ());
+	m_radii.insert_rows(
+		static_cast<arma::uword>(m_natoms), residues.back()->getRadii());
+	m_natoms += residues.back()->n_atoms();
+}
+
+template <typename T> PDB<T> PDB<T>::fetch(std::string PDB_id)
 {
 	throw "Not implemented";
 }
 
-template <typename T>
-arma::Mat<T> PDB<T>::get_backbone_atoms()
+template <typename T> arma::Mat<T> PDB<T>::get_backbone_atoms() const
 {
 	arma::Mat<T> result(3, m_nresidues * 4);
 	arma::uword pos = 0;
 	arma::uword i = 0;
 
 	for (auto const& chain : m_chain_order) {
-		for (auto const& residue : m_chain_map[chain]->getResidues()) {
-			result(arma::span::all, arma::span(i, i+3)) = m_xyz(arma::span::all, arma::span(pos, pos+3));
-			pos+=residue->n_atoms();
-			i+=4;
+		for (auto const& residue : m_chain_map.at(chain)->getResidues()) {
+			result(arma::span::all, arma::span(i, i + 3))
+				= m_xyz(arma::span::all, arma::span(pos, pos + 3));
+			pos += residue->n_atoms();
+			i += 4;
 		}
 	}
 	return result;
 }
 
-template <typename T>
-void PDB<T>::internalKS(arma::Mat<T>& E)
+template <typename T> void PDB<T>::internalKS(arma::Mat<T>& E) const
 {
 	auto backbone_atom_coords = get_backbone_atoms();
-    geometry::kabsch_sander(backbone_atom_coords, E);
+	geometry::kabsch_sander(backbone_atom_coords, E);
 }
 
-template <typename T>
-arma::Mat<T> PDB<T>::compute_kabsch_sander()
+template <typename T> arma::Mat<T> PDB<T>::compute_kabsch_sander() const
 {
 	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
@@ -93,20 +89,20 @@ arma::Mat<T> PDB<T>::compute_kabsch_sander()
 };
 
 template <typename T>
-arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points)
+arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const
 {
 	// calculates atom surface accessibility using the Shrake-Rupley algorithm
 
 	arma::Col<T> asa(static_cast<const arma::uword>(m_natoms));
 
-    geometry::shrake_rupley(m_xyz, m_radii, asa, static_cast<arma::uword>(m_natoms), probe,
-            static_cast<arma::uword>(n_sphere_points));
+	geometry::shrake_rupley(m_xyz, m_radii, asa,
+		static_cast<arma::uword>(m_natoms), probe,
+		static_cast<arma::uword>(n_sphere_points));
 
 	return asa;
 }
 
-template <typename T>
-arma::Mat<T> PDB<T>::predict_backbone_hbonds()
+template <typename T> arma::Mat<T> PDB<T>::predict_backbone_hbonds() const
 {
 	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
@@ -117,8 +113,7 @@ arma::Mat<T> PDB<T>::predict_backbone_hbonds()
 	return E;
 }
 
-template <typename T>
-void PDB<T>::compute_dssp()
+template <typename T> void PDB<T>::compute_dssp() const
 {
 	// arma::Mat<T> C_coords(3, m_nresidues);
 	// arma::Mat<T> O_coords(3, m_nresidues);
@@ -129,12 +124,11 @@ void PDB<T>::compute_dssp()
 
 	auto backbone_atoms = get_backbone_atoms();
 
-    // geometry::dssp(C_coords, O_coords, N_coords, CA_coords);
+	// geometry::dssp(C_coords, O_coords, N_coords, CA_coords);
 	// geometry::dssp(xyz, backbone_atoms);
 }
 
-template <typename T>
-T PDB<T>::calculate_RMSD(PDB& other)
+template <typename T> T PDB<T>::calculate_RMSD(PDB& other) const
 {
 	// first check if the size is the same
 	if (m_natoms != other.n_atoms()) {
@@ -144,8 +138,7 @@ T PDB<T>::calculate_RMSD(PDB& other)
 	return geometry::rmsd(m_xyz, other.get_xyz());
 }
 
-template <typename T>
-arma::Col<T> PDB<T>::calculate_centroid()
+template <typename T> arma::Col<T> PDB<T>::calculate_centroid() const
 {
 	arma::Col<T> result(3);
 
@@ -154,104 +147,88 @@ arma::Col<T> PDB<T>::calculate_centroid()
 	return result;
 }
 
-template <typename T>
-void PDB<T>::recentre()
+template <typename T> void PDB<T>::recentre()
 {
-    geometry::recentre_molecule(m_xyz);
+	geometry::recentre_molecule(m_xyz);
 }
 
 template <typename T>
-arma::Col<T> PDB<T>::calculate_phi_psi()
+arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 {
+	T coef = use_radians ? 1.0 : to_rad_constant;
 
-	// calculate phi and psi dihedral angles along the protein backbone
-	// returns a matrix of shape (2, n_atoms):
-	//  - row 0: phi
-	//  - row 1: psi
+	// the Phi kernel as a C++ lambda
+	auto phi_kernel = [coef](const auto& residue, const auto& residue_next) {
+		if (residue->is_c_terminus())
+			return static_cast<T>(0.0);
+		auto atom_coords_this = residue->get_backbone_atoms();
+		auto atom_coords_next = residue_next->get_backbone_atoms();
+		return geometry::dihedrals_lazy(atom_coords_this.col(2),
+			atom_coords_next.col(0), atom_coords_next.col(1),
+			atom_coords_next.col(2), coef);
+	};
 
-	// different chains are not connected, therefore need ignore the C and N terminus of consecutive chains
+	// the Psi kernel as a C++ lambda
+	auto psi_kernel = [coef](const auto& residue, const auto& residue_next) {
+		if (residue_next->is_n_terminus())
+			return static_cast<T>(0.0);
+		auto atom_coords_this = residue->get_backbone_atoms();
+		auto atom_coords_next = residue_next->get_backbone_atoms();
+		return geometry::dihedrals_lazy(atom_coords_this.col(0),
+			atom_coords_this.col(1), atom_coords_this.col(2),
+			atom_coords_next.col(0), coef);
+	};
 
-	arma::Col<T> result(m_nresidues - m_chain_order.size() + 1, arma::fill::zeros);
-
-	//	arma::Mat<T> result(3, nResidues*4, arma::fill::zeros);
-
-	arma::uword atomPosition = 0;
-
-	auto backbone_atoms = get_backbone_atoms();
-
-	for (const auto& chainName : m_chain_order) {
-		auto chain = m_chain_map[chainName];
-		arma::uword n_residues = chain->n_residues();
-
-		// create a 3D tensor with all the relevant coordinates
-		arma::Cube<T> phiAtomCoords(3, 4, n_residues - 1);
-		// arma::Cube<T> psiAtomCoords(3, 4, n_residues - 1);
-
-		for (arma::uword i = atomPosition; i < n_residues - 1; ++i) {
-			// C|O|N|CA
-			// phi angle
-			phiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4+2);
-			phiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col((i + 1)*4);
-			phiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col((i + 1)*4+1);
-			phiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4+2);
-
-			// psi angle
-			// psiAtomCoords.slice(i)(arma::span::all, 0) = backbone_atoms.col(i*4);
-			// psiAtomCoords.slice(i)(arma::span::all, 1) = backbone_atoms.col(i*4+1);
-			// psiAtomCoords.slice(i)(arma::span::all, 2) = backbone_atoms.col(i*4+2);
-			// psiAtomCoords.slice(i)(arma::span::all, 3) = backbone_atoms.col((i + 1)*4);
-		}
-
-		arma::Col<T> phi(n_residues - 1);
-		// arma::Col<T> psi(n_residues - 1);
-
-        geometry::dihedrals(phiAtomCoords, phi);
-        // geometry::dihedrals(psiAtomCoords, psi);
-
-		result(arma::span(atomPosition, n_residues - 2)) = phi * (180.0 / M_PI);
-		// result(arma::span(atomPosition + 1, n_residues - 1), 1) = psi * (180.0 / M_PI);
-
-		// atomPosition += n_residues + 1;
-  //       result.print();
-        return result;
-	}
-    result.print();
-	return result;
+	return geometry::atom_calculation_engine<2>(
+		m_residues, 0, phi_kernel, psi_kernel);
 }
 
-template <typename T>
-arma::Col<T> PDB<T>::calculate_phi(bool use_radians)
+template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 {
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
 	// the Phi kernel as a C++ lambda
-	auto lambda = [coef](const auto& residue,
-					 const auto& residue_next
-					 ) {
+	auto phi_kernel = [coef](const auto& residue, const auto& residue_next) {
+		if (residue->is_c_terminus())
+			return static_cast<T>(0.0);
 		auto atom_coords_this = residue->get_backbone_atoms();
 		auto atom_coords_next = residue_next->get_backbone_atoms();
-		
-		// N_i - C_{i+1}
-		arma::Col<T> b1 = arma::normalise(atom_coords_this.col(2) - atom_coords_next.col(0));
-		// C_{i+1} - O_{i+1}
-		arma::Col<T> b2 = arma::normalise(atom_coords_next.col(0) - atom_coords_next.col(1));
-		// O_{i+1} - N_{i+1}
-		arma::Col<T> b3 = arma::normalise(atom_coords_next.col(1) - atom_coords_next.col(2));
-		arma::Col<T> n1 = arma::cross(b1, b2);
-		arma::Col<T> n2 = arma::cross(b2, b3);
-		return std::atan2(arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2)) * coef;
+		return geometry::dihedrals_lazy(atom_coords_this.col(2),
+			atom_coords_next.col(0), atom_coords_next.col(1),
+			atom_coords_next.col(2), coef);
 	};
 
-	// result is a matrix where each row has the lambda/kernel result for each residue, so transform it into column vector
-	return arma::Col<T>(geometry::atom_calculation_engine<2>(m_residues, 0, lambda).memptr(), m_residues.size());
+	// result is a matrix where each row has the lambda/kernel result for each
+	// residue, so transform it into column vector
+	return arma::Col<T>(
+		geometry::atom_calculation_engine<2>(m_residues, 0, phi_kernel)
+			.memptr(),
+		m_nresidues);
 }
 
-template <typename T>
-arma::Col<T> PDB<T>::calculate_psi()
+template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 {
-	return arma::Col<T>({0});
+	// convert from radians to degrees
+	T coef = use_radians ? 1.0 : to_rad_constant;
+	// the Psi kernel as a C++ lambda
+	auto psi_kernel = [coef](const auto& residue, const auto& residue_next) {
+		if (residue_next->is_n_terminus())
+			return static_cast<T>(0.0);
+		auto atom_coords_this = residue->get_backbone_atoms();
+		auto atom_coords_next = residue_next->get_backbone_atoms();
+		return geometry::dihedrals_lazy(atom_coords_this.col(0),
+			atom_coords_this.col(1), atom_coords_this.col(2),
+			atom_coords_next.col(0), coef);
+	};
+
+	// result is a matrix where each row has the lambda/kernel result for each
+	// residue, so transform it into column vector
+	return arma::Col<T>(
+		geometry::atom_calculation_engine<2>(m_residues, 0, psi_kernel)
+			.memptr(),
+		m_nresidues);
 }
-//void rotate(arma::Col<T> &rotation) {
+// void rotate(arma::Col<T> &rotation) {
 //
 //    // first check which axes need to be rotated
 //    arma::uvec mask(3);
@@ -266,16 +243,14 @@ arma::Col<T> PDB<T>::calculate_psi()
 //
 //}
 
-template <typename T>
-void PDB<T>::kabsch_rotation(PDB<T>& other)
+template <typename T> void PDB<T>::kabsch_rotation(PDB<T>& other)
 {
 	// make copy of xyz
 	auto xyz_copy = other.get_xyz();
-    geometry::kabsch_rotation_(m_xyz, xyz_copy);
+	geometry::kabsch_rotation_(m_xyz, xyz_copy);
 }
 
-template <typename T>
-T PDB<T>::kabsch_rmsd(PDB& other)
+template <typename T> T PDB<T>::kabsch_rmsd(PDB& other) const
 {
 	// make copy of xyz
 	auto xyz_copy = m_xyz;

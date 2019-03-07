@@ -14,10 +14,7 @@ namespace prostruct {
 	using aminoAcidAtomMap = std::vector<std::map<std::string, std::string>>;
 	using stringIndexMap = std::map<std::string, int>;
 
-	enum class aaLocation {
-		Backbone,
-		Sidechain
-	};
+	enum class aaLocation { Backbone, Sidechain };
 
 	enum class AminoAcid {
 		ARG,
@@ -42,15 +39,14 @@ namespace prostruct {
 		VAL
 	};
 
-	template <typename T>
-	class Residue {
-		template <typename T1>
-		friend class Chain;
+	template <typename T> class Residue {
+		template <typename T1> friend class Chain;
 
 	public:
 		// takes an arbitrary number of atoms and tries to form a residue
 		//    Residue(std::unique_ptr<Atom> atoms...);
-		Residue(atomVector<T>, const std::string&, const std::string&);
+		Residue(atomVector<T>, const std::string&, const std::string&,
+			bool = false, bool = false);
 
 		atomVector<T> getBackbone()
 		{
@@ -75,7 +71,10 @@ namespace prostruct {
 			return sidechainAtoms;
 		}
 
-		std::shared_ptr<Atom<T>> operator[](const int index) { return atoms[index]; }
+		std::shared_ptr<Atom<T>> operator[](const int index)
+		{
+			return atoms[index];
+		}
 
 		arma::Mat<T> getXYZ() { return xyz; }
 
@@ -101,19 +100,21 @@ namespace prostruct {
 
 		arma::Col<T> getRadii() { return radii; }
 
+		bool is_n_terminus() { return m_n_terminus; }
+
+		bool is_c_terminus() { return m_c_terminus; }
+
 	protected:
-		template <typename...Args>
+		template <typename... Args>
 		arma::Col<arma::uword> get_atom_indices(Args... patterns)
 		{
 			arma::Col<arma::uword> max_result(atoms.size());
-			std::vector<std::string> vec = {patterns...};
+			std::vector<std::string> vec = { patterns... };
 
 			arma::uword result_idx = 0;
-			for (const auto& pattern: vec)
-			{
+			for (const auto& pattern : vec) {
 				arma::uword i = 0;
-				for (const auto& atom: atoms)
-				{
+				for (const auto& atom : atoms) {
 					if (atom->getName() == pattern) {
 						max_result(result_idx) = i;
 						result_idx++;
@@ -128,17 +129,23 @@ namespace prostruct {
 	private:
 		arma::Mat<T> xyz;
 		arma::Col<T> radii;
-		std::vector<int> backbone; /**< A vector with the index number of the backbone atoms */
-		std::vector<int> sidechain; /**< A vector with the index number of the sidechain atoms */
+		bool m_n_terminus;
+		bool m_c_terminus;
+		std::vector<int> backbone; /**< A vector with the index number of the
+									  backbone atoms */
+		std::vector<int> sidechain; /**< A vector with the index number of the
+									   sidechain atoms */
 		std::string aminoAcidName; /**< Name of the amino acid, e.g. ALA */
 		enum AminoAcid aminoAcid; /**< Amino acid enum, e.g. ALA */
 		std::string residueName; /**< Name of the residue, e.g. ALA1 */
-		atomVector<T> atoms; /**< A vector with the pointers to the Atom objects */
-		std::map<std::string, int> atomMap; /**< Map atom name to internal index */
+		atomVector<T>
+			atoms; /**< A vector with the pointers to the Atom objects */
+		std::map<std::string, int>
+			atomMap; /**< Map atom name to internal index */
 	};
 
-		template <typename T>
+	template <typename T>
 	using residueVector = std::vector<std::shared_ptr<Residue<T>>>;
 }
 
-#endif //PROSTRUCT_RESIDUE_H
+#endif // PROSTRUCT_RESIDUE_H

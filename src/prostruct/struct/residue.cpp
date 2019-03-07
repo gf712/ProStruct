@@ -485,19 +485,17 @@ const static stringIndexMap aminoAcidIndex {
 	{ "VAL", 19 }
 };
 
+/**
+ *  The Residue class represent one of the twenty standard amino acids.
+ *  A Residue is made of Atom objects which are connected via Bond objects.
+ *
+ *  @param[in] atoms_ Vector of Atom objects
+ *  @param[in] aminoAcidName_ name of amino acid
+ *  @param[in] residueName_ name of residue
+ */
 template <typename T>
-Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, const std::string& residueName_)
+Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, const std::string& residueName_, bool n_terminus, bool c_terminus)
 {
-
-	/**
-     *  The Residue class represent one of the twenty standard amino acids.
-     *  A Residue is made of Atom objects which are connected via Bond objects.
-     *
-     *  @param[in] atoms_ Vector of Atom objects
-     *  @param[in] aminoAcidName_ name of amino acid
-     *  @param[in] residueName_ name of residue
-     */
-
 	backbone = std::vector<int>(4);
 
 	if (aminoAcidIndex.find(aminoAcidName_) != aminoAcidIndex.end()) {
@@ -547,6 +545,9 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, con
 	residueName = residueName_;
 
 	createBonds();
+
+	m_n_terminus = n_terminus;
+	m_c_terminus = c_terminus;
 }
 
 template <typename T>
