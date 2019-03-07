@@ -52,7 +52,7 @@ namespace prostruct {
 		Residue(atomVector<T>, const std::string&, const std::string&,
 			bool = false, bool = false);
 
-		atomVector<T> getBackbone()
+		atomVector<T> getBackbone() const noexcept
 		{
 			std::vector<std::shared_ptr<Atom<T>>> backboneAtoms;
 			for (auto const& i : backbone) {
@@ -61,12 +61,14 @@ namespace prostruct {
 			return backboneAtoms;
 		}
 
-		arma::Mat<T> get_backbone_atoms()
+		AminoAcid get_amino_acid_type() const noexcept { return m_amino_acid; }
+
+		arma::Mat<T> get_backbone_atoms() const noexcept
 		{
 			return xyz(arma::span::all, arma::span(0, 3));
 		}
 
-		atomVector<T> getSidechain()
+		atomVector<T> getSidechain() const noexcept
 		{
 			std::vector<std::shared_ptr<Atom<T>>> sidechainAtoms;
 			for (auto const& i : sidechain) {
@@ -75,60 +77,70 @@ namespace prostruct {
 			return sidechainAtoms;
 		}
 
-		std::shared_ptr<Atom<T>> operator[](const int index)
+		std::shared_ptr<Atom<T>> operator[](const int index) const
 		{
 			return atoms[index];
 		}
 
-		arma::Mat<T> getXYZ() { return xyz; }
+		arma::Mat<T> get_xyz() const noexcept { return xyz; }
 
-		std::shared_ptr<Atom<T>> getAtom(int index) { return atoms[0]; }
+		std::string get_name() const noexcept { return m_residue_name; }
 
-		std::string getResidueName() { return residueName; }
+		std::shared_ptr<Atom<T>> get_atom(int index) const noexcept
+		{
+			return atoms[index];
+		}
 
 		void link(std::shared_ptr<Residue<T>>);
 
 		void createBonds();
 
-		int n_atoms() { return atoms.size(); };
+		int n_atoms() const noexcept { return atoms.size(); };
 
-		void print_atoms()
+		atomVector<T> getAtoms() const noexcept { return atoms; }
+
+		arma::Col<T> getRadii() const noexcept { return radii; }
+
+		bool is_n_terminus() const noexcept { return m_n_terminus; }
+
+		bool is_c_terminus() const noexcept { return m_c_terminus; }
+
+#ifndef SWIG
+		template <typename expect_one = std::true_type, typename... Args>
+		arma::Col<arma::uword> get_atom_indices(const Args&... patterns) const noexcept
 		{
+			arma::Col<arma::uword> max_result;
+			if constexpr (expect_one::value)
+				max_result.set_size(sizeof...(Args));
+			else
+				max_result.set_size(atoms.size());
 
-			for (auto const& atom : atoms) {
-				std::cout << atom->getName() << "-";
-			}
-		}
-
-		atomVector<T> getAtoms() { return atoms; }
-
-		arma::Col<T> getRadii() { return radii; }
-
-		bool is_n_terminus() { return m_n_terminus; }
-
-		bool is_c_terminus() { return m_c_terminus; }
-
-	protected:
-		template <typename... Args>
-		arma::Col<arma::uword> get_atom_indices(Args... patterns)
-		{
-			arma::Col<arma::uword> max_result(atoms.size());
 			std::vector<std::string> vec = { patterns... };
-
 			arma::uword result_idx = 0;
-			for (const auto& pattern : vec) {
-				arma::uword i = 0;
-				for (const auto& atom : atoms) {
-					if (atom->getName() == pattern) {
-						max_result(result_idx) = i;
-						result_idx++;
+
+			for (auto atom = atoms.cbegin(); atom != atoms.cend(); ++atom)
+			{
+				const auto pattern_result = std::find_if(vec.cbegin(), vec.cend(), [&atom](const auto& pattern){
+					return pattern == atom->get()->get_name();
+				});
+
+				if (pattern_result == vec.cend())
+					continue;
+				else {
+					max_result(result_idx) = std::distance(atoms.cbegin(), atom);
+					++result_idx;
+					if constexpr (expect_one::value) {
+						if (result_idx == sizeof...(Args))
+							break;
 					}
-					i++;
 				}
 			}
-			arma::Col<arma::uword> result = max_result.head(result_idx);
-			return result;
+			if constexpr (expect_one::value)
+				return max_result;
+			else
+				return max_result.head(result_idx);
 		}
+#endif
 
 	private:
 		arma::Mat<T> xyz;
@@ -140,8 +152,8 @@ namespace prostruct {
 		std::vector<int> sidechain; /**< A vector with the index number of the
 									   sidechain atoms */
 		std::string aminoAcidName; /**< Name of the amino acid, e.g. ALA */
-		enum AminoAcid aminoAcid; /**< Amino acid enum, e.g. ALA */
-		std::string residueName; /**< Name of the residue, e.g. ALA1 */
+		enum AminoAcid m_amino_acid; /**< Amino acid enum, e.g. ALA */
+		std::string m_residue_name; /**< Name of the residue, e.g. ALA1 */
 		atomVector<T>
 			atoms; /**< A vector with the pointers to the Atom objects */
 		std::map<std::string, int>

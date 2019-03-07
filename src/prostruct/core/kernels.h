@@ -27,6 +27,27 @@ namespace prostruct::kernels {
 		return std::atan2(arma::dot(arma::cross(n1, b2), n2), arma::dot(n1, n2))
 			* coef;
 	}
+	/**
+	 * An untyped version of the norm for armadillo
+	 * optimisations.
+	 */
+	template <typename T1, typename T2>
+	inline T1 norm_lazy(T2&& atom1, T2&& atom2)
+	{
+		return arma::dot(atom1 - atom2, atom1 - atom2);
+	}
+
+	/**
+	 * An untyped version of euclidean distances for armadillo
+	 * optimisations.
+	 * Note that the dot product tends to be quicker
+	 * than arma::norm when using the MKL backend.
+	 */
+	template <typename T1, typename T2>
+	inline T1 distance_lazy(T2&& atom1, T2&& atom2)
+	{
+		return std::sqrt(norm_lazy<T1>(atom1, atom2));
+	}
 }
 
 #endif // PROSTRUCT_KERNELS_H

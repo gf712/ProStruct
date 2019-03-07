@@ -43,8 +43,8 @@ TEST(ResidueTest, SimpleTwoAASequence)
 
 	auto chain = Chain<double>(residueVector<double>({ asp, arg }), "Chain1");
 
-	ASSERT_EQ(asp->getBackbone()[2]->getName(), "C");
-	ASSERT_EQ(arg->getBackbone()[0]->getName(), "N");
+	ASSERT_EQ(asp->getBackbone()[2]->get_name(), "C");
+	ASSERT_EQ(arg->getBackbone()[0]->get_name(), "N");
 
 	ASSERT_TRUE(asp->getBackbone()[2]->hasBond(arg->getBackbone()[0]));
 }

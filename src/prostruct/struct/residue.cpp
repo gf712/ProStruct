@@ -498,13 +498,13 @@ const static stringIndexMap aminoAcidIndex {
  *  @param[in] residueName_ name of residue
  */
 template <typename T>
-Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, const std::string& residueName_, bool n_terminus, bool c_terminus)
+Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, const std::string& residue_name, bool n_terminus, bool c_terminus)
 {
 	backbone = std::vector<int>(4);
 
 	if (aminoAcidIndex.find(aminoAcidName_) != aminoAcidIndex.end()) {
 		aminoAcidName = aminoAcidName_;
-		aminoAcid = static_cast<AminoAcid>(aminoAcidIndex.at(aminoAcidName));
+		m_amino_acid = static_cast<AminoAcid>(aminoAcidIndex.at(aminoAcidName));
 	} else
 		throw "Unknown amino acid!";
 
@@ -521,7 +521,7 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, con
 		// N, CA, C, O, R (CB,..)
 		// plus the special rules for the cyclic amino acids
 
-		auto name = atom->getName();
+		auto name = atom->get_name();
 		// is the atom in the backbone?
 		auto aaBackbone = backboneIndexMap.find(name);
 		auto aaLocation_ = (aaBackbone != backboneIndexMap.end()) ? aaLocation::Backbone : aaLocation::Sidechain;
@@ -538,7 +538,7 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, con
 
 		atomMap[name] = i;
 		atoms.emplace_back(atom);
-		atom->setRadius(aminoAcidRadii.at(static_cast<int>(aminoAcid)).at(name));
+		atom->setRadius(aminoAcidRadii.at(static_cast<int>(m_amino_acid)).at(name));
 		i++;
 	}
 
@@ -546,7 +546,7 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_, con
 		throw "Expected four atoms in the backbone, got " + std::to_string(backbone.size());
 	}
 
-	residueName = residueName_;
+	m_residue_name = residue_name;
 
 	createBonds();
 
@@ -560,7 +560,7 @@ void Residue<T>::createBonds()
 
 	bool first = true;
 	std::vector<std::string> atomPair;
-	auto res = aminoAcidAtoms[static_cast<int>(aminoAcid)];
+	auto res = aminoAcidAtoms[static_cast<int>(m_amino_acid)];
 
 	std::vector<int> positions;
 	std::copy(backbone.begin(), backbone.end(), std::back_inserter(positions));
@@ -570,7 +570,7 @@ void Residue<T>::createBonds()
 
 		auto atom = atoms[pos];
 
-		auto name = atom->getName();
+		auto name = atom->get_name();
 
 		if (first) {
 			first = false;
@@ -589,33 +589,32 @@ void Residue<T>::createBonds()
 			// does bond exist?
 			if (!atom->hasBond(atoms[atomMap[atomPair[1]]])) {
 				atom->addBond(atoms[atomMap[atomPair[1]]], 1);
-				//                std::cout << atom->getName() << " n bond: " << atom->getNumberOfBonds()
-				//                          << " " << atoms[atomMap[atomPair[1]]]->getName() << " n bonds: "
+				//                std::cout << atom->get_name() << " n bond: " << atom->getNumberOfBonds()
+				//                          << " " << atoms[atomMap[atomPair[1]]]->get_name() << " n bonds: "
 				//                          << atoms[atomMap[atomPair[1]]]->getNumberOfBonds() << std::endl;
 			}
 		}
-		//        std::cout << "Completed " << atom->getName() << std::endl;
+		//        std::cout << "Completed " << atom->get_name() << std::endl;
 	}
 
-	switch (aminoAcid) {
-
-	case AminoAcid::PRO:
-		atoms[atomMap["CD"]]->addBond(atoms[atomMap["N"]], 1);
-		break;
-	case AminoAcid::TRP: {
-		atoms[atomMap["CD2"]]->addBond(atoms[atomMap["CE2"]], 1);
-		atoms[atomMap["CH2"]]->addBond(atoms[atomMap["CZ3"]], 1);
-	} break;
-	case AminoAcid::HIS:
-		atoms[atomMap["CD2"]]->addBond(atoms[atomMap["NE2"]], 1);
-		break;
-	case AminoAcid::PHE:
-		atoms[atomMap["CE1"]]->addBond(atoms[atomMap["CZ"]], 1);
-		break;
-	case AminoAcid::TYR:
-		atoms[atomMap["CE2"]]->addBond(atoms[atomMap["OH"]], 1);
-	default:
-		break;
+	switch (m_amino_acid) {
+		case AminoAcid::PRO:
+			atoms[atomMap["CD"]]->addBond(atoms[atomMap["N"]], 1);
+			break;
+		case AminoAcid::TRP: {
+			atoms[atomMap["CD2"]]->addBond(atoms[atomMap["CE2"]], 1);
+			atoms[atomMap["CH2"]]->addBond(atoms[atomMap["CZ3"]], 1);
+		} break;
+		case AminoAcid::HIS:
+			atoms[atomMap["CD2"]]->addBond(atoms[atomMap["NE2"]], 1);
+			break;
+		case AminoAcid::PHE:
+			atoms[atomMap["CE1"]]->addBond(atoms[atomMap["CZ"]], 1);
+			break;
+		case AminoAcid::TYR:
+			atoms[atomMap["CE2"]]->addBond(atoms[atomMap["OH"]], 1);
+		default:
+			break;
 	}
 
 	xyz.resize(3, atoms.size());

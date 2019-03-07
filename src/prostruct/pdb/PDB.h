@@ -6,7 +6,6 @@
  *
  */
 
-
 #ifndef PROSTRUCT_PDB_H
 #define PROSTRUCT_PDB_H
 
@@ -50,11 +49,11 @@ namespace prostruct {
 			return m_chain_map.at(name);
 		}
 
-		arma::Mat<T> compute_kabsch_sander() const;
+		arma::Mat<T> compute_kabsch_sander() const noexcept;
 
-		arma::Mat<T> predict_backbone_hbonds() const;
+		arma::Mat<T> predict_backbone_hbonds() const noexcept;
 
-		void compute_dssp() const;
+		void compute_dssp() const noexcept;
 
 		arma::Mat<T> get_xyz() const noexcept { return m_xyz; }
 
@@ -64,23 +63,26 @@ namespace prostruct {
 
 		arma::Col<T> get_radii() const noexcept { return m_radii; }
 
+		residueVector<T> get_residues() const noexcept { return m_residues; }
+
 		arma::Col<T> compute_shrake_rupley(
-			T probe = 1.4, int n_sphere_points = 960) const;
+			T probe = 1.4, int n_sphere_points = 960) const noexcept;
 
 		T calculate_RMSD(PDB& other) const;
 
-		arma::Col<T> calculate_centroid() const;
+		arma::Col<T> calculate_centroid() const noexcept;
 
 		void recentre();
 
-		arma::Mat<T> calculate_phi_psi(bool use_radians = false) const;
+		arma::Mat<T> calculate_phi_psi(bool use_radians = false) const noexcept;
 
 		void kabsch_rotation(PDB<T>& other);
 
-		T kabsch_rmsd(PDB<T>& other) const;
+		T kabsch_rmsd(PDB<T>& other) const noexcept;
 
-		arma::Col<T> calculate_phi(bool use_radians = false) const;
-		arma::Col<T> calculate_psi(bool use_radians = false) const;
+		arma::Col<T> calculate_phi(bool use_radians = false) const noexcept;
+		arma::Col<T> calculate_psi(bool use_radians = false) const noexcept;
+		arma::Col<T> calculate_chi1(bool use_radians = false) const noexcept;
 
 		//    void rotate(arma::Col<T> &rotation); // rotation = [rotation_x,
 		//    rotation_y, rotation_z] void rotate(T rotation_angle, std::string
@@ -88,7 +90,7 @@ namespace prostruct {
 		//    // axis = {"x", "y", "z"}
 #ifndef SWIG
 		template <typename... Args>
-		arma::Col<arma::uword> get_atom_indices(Args... patterns)
+		arma::Col<arma::uword> get_atom_indices(Args... patterns) const noexcept
 		{
 			arma::Col<arma::uword> max_result(m_nresidues * m_natoms);
 			arma::uword i = 0;
@@ -122,8 +124,8 @@ namespace prostruct {
 		residueVector<T> m_residues;
 		static constexpr T to_rad_constant = 180.0 / M_PI;
 
-		void internalKS(arma::Mat<T>&) const;
-		arma::Mat<T> get_backbone_atoms() const;
+		void internalKS(arma::Mat<T>&) const noexcept;
+		arma::Mat<T> get_backbone_atoms() const noexcept;
 
 		void append_new_residue(
 			const std::pair<const std::string, atomVector<T>>&,

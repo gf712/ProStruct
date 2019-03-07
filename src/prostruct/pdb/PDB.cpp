@@ -50,7 +50,7 @@ void PDB<T>::append_new_residue(
 	residues.emplace_back(std::make_shared<Residue<T>>(atom_pair.second,
 		atom_pair.first.substr(0, 3), atom_pair.first, n_terminus, c_terminus));
 	m_xyz.insert_cols(
-		static_cast<arma::uword>(m_natoms), residues.back()->getXYZ());
+		static_cast<arma::uword>(m_natoms), residues.back()->get_xyz());
 	m_radii.insert_rows(
 		static_cast<arma::uword>(m_natoms), residues.back()->getRadii());
 	m_natoms += residues.back()->n_atoms();
@@ -61,7 +61,7 @@ template <typename T> PDB<T> PDB<T>::fetch(std::string PDB_id)
 	throw "Not implemented";
 }
 
-template <typename T> arma::Mat<T> PDB<T>::get_backbone_atoms() const
+template <typename T> arma::Mat<T> PDB<T>::get_backbone_atoms() const noexcept
 {
 	arma::Mat<T> result(3, m_nresidues * 4);
 	arma::uword pos = 0;
@@ -78,13 +78,13 @@ template <typename T> arma::Mat<T> PDB<T>::get_backbone_atoms() const
 	return result;
 }
 
-template <typename T> void PDB<T>::internalKS(arma::Mat<T>& E) const
+template <typename T> void PDB<T>::internalKS(arma::Mat<T>& E) const noexcept
 {
 	auto backbone_atom_coords = get_backbone_atoms();
 	geometry::kabsch_sander(backbone_atom_coords, E);
 }
 
-template <typename T> arma::Mat<T> PDB<T>::compute_kabsch_sander() const
+template <typename T> arma::Mat<T> PDB<T>::compute_kabsch_sander() const noexcept
 {
 	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
@@ -94,11 +94,11 @@ template <typename T> arma::Mat<T> PDB<T>::compute_kabsch_sander() const
 };
 
 template <typename T>
-arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const
+arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const noexcept
 {
 	// calculates atom surface accessibility using the Shrake-Rupley algorithm
 
-	arma::Col<T> asa(static_cast<const arma::uword>(m_natoms));
+	arma::Col<T> asa(static_cast<arma::uword>(m_natoms));
 
 	geometry::shrake_rupley(m_xyz, m_radii, asa,
 		static_cast<arma::uword>(m_natoms), probe,
@@ -107,7 +107,7 @@ arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const
 	return asa;
 }
 
-template <typename T> arma::Mat<T> PDB<T>::predict_backbone_hbonds() const
+template <typename T> arma::Mat<T> PDB<T>::predict_backbone_hbonds() const noexcept
 {
 	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
@@ -118,7 +118,7 @@ template <typename T> arma::Mat<T> PDB<T>::predict_backbone_hbonds() const
 	return E;
 }
 
-template <typename T> void PDB<T>::compute_dssp() const
+template <typename T> void PDB<T>::compute_dssp() const noexcept
 {
 	// arma::Mat<T> C_coords(3, m_nresidues);
 	// arma::Mat<T> O_coords(3, m_nresidues);
@@ -143,7 +143,7 @@ template <typename T> T PDB<T>::calculate_RMSD(PDB& other) const
 	return geometry::rmsd(m_xyz, other.get_xyz());
 }
 
-template <typename T> arma::Col<T> PDB<T>::calculate_centroid() const
+template <typename T> arma::Col<T> PDB<T>::calculate_centroid() const noexcept
 {
 	arma::Col<T> result(3);
 
@@ -158,7 +158,7 @@ template <typename T> void PDB<T>::recentre()
 }
 
 template <typename T>
-arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
+arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const noexcept
 {
 	T coef = use_radians ? 1.0 : to_rad_constant;
 
@@ -189,7 +189,7 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const
 	return core::residue_kernel_engine(m_residues, 0, phi_kernel, psi_kernel);
 }
 
-template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
+template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const noexcept
 {
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
@@ -212,7 +212,7 @@ template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 		m_nresidues);
 }
 
-template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
+template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const noexcept
 {
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
@@ -233,6 +233,51 @@ template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 	return arma::Col<T>(
 		core::residue_kernel_engine(m_residues, 0, psi_kernel).memptr(),
 		m_nresidues);
+}
+
+template <typename T> arma::Col<T> PDB<T>::calculate_chi1(bool use_radians) const noexcept
+{
+	// convert from radians to degrees
+	T coef = use_radians ? 1.0 : to_rad_constant;
+	// the chi1 kernel as a C++ lambda
+	auto chi1_kernel = [coef](const std::shared_ptr<Residue<T>>& residue)
+	{
+		arma::Col<arma::uword> idx;
+		switch (residue->get_amino_acid_type()) {
+			case AminoAcid::VAL:
+			case AminoAcid::ILE: {
+				idx = residue->get_atom_indices("N", "CA", "CB", "CG1");
+			} break;
+			case AminoAcid::THR: {
+				idx = residue->get_atom_indices("N", "CA", "CB", "OG1");
+			} break;
+			case AminoAcid::SER: {
+				idx = residue->get_atom_indices("N", "CA", "CB", "OG");
+			} break;
+			case AminoAcid::ALA:
+			case AminoAcid::CYS:
+			case AminoAcid::GLY: {
+				return static_cast<T>(0.0);
+			}
+			default: {
+				idx = residue->get_atom_indices("N", "CA", "CB", "CG");
+			}
+		}
+
+		auto xyz = residue->get_xyz();
+
+		return kernels::dihedrals_lazy(xyz.col(idx(0)),
+									   xyz.col(idx(1)),
+									   xyz.col(idx(2)),
+									   xyz.col(idx(3)),
+									   coef);
+	};
+
+	// result is a matrix where each row has the lambda/kernel result for each
+	// residue, so transform it into column vector
+	return arma::Col<T>(
+			core::residue_kernel_engine(m_residues, 0, chi1_kernel).memptr(),
+			m_nresidues);
 }
 // void rotate(arma::Col<T> &rotation) {
 //
@@ -256,7 +301,7 @@ template <typename T> void PDB<T>::kabsch_rotation(PDB<T>& other)
 	geometry::kabsch_rotation_(m_xyz, xyz_copy);
 }
 
-template <typename T> T PDB<T>::kabsch_rmsd(PDB& other) const
+template <typename T> T PDB<T>::kabsch_rmsd(PDB& other) const noexcept
 {
 	// make copy of xyz
 	auto xyz_copy = m_xyz;

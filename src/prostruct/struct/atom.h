@@ -58,7 +58,7 @@ public:
 	std::string getElement() { return name; }
 	arma::Col<T> getXYZ() { return arma::Col<T>(std::vector<T>({ x, y, z })); }
 
-	std::string getName() { return name; }
+	std::string get_name() const noexcept { return name; }
 
 private:
 	T x, y, z;
