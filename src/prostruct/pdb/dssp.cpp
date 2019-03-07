@@ -112,8 +112,7 @@ namespace prostruct {
         template void kabsch_sander(const arma::Mat<float>&, arma::Mat<float>&);
         template void kabsch_sander(const arma::Mat<double>&, arma::Mat<double>&);
 
-        template void
-        dssp(const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &);
+        template void dssp(const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &, const arma::Mat<float> &);
 
         template void dssp(const arma::Mat<double> &, const arma::Mat<double> &, const arma::Mat<double> &,
                            const arma::Mat<double> &);

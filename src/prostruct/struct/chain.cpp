@@ -10,7 +10,8 @@
 using namespace prostruct;
 
 template <typename T>
-Chain<T>::Chain(std::vector<std::shared_ptr<Residue<T>>> residues_, std::string chainName_)
+Chain<T>::Chain(
+	std::vector<std::shared_ptr<Residue<T>>> residues_, std::string chainName_)
 {
 
 	bool first = true;
@@ -39,8 +40,7 @@ Chain<T>::Chain(std::vector<std::shared_ptr<Residue<T>>> residues_, std::string 
 	m_nresidues = static_cast<int>(residues.size());
 }
 
-template <typename T>
-chainAtomVector<T> Chain<T>::getBackboneAtoms()
+template <typename T> chainAtomVector<T> Chain<T>::getBackboneAtoms()
 {
 	std::vector<std::vector<std::shared_ptr<Atom<T>>>> backboneAtoms;
 	backboneAtoms.reserve(m_nresidues);

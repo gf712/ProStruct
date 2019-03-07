@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(ProStruct)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_TESTING "Enable tests" OFF)
 option(OPTIMIZE_FOR_NATIVE "Build with -march=native" ON)

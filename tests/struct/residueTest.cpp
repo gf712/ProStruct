@@ -12,12 +12,12 @@ template <typename T>
 class ResidueTestClass: public Residue<T>
 {
 public:
-    template <class... Args>
-    ResidueTestClass(Args... m): Residue<T>(m...) {};
+	template <class... Args>
+	ResidueTestClass(Args... m): Residue<T>(m...) {};
 
-    auto get_atom_indices(const std::string& name) {
-        return Residue<T>::get_atom_indices(name);
-    }
+	auto get_atom_indices(const std::string& name) {
+		return Residue<T>::get_atom_indices(name);
+	}
 };
 
 TEST(ResidueTest, Alanine) {
@@ -43,8 +43,8 @@ TEST(ResidueTest, Alanine) {
 
 	ASSERT_EQ(ala.get_atom_indices("N")(0), 0);
 	ASSERT_EQ(ala.get_atom_indices("N").size(), 1);
-    ASSERT_EQ(ala.get_atom_indices("C")(0), 2);
-    ASSERT_EQ(ala.get_atom_indices("C").size(), 1);
+	ASSERT_EQ(ala.get_atom_indices("C")(0), 2);
+	ASSERT_EQ(ala.get_atom_indices("C").size(), 1);
 }
 
 TEST(ResidueTest, Argenine)

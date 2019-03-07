@@ -7,24 +7,20 @@
 
 #include <map>
 #include <memory>
+#include <regex>
 #include <string>
 #include <vector>
-#include <regex>
 
 #include "prostruct/struct/bond.h"
 #include <armadillo>
 
-template <typename T>
-using atomVector = std::vector<std::shared_ptr<Atom<T>>>;
+template <typename T> using atomVector = std::vector<std::shared_ptr<Atom<T>>>;
 
 template <typename T>
 class Atom : public std::enable_shared_from_this<Atom<T>> {
 
 public:
-	Atom(const std::string& element)
-	{
-		load_atom(element);
-	}
+	Atom(const std::string& element) { load_atom(element); }
 	Atom(const std::string&, const std::string& name)
 	{
 		load_atom(element, name);
@@ -34,10 +30,7 @@ public:
 		load_atom(element, name, x, y, z);
 	};
 
-	std::shared_ptr<Atom<T>> getAtom()
-	{
-		return this->shared_from_this();
-	};
+	std::shared_ptr<Atom<T>> getAtom() { return this->shared_from_this(); };
 
 	void addBond(std::shared_ptr<Atom<T>> atom, int bondType);
 	void addBond(std::shared_ptr<Bond<T>> bond);
@@ -68,7 +61,8 @@ private:
 	T radius;
 	void load_atom(const std::string& element);
 	void load_atom(const std::string& element, const std::string& name);
-	void load_atom(const std::string& element, const std::string& name, T x, T y, T z);
+	void load_atom(
+		const std::string& element, const std::string& name, T x, T y, T z);
 	T atomicWeight;
 	int atomicNumber;
 	std::string element;
@@ -76,4 +70,4 @@ private:
 	std::vector<std::shared_ptr<Bond<T>>> bonds;
 };
 
-#endif //PROSTRUCT_ATOM_H
+#endif // PROSTRUCT_ATOM_H
