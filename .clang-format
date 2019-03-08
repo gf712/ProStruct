@@ -3,5 +3,7 @@ BasedOnStyle: WebKit
 TabWidth: '4'
 UseTab: Always
 NamespaceIndentation: All
-ColumnLimit: 80
+ColumnLimit: 100
+AlwaysBreakTemplateDeclarations: true
+BreakBeforeBraces: Allman
 ...

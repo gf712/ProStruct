@@ -139,8 +139,10 @@ namespace prostruct {
 			const arma::Mat<double>&, arma::Col<double>&);
 
 		template float kabsch_rmsd_(arma::Mat<float>&, arma::Mat<float>&);
-
 		template double kabsch_rmsd_(arma::Mat<double>&, arma::Mat<double>&);
+
+		template void kabsch_rotation_(arma::Mat<float>&, arma::Mat<float>&);
+		template void kabsch_rotation_(arma::Mat<double>&, arma::Mat<double>&);
 
 		template void recentre_molecule(arma::Mat<float>&);
 

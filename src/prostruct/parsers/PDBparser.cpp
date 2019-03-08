@@ -6,7 +6,7 @@
  *
  */
 
-#include "prostruct/parsers/PDBparser.h"
+#include <prostruct/parsers/PDBparser.h>
 
 #include <cstdio>
 #include <fstream>

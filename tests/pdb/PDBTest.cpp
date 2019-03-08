@@ -100,28 +100,28 @@ TYPED_TEST(PDBTest, Kabsch_RMSD)
 	EXPECT_NEAR(rmsd, 0.0, get_epsilon<TypeParam>());
 }
 
-TYPED_TEST(PDBTest, phi_angles)
-{
-	auto pdb = PDB<TypeParam>("test.pdb");
-
-	auto phi_degree = pdb.calculate_phi();
-
-	EXPECT_NEAR(phi_degree(10), -76.065502471, get_epsilon<TypeParam>());
-
-	auto phi_rad = pdb.calculate_phi(true);
-
-	EXPECT_NEAR(phi_rad(10), -1.3275937, get_epsilon<TypeParam>());
-}
-
-TYPED_TEST(PDBTest, psi_angles)
-{
-	auto pdb = PDB<TypeParam>("test.pdb");
-
-	auto psi_degree = pdb.calculate_psi();
-
-	EXPECT_NEAR(psi_degree(10), 94.52472, get_epsilon<TypeParam>());
-
-	auto psi_rad = pdb.calculate_psi(true);
-
-	EXPECT_NEAR(psi_rad(10), 1.6497685, get_epsilon<TypeParam>());
-}
+//TYPED_TEST(PDBTest, phi_angles)
+//{
+//	auto pdb = PDB<TypeParam>("test.pdb");
+//
+//	auto phi_degree = pdb.calculate_phi();
+//
+//	EXPECT_NEAR(phi_degree(10), -76.065502471, get_epsilon<TypeParam>());
+//
+//	auto phi_rad = pdb.calculate_phi(true);
+//
+//	EXPECT_NEAR(phi_rad(10), -1.3275937, get_epsilon<TypeParam>());
+//}
+//
+//TYPED_TEST(PDBTest, psi_angles)
+//{
+//	auto pdb = PDB<TypeParam>("test.pdb");
+//
+//	auto psi_degree = pdb.calculate_psi();
+//
+//	EXPECT_NEAR(psi_degree(10), 94.52472, get_epsilon<TypeParam>());
+//
+//	auto psi_rad = pdb.calculate_psi(true);
+//
+//	EXPECT_NEAR(psi_rad(10), 1.6497685, get_epsilon<TypeParam>());
+//}

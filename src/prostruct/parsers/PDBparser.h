@@ -9,7 +9,8 @@
 #ifndef PROSTRUCT_PDBPARSER_H
 #define PROSTRUCT_PDBPARSER_H
 
-#include "prostruct/struct/chain.h"
+#include <prostruct/pdb/struct_base.h>
+#include <prostruct/struct/atom.h>
 
 struct AASequenceOrder {
 	bool operator()(const std::string& left, const std::string& right) const

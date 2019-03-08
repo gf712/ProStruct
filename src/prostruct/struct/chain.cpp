@@ -6,8 +6,7 @@
  *
  */
 
-#include "prostruct/struct/chain.h"
-#include "chain.h"
+#include <prostruct/struct/chain.h>
 
 #include <iostream>
 
@@ -15,16 +14,16 @@ using namespace prostruct;
 
 template <typename T>
 Chain<T>::Chain(
-	std::vector<std::shared_ptr<Residue<T>>> residues_, std::string chainName_)
+	std::vector<std::shared_ptr<Residue<T>>> residues, std::string chainName)
 {
 
 	bool first = true;
-	residues = residues_;
+	this->m_residues = residues;
 	std::shared_ptr<Residue<T>> previousResidue;
-	m_natoms = 0;
+	this->m_natoms = 0;
 
 	// link residues
-	for (auto const& residue : residues_) {
+	for (auto const& residue : residues) {
 
 		//        std::cout << residue->getResidueName() << std::endl;
 
@@ -38,20 +37,10 @@ Chain<T>::Chain(
 			previousResidue = residue;
 		}
 
-		m_natoms += residue->n_atoms();
+		this->m_natoms += residue->n_atoms();
 	}
 
-	m_nresidues = static_cast<int>(residues.size());
-}
-
-template <typename T> chainAtomVector<T> Chain<T>::getBackboneAtoms()
-{
-	std::vector<std::vector<std::shared_ptr<Atom<T>>>> backboneAtoms;
-	backboneAtoms.reserve(m_nresidues);
-	for (auto const& residue : residues) {
-		backboneAtoms.push_back(residue->getBackbone());
-	}
-	return backboneAtoms;
+	this->m_nresidues = static_cast<int>(residues.size());
 }
 
 template class prostruct::Chain<float>;

@@ -8,6 +8,7 @@
  
 %module prostruct
 %{
+  // #include "prostruct/pdb/struct_base.h"
 	#include "prostruct/prostruct.h"
 %}
 
@@ -51,11 +52,16 @@
 
 //%shared_ptr(prostruct::PDB)
 
-%include "prostruct/pdb/PDB.h"
 %include "prostruct/struct/chain.h"
 %include "prostruct/struct/residue.h"
+%include "prostruct/pdb/struct_base.h"
+%include "prostruct/pdb/PDB.h"
 
 namespace prostruct {
+
+  %template(StructBase_float) StructBase<float>;
+  %template(StructBase_double) StructBase<double>;  
+  
 	%template(PDB_float) PDB<float>;
 	%template(PDB_double) PDB<double>;
 
