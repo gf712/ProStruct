@@ -242,17 +242,17 @@ template <typename T> arma::Col<T> PDB<T>::calculate_chi1(bool use_radians) cons
 	// the chi1 kernel as a C++ lambda
 	auto chi1_kernel = [coef](const std::shared_ptr<Residue<T>>& residue)
 	{
-		arma::Col<arma::uword> idx;
+		arma::Mat<T> coords;
 		switch (residue->get_amino_acid_type()) {
 			case AminoAcid::VAL:
 			case AminoAcid::ILE: {
-				idx = residue->get_atom_indices("N", "CA", "CB", "CG1");
+				coords = residue->get_atom_coords("N", "CA", "CB", "CG1");
 			} break;
 			case AminoAcid::THR: {
-				idx = residue->get_atom_indices("N", "CA", "CB", "OG1");
+				coords = residue->get_atom_coords("N", "CA", "CB", "OG1");
 			} break;
 			case AminoAcid::SER: {
-				idx = residue->get_atom_indices("N", "CA", "CB", "OG");
+				coords = residue->get_atom_coords("N", "CA", "CB", "OG");
 			} break;
 			case AminoAcid::ALA:
 			case AminoAcid::CYS:
@@ -260,16 +260,14 @@ template <typename T> arma::Col<T> PDB<T>::calculate_chi1(bool use_radians) cons
 				return static_cast<T>(0.0);
 			}
 			default: {
-				idx = residue->get_atom_indices("N", "CA", "CB", "CG");
+				coords = residue->get_atom_coords("N", "CA", "CB", "CG");
 			}
 		}
 
-		auto xyz = residue->get_xyz();
-
-		return kernels::dihedrals_lazy(xyz.col(idx(0)),
-									   xyz.col(idx(1)),
-									   xyz.col(idx(2)),
-									   xyz.col(idx(3)),
+		return kernels::dihedrals_lazy(coords.col(0),
+									   coords.col(1),
+									   coords.col(2),
+									   coords.col(3),
 									   coef);
 	};
 

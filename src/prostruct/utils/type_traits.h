@@ -61,6 +61,15 @@ namespace prostruct::utils {
 		else
 			return lambda_compare_arity<LambdaTypes...>();
 	}
+
+	template <typename ...Args>
+	inline constexpr bool all_integral_v = (std::is_integral<Args>::value && ...);
+
+	template <typename...>
+	inline constexpr auto all_same_v = std::true_type{};
+
+	template <typename T, typename... Rest>
+	inline constexpr auto all_same_v<T, Rest...> = (std::is_same_v<T, Rest> && ...);
 }
 
 #endif // PROSTRUCT_TYPE_TRAITS_H

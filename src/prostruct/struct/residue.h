@@ -9,9 +9,10 @@
 #ifndef PROSTRUCT_RESIDUE_H
 #define PROSTRUCT_RESIDUE_H
 
-#include <regex>
+#include <vector>
 
-#include "prostruct/struct/atom.h"
+#include <prostruct/struct/atom.h>
+#include <prostruct/utils/type_traits.h>
 
 namespace prostruct {
 
@@ -139,6 +140,54 @@ namespace prostruct {
 				return max_result;
 			else
 				return max_result.head(result_idx);
+		}
+
+		template <typename expect_one = std::true_type, typename... Args>
+		arma::Mat<T> get_atom_coords(Args ...idx) const noexcept
+		{
+			if constexpr (utils::all_integral_v<Args...>)
+			{
+				std::vector<arma::uword> idx_vector = {idx ...};
+				return xyz(arma::span::all, idx_vector);
+			}
+			if constexpr (utils::all_same_v<Args...>)
+			{
+				arma::Mat<T> max_result;
+				if constexpr (expect_one::value)
+					max_result.set_size(3, sizeof...(Args));
+				else
+					max_result.set_size(3, atoms.size());
+
+				std::vector<std::string> vec = { idx... };
+				arma::uword result_idx = 0;
+
+				for (auto atom = atoms.cbegin(); atom != atoms.cend(); ++atom)
+				{
+					const auto pattern_result = std::find_if(vec.cbegin(), vec.cend(), [&atom](const auto& pattern){
+						return pattern == atom->get()->get_name();
+					});
+
+					if (pattern_result == vec.cend())
+						continue;
+					else {
+						max_result.col(result_idx) = xyz.col(std::distance(atoms.cbegin(), atom));
+						++result_idx;
+						if constexpr (expect_one::value) {
+							if (result_idx == sizeof...(Args))
+								break;
+						}
+					}
+				}
+				if constexpr (expect_one::value)
+					return max_result;
+				else
+					return max_result.head(result_idx);
+			}
+		}
+
+		arma::Mat<T> get_atom_coords(const arma::Col<arma::uword>& idx) const noexcept
+		{
+			return xyz(arma::Col<arma::uword>({0,1,2}), idx);
 		}
 #endif
 
