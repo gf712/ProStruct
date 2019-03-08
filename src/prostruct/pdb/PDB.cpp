@@ -84,7 +84,8 @@ template <typename T> void PDB<T>::internalKS(arma::Mat<T>& E) const noexcept
 	geometry::kabsch_sander(backbone_atom_coords, E);
 }
 
-template <typename T> arma::Mat<T> PDB<T>::compute_kabsch_sander() const noexcept
+template <typename T>
+arma::Mat<T> PDB<T>::compute_kabsch_sander() const noexcept
 {
 	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
@@ -94,7 +95,8 @@ template <typename T> arma::Mat<T> PDB<T>::compute_kabsch_sander() const noexcep
 };
 
 template <typename T>
-arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const noexcept
+arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const
+	noexcept
 {
 	// calculates atom surface accessibility using the Shrake-Rupley algorithm
 
@@ -107,7 +109,8 @@ arma::Col<T> PDB<T>::compute_shrake_rupley(T probe, int n_sphere_points) const n
 	return asa;
 }
 
-template <typename T> arma::Mat<T> PDB<T>::predict_backbone_hbonds() const noexcept
+template <typename T>
+arma::Mat<T> PDB<T>::predict_backbone_hbonds() const noexcept
 {
 	arma::Mat<T> E(m_nresidues, m_nresidues, arma::fill::zeros);
 
@@ -189,7 +192,8 @@ arma::Mat<T> PDB<T>::calculate_phi_psi(bool use_radians) const noexcept
 	return core::residue_kernel_engine(m_residues, 0, phi_kernel, psi_kernel);
 }
 
-template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const noexcept
+template <typename T>
+arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const noexcept
 {
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
@@ -212,7 +216,8 @@ template <typename T> arma::Col<T> PDB<T>::calculate_phi(bool use_radians) const
 		m_nresidues);
 }
 
-template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const noexcept
+template <typename T>
+arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const noexcept
 {
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
@@ -235,47 +240,45 @@ template <typename T> arma::Col<T> PDB<T>::calculate_psi(bool use_radians) const
 		m_nresidues);
 }
 
-template <typename T> arma::Col<T> PDB<T>::calculate_chi1(bool use_radians) const noexcept
+template <typename T>
+arma::Col<T> PDB<T>::calculate_chi1(bool use_radians) const noexcept
 {
 	// convert from radians to degrees
 	T coef = use_radians ? 1.0 : to_rad_constant;
 	// the chi1 kernel as a C++ lambda
-	auto chi1_kernel = [coef](const std::shared_ptr<Residue<T>>& residue)
-	{
+	auto chi1_kernel = [coef](const std::shared_ptr<Residue<T>>& residue) {
 		arma::Mat<T> coords;
 		switch (residue->get_amino_acid_type()) {
-			case AminoAcid::VAL:
-			case AminoAcid::ILE: {
-				coords = residue->get_atom_coords("N", "CA", "CB", "CG1");
-			} break;
-			case AminoAcid::THR: {
-				coords = residue->get_atom_coords("N", "CA", "CB", "OG1");
-			} break;
-			case AminoAcid::SER: {
-				coords = residue->get_atom_coords("N", "CA", "CB", "OG");
-			} break;
-			case AminoAcid::ALA:
-			case AminoAcid::CYS:
-			case AminoAcid::GLY: {
-				return static_cast<T>(0.0);
-			}
-			default: {
-				coords = residue->get_atom_coords("N", "CA", "CB", "CG");
-			}
+		case AminoAcid::VAL:
+		case AminoAcid::ILE: {
+			coords = residue->get_atom_coords("N", "CA", "CB", "CG1");
+		} break;
+		case AminoAcid::THR: {
+			coords = residue->get_atom_coords("N", "CA", "CB", "OG1");
+		} break;
+		case AminoAcid::SER: {
+			coords = residue->get_atom_coords("N", "CA", "CB", "OG");
+		} break;
+		case AminoAcid::CYS:
+			coords = residue->get_atom_coords("N", "CA", "CB", "SG");
+		case AminoAcid::ALA:
+		case AminoAcid::GLY: {
+			return static_cast<T>(0.0);
+		}
+		default: {
+			coords = residue->get_atom_coords("N", "CA", "CB", "CG");
+		}
 		}
 
-		return kernels::dihedrals_lazy(coords.col(0),
-									   coords.col(1),
-									   coords.col(2),
-									   coords.col(3),
-									   coef);
+		return kernels::dihedrals_lazy(
+			coords.col(0), coords.col(1), coords.col(2), coords.col(3), coef);
 	};
 
 	// result is a matrix where each row has the lambda/kernel result for each
 	// residue, so transform it into column vector
 	return arma::Col<T>(
-			core::residue_kernel_engine(m_residues, 0, chi1_kernel).memptr(),
-			m_nresidues);
+		core::residue_kernel_engine(m_residues, 0, chi1_kernel).memptr(),
+		m_nresidues);
 }
 // void rotate(arma::Col<T> &rotation) {
 //
