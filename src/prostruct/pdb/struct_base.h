@@ -78,18 +78,21 @@ namespace prostruct
 
 		arma::Col<T> get_radii() const noexcept { return m_radii; }
 
-//#ifndef SWIG
-		std::vector<std::shared_ptr<Residue<T>>> get_residues() const noexcept { return m_residues; }
-//#else
-//		std::vector<Residue<T>> get_residues() const noexcept {
-//			std::vector<Residue<T>> result;
-//			for (const auto& residue: m_residues)
-//				{
-//				result.push_back(residue->get());
-//				}
-//			return result;
-//		}
-//#endif
+		//#ifndef SWIG
+		std::vector<std::shared_ptr<Residue<T>>> get_residues() const noexcept
+		{
+			return m_residues;
+		}
+		//#else
+		//		std::vector<Residue<T>> get_residues() const noexcept {
+		//			std::vector<Residue<T>> result;
+		//			for (const auto& residue: m_residues)
+		//				{
+		//				result.push_back(residue->get());
+		//				}
+		//			return result;
+		//		}
+		//#endif
 		arma::Col<T> compute_shrake_rupley(T probe = 1.4, int n_sphere_points = 960) const noexcept
 		{
 			arma::Col<T> asa(static_cast<arma::uword>(m_natoms));
@@ -410,17 +413,18 @@ namespace prostruct
 		arma::Mat<T> compute_shortest_distance() const noexcept
 		{
 			auto neighbour_kernel = [](const std::shared_ptr<Residue<T>>& residue,
-					const std::shared_ptr<Residue<T>>& residue_neighbour) {
-
+										const std::shared_ptr<Residue<T>>& residue_neighbour) {
 				auto sidechain = residue->get_sidechain_atoms();
 				auto sidechain_neighbour = residue_neighbour->get_sidechain_atoms();
 				T shortest_distance = std::numeric_limits<T>::infinity();
 
 #pragma omp parallel for collapse(2)
-				for (arma::uword i = 0; i < sidechain.n_cols; ++i) {
+				for (arma::uword i = 0; i < sidechain.n_cols; ++i)
+				{
 					for (arma::uword j = i + 1; j < sidechain_neighbour.n_cols; ++j)
 					{
-						auto dist = kernels::distance_lazy<T>(sidechain.col(i), sidechain_neighbour.col(j));
+						auto dist = kernels::distance_lazy<T>(
+							sidechain.col(i), sidechain_neighbour.col(j));
 						if (dist < shortest_distance)
 							shortest_distance = dist;
 					}
@@ -433,17 +437,18 @@ namespace prostruct
 		arma::Mat<T> compute_neighbours(T threshold) const noexcept
 		{
 			auto neighbour_kernel = [threshold](const std::shared_ptr<Residue<T>>& residue,
-									   const std::shared_ptr<Residue<T>>& residue_neighbour) {
-
+										const std::shared_ptr<Residue<T>>& residue_neighbour) {
 				auto sidechain = residue->get_sidechain_atoms();
 				auto sidechain_neighbour = residue_neighbour->get_sidechain_atoms();
 				T shortest_distance = std::numeric_limits<T>::infinity();
 
 #pragma omp parallel for collapse(2)
-				for (arma::uword i = 0; i < sidechain.n_cols; ++i) {
+				for (arma::uword i = 0; i < sidechain.n_cols; ++i)
+				{
 					for (arma::uword j = i + 1; j < sidechain_neighbour.n_cols; ++j)
 					{
-						auto dist = kernels::distance_lazy<T>(sidechain.col(i), sidechain_neighbour.col(j));
+						auto dist = kernels::distance_lazy<T>(
+							sidechain.col(i), sidechain_neighbour.col(j));
 						if (dist < threshold)
 							return 1;
 					}
@@ -480,13 +485,14 @@ namespace prostruct
 			arma::uword pos = 0;
 			arma::uword i = 0;
 
-			for (auto const& residue : m_residues) {
+			for (auto const& residue : m_residues)
+			{
 				result(arma::span::all, arma::span(i, i + 3))
-						= m_xyz(arma::span::all, arma::span(pos, pos + 3));
+					= m_xyz(arma::span::all, arma::span(pos, pos + 3));
 				pos += residue->n_atoms();
 				i += 4;
 			}
-			return  result;
+			return result;
 		}
 
 	protected:

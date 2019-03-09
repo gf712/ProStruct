@@ -18,17 +18,16 @@
 #include "prostruct/struct/bond.h"
 #include <armadillo>
 
-template <typename T> using atomVector = std::vector<std::shared_ptr<Atom<T>>>;
+template <typename T>
+using atomVector = std::vector<std::shared_ptr<Atom<T>>>;
 
 template <typename T>
-class Atom : public std::enable_shared_from_this<Atom<T>> {
+class Atom : public std::enable_shared_from_this<Atom<T>>
+{
 
 public:
 	Atom(const std::string& element) { load_atom(element); }
-	Atom(const std::string&, const std::string&)
-	{
-		load_atom(element, name);
-	}
+	Atom(const std::string&, const std::string&) { load_atom(element, name); }
 	Atom(const std::string& element, const std::string& name, T x, T y, T z)
 	{
 		load_atom(element, name, x, y, z);
@@ -65,8 +64,7 @@ private:
 	T radius;
 	void load_atom(const std::string& element);
 	void load_atom(const std::string& element, const std::string& name);
-	void load_atom(
-		const std::string& element, const std::string& name, T x, T y, T z);
+	void load_atom(const std::string& element, const std::string& name, T x, T y, T z);
 	T atomicWeight;
 	int atomicNumber;
 	std::string element;

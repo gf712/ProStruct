@@ -322,12 +322,14 @@ void Atom<T>::addBond(std::shared_ptr<Atom<T>> atom, int atomType)
 {
 
 	// assumes that an atom can at most form 4 bonds
-	if (bonds.size() < 4) {
+	if (bonds.size() < 4)
+	{
 		auto newBond = std::make_shared<Bond<T>>(getAtom(), atom, atomType);
 		bonds.emplace_back(newBond);
 		// adds Bond to second Atom
 		atom->addBond(newBond);
-	} else
+	}
+	else
 		throw "Atom can form at most 4 bonds";
 }
 
@@ -336,9 +338,11 @@ void Atom<T>::addBond(std::shared_ptr<Bond<T>> bond)
 {
 
 	// assumes that an atom can at most form 4 bonds
-	if (bonds.size() < 4) {
+	if (bonds.size() < 4)
+	{
 		bonds.emplace_back(bond);
-	} else
+	}
+	else
 		throw "Atom can form at most 4 bonds";
 }
 
@@ -357,7 +361,8 @@ void Atom<T>::destroyBond(std::shared_ptr<Bond<T>> bondP)
 
 	auto iter = std::find(bonds.begin(), bonds.end(), bondP);
 
-	if (iter == bonds.end()) {
+	if (iter == bonds.end())
+	{
 		throw "The given bond pointer was not found in this atom";
 	}
 
@@ -371,7 +376,8 @@ bool Atom<T>::hasBond(const std::shared_ptr<Atom<T>>& atom2)
 	// Checks if there is a bond between this and atom2
 	// Note that the bond has no direction, therefore need
 	// to check atom2 in Bond class member Atom1 and Atom2
-	for (auto const& bond : bonds) {
+	for (auto const& bond : bonds)
+	{
 		if (bond->getAtom1() == atom2 or bond->getAtom2() == atom2)
 			return true;
 	}

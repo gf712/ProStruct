@@ -16,7 +16,8 @@ template <typename>
 class Atom;
 
 template <typename T>
-class Bond {
+class Bond
+{
 
 public:
 	Bond(T x, T y, T z, int bondType);
@@ -44,4 +45,4 @@ private:
 	T length;
 };
 
-#endif //PROSTRUCT_BOND_H
+#endif // PROSTRUCT_BOND_H

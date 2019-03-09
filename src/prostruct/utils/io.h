@@ -15,7 +15,8 @@
 #include <cxxabi.h>
 #endif
 
-namespace prostruct {
+namespace prostruct
+{
 	template <typename T>
 	std::string demangled_type()
 	{
@@ -33,4 +34,4 @@ namespace prostruct {
 	}
 }
 
-#endif //PROSTRUCT_IO_H
+#endif // PROSTRUCT_IO_H

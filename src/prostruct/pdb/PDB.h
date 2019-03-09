@@ -9,7 +9,6 @@
 #ifndef PROSTRUCT_PDB_H
 #define PROSTRUCT_PDB_H
 
-
 #include <prostruct/parsers/PDBparser.h>
 #include <prostruct/pdb/struct_base.h>
 #include <prostruct/struct/chain.h>
@@ -19,7 +18,8 @@
 
 #include <fmt/format.h>
 
-namespace prostruct {
+namespace prostruct
+{
 
 	template <class T>
 	class StructBase;
@@ -27,21 +27,24 @@ namespace prostruct {
 	class Chain;
 
 	template <typename T>
-	class PDB: public StructBase<T> {
+	class PDB : public StructBase<T>
+	{
 	public:
 		PDB(const std::string& filename);
 
 		static PDB fetch(std::string);
 
-		std::string to_string() final {
+		std::string to_string() final
+		{
 			return format(fmt("<prostruct.PDB {} precision, with {} atoms, {} "
 							  "residues at {}>"),
-						  demangled_type<T>(), this->m_natoms, this->m_nresidues, fmt::ptr(this));
+				demangled_type<T>(), this->m_natoms, this->m_nresidues, fmt::ptr(this));
 		}
 
 		std::string get_filename() { return m_filename; }
 
-		std::shared_ptr<Chain<T>> get_chain(const std::string &name) const {
+		std::shared_ptr<Chain<T>> get_chain(const std::string& name) const
+		{
 			return m_chain_map.at(name);
 		}
 
@@ -58,9 +61,9 @@ namespace prostruct {
 			for (const auto& chain_name : m_chain_order)
 			{
 				arma::Col<arma::uword> residue_atoms
-						= m_chain_map[chain_name]->get_atom_indices(std::forward<Args>(patterns)...);
+					= m_chain_map[chain_name]->get_atom_indices(std::forward<Args>(patterns)...);
 				max_result(arma::span(i, i + residue_atoms.n_rows - 1))
-						= residue_atoms + position_in_pdb;
+					= residue_atoms + position_in_pdb;
 				i += residue_atoms.n_rows;
 				position_in_pdb += m_chain_map[chain_name]->m_natoms;
 			}
@@ -79,7 +82,6 @@ namespace prostruct {
 		std::vector<std::string> m_chain_order;
 		std::map<std::string, std::shared_ptr<Chain<T>>> m_chain_map;
 		int m_number_of_chains;
-
 	};
 
 } // namespace prostruct

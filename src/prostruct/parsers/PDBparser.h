@@ -12,7 +12,8 @@
 #include <prostruct/pdb/struct_base.h>
 #include <prostruct/struct/atom.h>
 
-struct AASequenceOrder {
+struct AASequenceOrder
+{
 	bool operator()(const std::string& left, const std::string& right) const
 	{
 		std::string::size_type p_r = right.find('-');
@@ -32,14 +33,16 @@ struct AASequenceOrder {
 		else if (pp_l + 1 < left.size() && pp_r + 1 == right.size() && right_int == left_int)
 			return false; // compare insertion with non-insertion -> ALA1 > ALA1A
 		else if (pp_l + 1 < left.size() && pp_r + 1 < right.size() && right_int == left_int)
-			return right.substr(pp_r + 1, right.npos) > left.substr(pp_l + 1, left.npos); // compare insertions -> ALA2A > ALA2A
+			return right.substr(pp_r + 1, right.npos)
+				> left.substr(pp_l + 1, left.npos); // compare insertions -> ALA2A > ALA2A
 		else
 			return right_int > left_int;
 	}
 };
 
 template <typename T>
-void createMap(const std::string&, std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>>&,
+void createMap(const std::string&,
+	std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>>&,
 	std::vector<std::string>&);
 
-#endif //PROSTRUCT_PDBPARSER_H
+#endif // PROSTRUCT_PDBPARSER_H

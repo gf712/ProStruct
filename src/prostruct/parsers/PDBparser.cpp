@@ -30,8 +30,7 @@ inline float scalar_from_buffer(const std::string& buffer)
 }
 
 template <typename T>
-void createMap(
-	const std::string& fname,
+void createMap(const std::string& fname,
 	std::map<std::string, std::map<std::string, atomVector<T>, AASequenceOrder>>& chainResMap,
 	std::vector<std::string>& chainOrder)
 {
@@ -43,13 +42,15 @@ void createMap(
 	if (!file.is_open())
 		throw "File does not exist!";
 
-	while (std::getline(file, line)) {
+	while (std::getline(file, line))
+	{
 
 		auto record = line.substr(0, 5);
 
 		remove_whitespace(record);
 
-		if (record == "ATOM") {
+		if (record == "ATOM")
+		{
 
 			auto serialStr = line.substr(6, 5);
 			//            int serial = std::stoi(serialStr);
@@ -74,18 +75,22 @@ void createMap(
 			remove_whitespace(resSeqStr);
 			remove_whitespace(insCode);
 
-			if (std::find(chainOrder.begin(), chainOrder.end(), chainID) == chainOrder.end()) {
+			if (std::find(chainOrder.begin(), chainOrder.end(), chainID) == chainOrder.end())
+			{
 				chainOrder.push_back(chainID);
 			}
 
 			auto residueID = residue + "-" + resSeqStr + "-" + insCode;
-			chainResMap[chainID][residueID].emplace_back(std::make_shared<Atom<T>>(element, name, x, y, z));
+			chainResMap[chainID][residueID].emplace_back(
+				std::make_shared<Atom<T>>(element, name, x, y, z));
 		}
 	}
 }
 
-template void createMap(const std::string&, std::map<std::string, std::map<std::string, atomVector<float>, AASequenceOrder>>&,
+template void createMap(const std::string&,
+	std::map<std::string, std::map<std::string, atomVector<float>, AASequenceOrder>>&,
 	std::vector<std::string>&);
 
-template void createMap(const std::string&, std::map<std::string, std::map<std::string, atomVector<double>, AASequenceOrder>>&,
+template void createMap(const std::string&,
+	std::map<std::string, std::map<std::string, atomVector<double>, AASequenceOrder>>&,
 	std::vector<std::string>&);

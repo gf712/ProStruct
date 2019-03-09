@@ -14,7 +14,7 @@ using namespace prostruct;
 
 template <typename T>
 Chain<T>::Chain(
-		const std::vector<std::shared_ptr<Residue<T>>>& residues, const std::string& chainName)
+	const std::vector<std::shared_ptr<Residue<T>>>& residues, const std::string& chainName)
 {
 
 	bool first = true;
@@ -23,16 +23,15 @@ Chain<T>::Chain(
 	this->m_natoms = 0;
 
 	// link residues
-	for (auto const& residue : residues) {
-
-		//        std::cout << residue->getResidueName() << std::endl;
-
-		if (first) {
+	for (auto const& residue : residues)
+	{
+		if (first)
+		{
 			previousResidue = residue;
 			first = false;
 		}
-
-		else {
+		else
+		{
 			residue->link(previousResidue);
 			previousResidue = residue;
 		}
@@ -44,8 +43,8 @@ Chain<T>::Chain(
 }
 
 template <typename T>
-Chain<T>::Chain(
-	const std::vector<std::shared_ptr<Residue<T>>>& residues, const std::string& chainName, const arma::Mat<T>& xyz)
+Chain<T>::Chain(const std::vector<std::shared_ptr<Residue<T>>>& residues,
+	const std::string& chainName, const arma::Mat<T>& xyz)
 {
 
 	bool first = true;
@@ -55,23 +54,20 @@ Chain<T>::Chain(
 	this->m_natoms = 0;
 
 	// link residues
-	for (auto const& residue : residues) {
-
-		//        std::cout << residue->getResidueName() << std::endl;
-
-		if (first) {
+	for (auto const& residue : residues)
+	{
+		if (first)
+		{
 			previousResidue = residue;
 			first = false;
 		}
-
-		else {
+		else
+		{
 			residue->link(previousResidue);
 			previousResidue = residue;
 		}
-
 		this->m_natoms += residue->n_atoms();
 	}
-
 	this->m_nresidues = static_cast<int>(residues.size());
 }
 

@@ -12,17 +12,20 @@
 #include <tuple>
 #include <type_traits>
 
-namespace prostruct::utils {
+namespace prostruct::utils
+{
 	// adapted from https://qiita.com/angeart/items/94734d68999eca575881
-	namespace detail {
+	namespace detail
+	{
 		template <typename ReturnType, typename Cls, typename... Args>
-		struct lambda_properties_helper {
+		struct lambda_properties_helper
+		{
 			using return_type = ReturnType;
 			static constexpr size_t size = sizeof...(Args) - 1;
-			template <size_t i> struct arg {
-				typedef
-					typename std::tuple_element<i, std::tuple<Args...>>::type
-						type;
+			template <size_t i>
+			struct arg
+			{
+				typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
 			};
 		};
 
@@ -45,13 +48,13 @@ namespace prostruct::utils {
 	{
 	};
 
-	template <typename Head, typename ...Tail>
+	template <typename Head, typename... Tail>
 	constexpr bool lambda_compare_arity()
 	{
 		return ((lambda_properties<Head>::size == lambda_properties<Tail>::size) && ...);
 	}
 
-	template <typename ...LambdaTypes>
+	template <typename... LambdaTypes>
 	constexpr bool lambdas_have_same_arity()
 	{
 		if constexpr (sizeof...(LambdaTypes) == 0)
@@ -62,11 +65,11 @@ namespace prostruct::utils {
 			return lambda_compare_arity<LambdaTypes...>();
 	}
 
-	template <typename ...Args>
+	template <typename... Args>
 	inline constexpr bool all_integral_v = (std::is_integral<Args>::value && ...);
 
 	template <typename...>
-	inline constexpr auto all_same_v = std::true_type{};
+	inline constexpr auto all_same_v = std::true_type {};
 
 	template <typename T, typename... Rest>
 	inline constexpr auto all_same_v<T, Rest...> = (std::is_same_v<T, Rest> && ...);

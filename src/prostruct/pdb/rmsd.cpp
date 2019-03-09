@@ -6,11 +6,13 @@
  *
  */
 
-#include <prostruct/pdb/geometry.h>
 #include <prostruct/core/kernels.h>
+#include <prostruct/pdb/geometry.h>
 
-namespace prostruct {
-	namespace geometry {
+namespace prostruct
+{
+	namespace geometry
+	{
 
 		template <typename T>
 		T rmsd(const arma::Mat<T>& xyz, const arma::Mat<T>& xyz_other)
@@ -19,7 +21,8 @@ namespace prostruct {
 			T sum = 0.0;
 
 #pragma omp parallel for reduction(+ : sum)
-			for (arma::uword i = 0; i < xyz.n_cols; ++i) {
+			for (arma::uword i = 0; i < xyz.n_cols; ++i)
+			{
 				sum += kernels::distance_lazy<T>(xyz.col(i), xyz_other.col(i));
 			}
 
@@ -36,7 +39,8 @@ namespace prostruct {
 
 			T sum_x = 0.0, sum_y = 0.0, sum_z = 0.0;
 #pragma omp simd reduction(+ : sum_x, sum_y, sum_z)
-			for (arma::uword i = 0; i < xyz.n_cols; ++i) {
+			for (arma::uword i = 0; i < xyz.n_cols; ++i)
+			{
 				sum_x += xyz.at(0, i);
 				sum_y += xyz.at(1, i);
 				sum_z += xyz.at(2, i);
@@ -47,22 +51,23 @@ namespace prostruct {
 		}
 
 		template <typename T>
-		void reposition_molecule(
-			arma::Mat<T>& xyz, const arma::Col<T>& centroid)
+		void reposition_molecule(arma::Mat<T>& xyz, const arma::Col<T>& centroid)
 		{
 
 			T x = centroid.at(0);
 			T y = centroid.at(1);
 			T z = centroid.at(2);
 
-			for (arma::uword i = 0; i < xyz.n_cols; ++i) {
+			for (arma::uword i = 0; i < xyz.n_cols; ++i)
+			{
 				xyz.at(0, i) -= x;
 				xyz.at(1, i) -= y;
 				xyz.at(2, i) -= z;
 			}
 		}
 
-		template <typename T> void recentre_molecule(arma::Mat<T>& xyz)
+		template <typename T>
+		void recentre_molecule(arma::Mat<T>& xyz)
 		{
 
 			arma::Col<T> centroid(3);
@@ -130,13 +135,11 @@ namespace prostruct {
 
 		template float rmsd(const arma::Mat<float>&, const arma::Mat<float>&);
 
-		template double rmsd(
-			const arma::Mat<double>&, const arma::Mat<double>&);
+		template double rmsd(const arma::Mat<double>&, const arma::Mat<double>&);
 
 		template void get_centroid(const arma::Mat<float>&, arma::Col<float>&);
 
-		template void get_centroid(
-			const arma::Mat<double>&, arma::Col<double>&);
+		template void get_centroid(const arma::Mat<double>&, arma::Col<double>&);
 
 		template float kabsch_rmsd_(arma::Mat<float>&, arma::Mat<float>&);
 		template double kabsch_rmsd_(arma::Mat<double>&, arma::Mat<double>&);

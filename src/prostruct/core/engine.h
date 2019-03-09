@@ -12,8 +12,8 @@
 #include <armadillo>
 #include <prostruct/pdb/PDB.h>
 #include <prostruct/struct/residue.h>
-#include <prostruct/utils/type_traits.h>
 #include <prostruct/utils/tuple_utils.h>
+#include <prostruct/utils/type_traits.h>
 
 namespace prostruct::core
 {
@@ -77,7 +77,8 @@ namespace prostruct::core
 			constexpr size_t arity
 				= utils::lambda_properties<std::decay_t<decltype(std::get<0>(comp))>>::size;
 
-			static_assert(arity % 2 == 0, "The arity of a pairwise kernel has to be a multiple of 2.");
+			static_assert(
+				arity % 2 == 0, "The arity of a pairwise kernel has to be a multiple of 2.");
 
 			constexpr size_t window_size = arity / 2;
 
@@ -85,30 +86,33 @@ namespace prostruct::core
 
 			if constexpr (skip_diagonal::value)
 				window_displacement = 1;
-			if constexpr (is_symmmetric::value) {
+			if constexpr (is_symmmetric::value)
+			{
 #pragma omp parallel for collapse(2)
-				for (size_t i = start; i < residues.size() - window_size + 1; ++i) {
+				for (size_t i = start; i < residues.size() - window_size + 1; ++i)
+				{
 					for (size_t j = i + window_displacement; j < residues.size() - window_size + 1;
-						 ++j) {
+						 ++j)
+					{
 						execute_tuple(comp,
-									  vector_to_tuple_helper(
-											  residues,
-											  std::make_index_sequence<window_size>{}, i - start, j - start),
-									  result.tube(i, j));
+							vector_to_tuple_helper(residues,
+								std::make_index_sequence<window_size> {}, i - start, j - start),
+							result.tube(i, j));
 					}
 				}
 			}
 			else
 			{
 #pragma omp parallel for collapse(2)
-				for (size_t i = start; i < residues.size() - window_size + 1; ++i) {
-					for (size_t j = start + window_displacement; j < residues.size() - window_size + 1;
-						 ++j) {
+				for (size_t i = start; i < residues.size() - window_size + 1; ++i)
+				{
+					for (size_t j = start + window_displacement;
+						 j < residues.size() - window_size + 1; ++j)
+					{
 						execute_tuple(comp,
-									  vector_to_tuple_helper(
-											  residues,
-											  std::make_index_sequence<window_size>{}, i - start, j - start),
-									  result.tube(i, j));
+							vector_to_tuple_helper(residues,
+								std::make_index_sequence<window_size> {}, i - start, j - start),
+							result.tube(i, j));
 					}
 				}
 			}
