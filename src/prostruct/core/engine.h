@@ -13,6 +13,7 @@
 #include <prostruct/pdb/PDB.h>
 #include <prostruct/struct/residue.h>
 #include <prostruct/utils/type_traits.h>
+#include <prostruct/utils/tuple_utils.h>
 
 namespace prostruct::core
 {
@@ -49,7 +50,7 @@ namespace prostruct::core
 		}
 		else
 		{
-			static_assert(utils::lambdas_have_same_arity(computations...), "Not implemented yet!");
+			static_assert(utils::lambdas_have_same_arity<Args...>(), "Not implemented yet!");
 		}
 
 		return result;
@@ -60,44 +61,61 @@ namespace prostruct::core
 	 * for all combinations of residue to residue
 	 *
 	 */
-	template <typename is_symmmetric = std::true_type, typename calculate_diagonal = std::true_type,
+	template <typename is_symmmetric = std::true_type, typename skip_diagonal = std::true_type,
 		typename T, typename... Args>
 	arma::Cube<T> pairwise_residue_kernel_engine(
 		const prostruct::residueVector<T>& residues, size_t start, Args... computations)
 	{
 		constexpr int n_computations = sizeof...(computations);
 		auto result
-			= arma::Cube<T>(n_computations, residues.size(), residues.size(), arma::fill::zeros);
+			= arma::Cube<T>(residues.size(), residues.size(), n_computations, arma::fill::zeros);
 
 		std::tuple<Args...> comp { computations... };
 
 		if constexpr (utils::lambdas_have_same_arity<Args...>())
 		{
-			constexpr size_t window_size
+			constexpr size_t arity
 				= utils::lambda_properties<std::decay_t<decltype(std::get<0>(comp))>>::size;
 
-			//			static_assert(window_size % sizeof...(computations), "");
+			static_assert(arity % 2 == 0, "The arity of a pairwise kernel has to be a multiple of 2.");
+
+			constexpr size_t window_size = arity / 2;
 
 			size_t window_displacement = 0;
-			if constexpr (calculate_diagonal::value)
-				window_displacement = 1;
 
+			if constexpr (skip_diagonal::value)
+				window_displacement = 1;
+			if constexpr (is_symmmetric::value) {
 #pragma omp parallel for collapse(2)
-			for (size_t i = start; i < residues.size() - window_size + 1; ++i)
+				for (size_t i = start; i < residues.size() - window_size + 1; ++i) {
+					for (size_t j = i + window_displacement; j < residues.size() - window_size + 1;
+						 ++j) {
+						execute_tuple(comp,
+									  vector_to_tuple_helper(
+											  residues,
+											  std::make_index_sequence<window_size>{}, i - start, j - start),
+									  result.tube(i, j));
+					}
+				}
+			}
+			else
 			{
-				for (size_t j = start + window_displacement; j < residues.size() - window_size + 1;
-					 ++j)
-				{
-					execute_tuple(comp,
-						vector_to_tuple_helper(
-							residues, std::make_index_sequence<window_size> {}, i - start),
-						result.subcube(i - start, i - start));
+#pragma omp parallel for collapse(2)
+				for (size_t i = start; i < residues.size() - window_size + 1; ++i) {
+					for (size_t j = start + window_displacement; j < residues.size() - window_size + 1;
+						 ++j) {
+						execute_tuple(comp,
+									  vector_to_tuple_helper(
+											  residues,
+											  std::make_index_sequence<window_size>{}, i - start, j - start),
+									  result.tube(i, j));
+					}
 				}
 			}
 		}
 		else
 		{
-			static_assert(utils::lambdas_have_same_arity(computations...), "Not implemented yet!");
+			static_assert(utils::lambdas_have_same_arity<Args...>(), "Not implemented yet!");
 		}
 
 		return result;

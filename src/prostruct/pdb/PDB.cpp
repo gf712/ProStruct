@@ -23,7 +23,8 @@ PDB<T>::PDB(const std::string& filename) : StructBase<T>(), m_filename(filename)
 	this->m_natoms = 0;
 	this->m_nresidues = 0;
 	this->m_xyz.set_size(3, 0);
-
+	arma::uword start_current_atom = 0;
+	arma::uword end_current_atom = 0;
 	for (const auto& chain : m_chain_order) {
 		residueVector<T> residues;
 		const std::map<std::string, atomVector<T>, AASequenceOrder> chain_i
@@ -34,7 +35,9 @@ PDB<T>::PDB(const std::string& filename) : StructBase<T>(), m_filename(filename)
 			this->append_new_residue(*atomPair, residues, false, false);
 		}
 		this->append_new_residue(*std::prev(chain_i.cend()), residues, false, true);
-		m_chain_map[chain] = std::make_shared<Chain<T>>(residues, chain);
+		end_current_atom += this->m_natoms - start_current_atom;
+		m_chain_map[chain] = std::make_shared<Chain<T>>(residues, chain, this->m_xyz(arma::span::all, arma::span(start_current_atom, end_current_atom-1)));
+		start_current_atom = end_current_atom;
 		this->m_nresidues += static_cast<arma::uword>(residues.size());
 		this->m_residues.insert(this->m_residues.end(), residues.begin(), residues.end());
 	}

@@ -11,6 +11,10 @@
 
 #include <prostruct/pdb/struct_base.h>
 #include <prostruct/struct/residue.h>
+#include <prostruct/utils/io.h>
+
+#include <fmt/format.h>
+
 
 namespace prostruct
 {
@@ -25,7 +29,15 @@ namespace prostruct
 	{
 
 	public:
-		Chain(std::vector<std::shared_ptr<Residue<T>>>, std::string);
+		Chain(const std::vector<std::shared_ptr<Residue<T>>>&, const std::string&);
+		Chain(const std::vector<std::shared_ptr<Residue<T>>>&, const std::string&, const arma::Mat<T>& xyz);
+
+		virtual std::string to_string()
+		{
+			return format(fmt("<prostruct.Chain {} precision, with {} atoms, {} "
+							  "residues at {}>"),
+				demangled_type<T>(), this->m_natoms, this->m_nresidues, fmt::ptr(this));
+		}
 
 #ifndef SWIG
 		template <typename... Args>

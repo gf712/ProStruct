@@ -57,6 +57,7 @@ namespace prostruct
 		friend class Chain;
 
 	public:
+
 		// takes an arbitrary number of atoms and tries to form a residue
 		//    Residue(std::unique_ptr<Atom> atoms...);
 		Residue(atomVector<T>, const std::string&, const std::string&, bool = false, bool = false);
@@ -80,7 +81,7 @@ namespace prostruct
 			return xyz(arma::span::all, arma::span(0, 3));
 		}
 
-		atomVector<T> getSidechain() const noexcept
+		atomVector<T> get_sidechain() const noexcept
 		{
 			std::vector<std::shared_ptr<Atom<T>>> sidechainAtoms;
 			for (auto const& i : sidechain)
@@ -88,6 +89,14 @@ namespace prostruct
 				sidechainAtoms.emplace_back(atoms[i]);
 			}
 			return sidechainAtoms;
+		}
+
+		arma::Mat<T> get_sidechain_atoms() const noexcept
+		{
+			if (get_amino_acid_type() == AminoAcid::GLY)
+				return arma::Mat<T>(3, 0);
+			else
+				return xyz(arma::span::all, arma::span(4, atoms.size()-1));
 		}
 
 		std::shared_ptr<Atom<T>> operator[](const int index) const { return atoms[index]; }

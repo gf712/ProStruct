@@ -25,7 +25,7 @@ class Atom : public std::enable_shared_from_this<Atom<T>> {
 
 public:
 	Atom(const std::string& element) { load_atom(element); }
-	Atom(const std::string&, const std::string& name)
+	Atom(const std::string&, const std::string&)
 	{
 		load_atom(element, name);
 	}

@@ -628,7 +628,7 @@ void Residue<T>::createBonds()
 		radii.at(i) = atom->getRadius();
 		i++;
 	}
-	for (const auto& atom : getSidechain()) {
+	for (const auto& atom : get_sidechain()) {
 		xyz.at(0, i) = atom->getX();
 		xyz.at(1, i) = atom->getY();
 		xyz.at(2, i) = atom->getZ();

@@ -72,10 +72,14 @@ namespace prostruct {
 #endif
 		virtual arma::Mat<T> get_backbone_atoms() const noexcept final;
 
+		int n_chains() { return m_number_of_chains; }
+
 	private:
 		std::string m_filename;
 		std::vector<std::string> m_chain_order;
 		std::map<std::string, std::shared_ptr<Chain<T>>> m_chain_map;
+		int m_number_of_chains;
+
 	};
 
 } // namespace prostruct

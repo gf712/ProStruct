@@ -6,6 +6,9 @@
  *
  */
 
+#ifndef PROSTRUCT_TUPLE_UTILS_H
+#define PROSTRUCT_TUPLE_UTILS_H
+
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -16,9 +19,9 @@ namespace prostruct {
 		template <typename F, typename T, typename... A>
 		static inline auto apply(F&& f, T&& t, A&&... a)
 		{
-			return Apply<N - 1>::apply(::std::forward<F>(f),
-				::std::forward<T>(t), ::std::get<N - 1>(::std::forward<T>(t)),
-				::std::forward<A>(a)...);
+			return Apply<N - 1>::apply(std::forward<F>(f),
+				std::forward<T>(t), std::get<N - 1>(std::forward<T>(t)),
+				std::forward<A>(a)...);
 		}
 	};
 
@@ -26,15 +29,15 @@ namespace prostruct {
 		template <typename F, typename T, typename... A>
 		static inline auto apply(F&& f, T&&, A&&... a)
 		{
-			return ::std::forward<F>(f)(::std::forward<A>(a)...);
+			return std::forward<F>(f)(::std::forward<A>(a)...);
 		}
 	};
 
 	template <typename F, typename T, typename ResultType>
 	void apply(F&& f, T&& t, ResultType& result)
 	{
-		result = Apply<::std::tuple_size<::std::decay_t<T>>::value>::apply(
-			::std::forward<F>(f), ::std::forward<T>(t));
+		result = Apply<std::tuple_size<std::decay_t<T>>::value>::apply(
+			std::forward<F>(f), std::forward<T>(t));
 	}
 
 	// adapted from https://en.cppreference.com/w/cpp/utility/integer_sequence
@@ -45,7 +48,7 @@ namespace prostruct {
 		std::index_sequence<Idx...>, ResultType&& result)
 	{
 		return (
-			apply(std::get<Idx>(lambda_tuple), lambda_args, result[Idx]), ...);
+			apply(std::get<Idx>(lambda_tuple), lambda_args, result(Idx)), ...);
 	}
 
 	template <typename... Args, typename... LambdaArgs, typename ResultType>
@@ -63,4 +66,13 @@ namespace prostruct {
 	{
 		return std::make_tuple(vec[Idx + offset]...);
 	}
+
+	template <typename T, std::size_t... Idx>
+	auto vector_to_tuple_helper(
+			const std::vector<T>& vec, std::index_sequence<Idx...>, size_t offset, size_t pair_offset)
+	{
+		return std::make_tuple(vec[Idx + offset]..., vec[Idx + pair_offset]...);
+	}
 }
+
+#endif // PROSTRUCT_TUPLE_UTILS_H
