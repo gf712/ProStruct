@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-#include "prostruct/struct/bond.h"
+#include <prostruct/struct/bond.h>
 #include <armadillo>
 
 template <typename T>

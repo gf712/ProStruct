@@ -9,9 +9,8 @@
 #ifndef PROSTRUCT_RESIDUE_H
 #define PROSTRUCT_RESIDUE_H
 
-#include <vector>
-
 #include <prostruct/struct/atom.h>
+#include <prostruct/struct/utils.h>
 #include <prostruct/utils/type_traits.h>
 
 namespace prostruct
@@ -19,36 +18,6 @@ namespace prostruct
 
 	using aminoAcidAtomMap = std::vector<std::map<std::string, std::string>>;
 	using stringIndexMap = std::map<std::string, int>;
-
-	enum class aaLocation
-	{
-		Backbone,
-		Sidechain
-	};
-
-	enum class AminoAcid
-	{
-		ARG,
-		ALA,
-		ASN,
-		ASP,
-		CYS,
-		GLN,
-		GLU,
-		GLY,
-		HIS,
-		ILE,
-		LEU,
-		LYS,
-		MET,
-		PHE,
-		PRO,
-		SER,
-		THR,
-		TRP,
-		TYR,
-		VAL
-	};
 
 	template <typename T>
 	class Residue

@@ -19,10 +19,6 @@
 
 #include <fmt/format.h>
 
-#include <armadillo>
-#include <set>
-#include <string>
-
 using namespace prostruct;
 
 namespace prostruct
@@ -78,21 +74,11 @@ namespace prostruct
 
 		arma::Col<T> get_radii() const noexcept { return m_radii; }
 
-		//#ifndef SWIG
 		std::vector<std::shared_ptr<Residue<T>>> get_residues() const noexcept
 		{
 			return m_residues;
 		}
-		//#else
-		//		std::vector<Residue<T>> get_residues() const noexcept {
-		//			std::vector<Residue<T>> result;
-		//			for (const auto& residue: m_residues)
-		//				{
-		//				result.push_back(residue->get());
-		//				}
-		//			return result;
-		//		}
-		//#endif
+
 		arma::Col<T> compute_shrake_rupley(T probe = 1.4, int n_sphere_points = 960) const noexcept
 		{
 			arma::Col<T> asa(static_cast<arma::uword>(m_natoms));
@@ -125,31 +111,8 @@ namespace prostruct
 
 		virtual arma::Mat<T> calculate_phi_psi(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-
-			// the Phi kernel as a C++ lambda
-			auto phi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
-								  const std::shared_ptr<Residue<T>>& residue_next) {
-				if (residue->is_c_terminus())
-					return static_cast<T>(0.0);
-				auto atom_coords_this = residue->get_backbone_atoms();
-				auto atom_coords_next = residue_next->get_backbone_atoms();
-				return kernels::dihedrals_lazy(atom_coords_this.col(2), atom_coords_next.col(0),
-					atom_coords_next.col(1), atom_coords_next.col(2), coef);
-			};
-
-			// the Psi kernel as a C++ lambda
-			auto psi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
-								  const std::shared_ptr<Residue<T>>& residue_next) {
-				if (residue_next->is_n_terminus())
-					return static_cast<T>(0.0);
-				auto atom_coords_this = residue->get_backbone_atoms();
-				auto atom_coords_next = residue_next->get_backbone_atoms();
-				return kernels::dihedrals_lazy(atom_coords_this.col(0), atom_coords_this.col(1),
-					atom_coords_this.col(2), atom_coords_next.col(0), coef);
-			};
-
-			return core::residue_kernel_engine(m_residues, 0, phi_kernel, psi_kernel);
+			return core::residue_kernel_engine(m_residues, 0, kernels::phi_kernel<T>(use_radians),
+				kernels::psi_kernel<T>(use_radians));
 		}
 
 		void kabsch_rotation(StructBase<T>& other) noexcept
@@ -170,244 +133,61 @@ namespace prostruct
 
 		arma::Col<T> calculate_phi(bool use_radians = false) const noexcept
 		{
-			// convert from radians to degrees
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the Phi kernel as a C++ lambda
-			auto phi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
-								  const std::shared_ptr<Residue<T>>& residue_next) {
-				if (residue->is_c_terminus())
-					return static_cast<T>(0.0);
-				auto atom_coords_this = residue->get_backbone_atoms();
-				auto atom_coords_next = residue_next->get_backbone_atoms();
-				return kernels::dihedrals_lazy(atom_coords_this.col(2), atom_coords_next.col(0),
-					atom_coords_next.col(1), atom_coords_next.col(2), coef);
-			};
-
 			// result is a matrix where each row has the lambda/kernel result for each
 			// residue, so transform it into column vector
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, phi_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::phi_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Col<T> calculate_psi(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the Psi kernel as a C++ lambda
-			auto psi_kernel = [coef](const std::shared_ptr<Residue<T>>& residue,
-								  const std::shared_ptr<Residue<T>>& residue_next) {
-				if (residue_next->is_n_terminus())
-					return static_cast<T>(0.0);
-				auto atom_coords_this = residue->get_backbone_atoms();
-				auto atom_coords_next = residue_next->get_backbone_atoms();
-				return kernels::dihedrals_lazy(atom_coords_this.col(0), atom_coords_this.col(1),
-					atom_coords_this.col(2), atom_coords_next.col(0), coef);
-			};
-
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, psi_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::psi_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Col<T> calculate_chi1(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the chi1 kernel as a C++ lambda
-			auto chi1_kernel = [coef](const std::shared_ptr<Residue<T>>& residue) {
-				arma::Mat<T> coords;
-				switch (residue->get_amino_acid_type())
-				{
-				case AminoAcid::VAL:
-				case AminoAcid::ILE:
-				{
-					coords = residue->get_atom_coords("N", "CA", "CB", "CG1");
-				}
-				break;
-				case AminoAcid::THR:
-				{
-					coords = residue->get_atom_coords("N", "CA", "CB", "OG1");
-				}
-				break;
-				case AminoAcid::SER:
-				{
-					coords = residue->get_atom_coords("N", "CA", "CB", "OG");
-				}
-				break;
-				case AminoAcid::CYS:
-					coords = residue->get_atom_coords("N", "CA", "CB", "SG");
-				case AminoAcid::ALA:
-				case AminoAcid::GLY:
-				{
-					return static_cast<T>(0.0);
-				}
-				default:
-				{
-					coords = residue->get_atom_coords("N", "CA", "CB", "CG");
-				}
-				}
-
-				return kernels::dihedrals_lazy(
-					coords.col(0), coords.col(1), coords.col(2), coords.col(3), coef);
-			};
-
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, chi1_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::chi1_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Col<T> calculate_chi2(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the chi2 kernel as a C++ lambda
-			auto chi1_kernel = [coef](const std::shared_ptr<Residue<T>>& residue) {
-				arma::Mat<T> coords;
-				switch (residue->get_amino_acid_type())
-				{
-				case AminoAcid::ARG:
-				case AminoAcid::GLN:
-				case AminoAcid::GLU:
-				case AminoAcid::LYS:
-				case AminoAcid::PRO:
-				{
-					coords = residue->get_atom_coords("CA", "CB", "CG", "CD");
-				}
-				break;
-				case AminoAcid::ASN:
-				case AminoAcid::ASP:
-				{
-					coords = residue->get_atom_coords("CA", "CB", "CG", "OD1");
-				}
-				break;
-				case AminoAcid::HIS:
-				{
-					coords = residue->get_atom_coords("CA", "CB", "CG", "ND1");
-				}
-				break;
-				case AminoAcid::ILE:
-				{
-					coords = residue->get_atom_coords("CA", "CB", "CG1", "CD");
-				}
-				break;
-				case AminoAcid::LEU:
-				case AminoAcid::PHE:
-				case AminoAcid::TRP:
-				case AminoAcid::TYR:
-				{
-					coords = residue->get_atom_coords("CA", "CB", "CG", "CD1");
-				}
-				break;
-				case AminoAcid::MET:
-				{
-					coords = residue->get_atom_coords("CA", "CB", "CG", "SD");
-				}
-				default:
-				{
-					return static_cast<T>(0.0);
-				}
-				}
-
-				return kernels::dihedrals_lazy(
-					coords.col(0), coords.col(1), coords.col(2), coords.col(3), coef);
-			};
-
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, chi1_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::chi2_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Col<T> calculate_chi3(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the chi3 kernel as a C++ lambda
-			auto chi4_kernel = [coef](const std::shared_ptr<Residue<T>>& residue) {
-				arma::Mat<T> coords;
-				switch (residue->get_amino_acid_type())
-				{
-				case AminoAcid::ARG:
-				{
-					coords = residue->get_atom_coords("CB", "CG", "CD", "NE");
-				}
-				break;
-				case AminoAcid::GLN:
-				case AminoAcid::GLU:
-				{
-					coords = residue->get_atom_coords("CG", "CD", "CE", "OE1");
-				}
-				break;
-				case AminoAcid::LYS:
-				{
-					coords = residue->get_atom_coords("CB", "CG", "CD", "CE");
-				}
-				break;
-				case AminoAcid::MET:
-				{
-					coords = residue->get_atom_coords("CB", "CG", "SD", "CE");
-				}
-				break;
-				default:
-				{
-					return static_cast<T>(0.0);
-				}
-				}
-				return kernels::dihedrals_lazy(
-					coords.col(0), coords.col(1), coords.col(2), coords.col(3), coef);
-			};
-
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, chi4_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::chi3_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Col<T> calculate_chi4(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the chi4 kernel as a C++ lambda
-			auto chi4_kernel = [coef](const std::shared_ptr<Residue<T>>& residue) {
-				arma::Mat<T> coords;
-				switch (residue->get_amino_acid_type())
-				{
-				case AminoAcid::ARG:
-				{
-					coords = residue->get_atom_coords("CG", "CD", "NE", "CZ");
-				}
-				break;
-				case AminoAcid::LYS:
-				{
-					coords = residue->get_atom_coords("CG", "CD", "CE", "NZ");
-				}
-				break;
-				default:
-				{
-					return static_cast<T>(0.0);
-				}
-				}
-				return kernels::dihedrals_lazy(
-					coords.col(0), coords.col(1), coords.col(2), coords.col(3), coef);
-			};
-
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, chi4_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::chi4_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Col<T> calculate_chi5(bool use_radians = false) const noexcept
 		{
-			T coef = use_radians ? 1.0 : to_rad_constant;
-			// the chi5 kernel as a C++ lambda
-			auto chi5_kernel = [coef](const std::shared_ptr<Residue<T>>& residue) {
-				arma::Mat<T> coords;
-				switch (residue->get_amino_acid_type())
-				{
-				case AminoAcid::ARG:
-				{
-					coords = residue->get_atom_coords("CD", "NE", "CZ", "Nh1");
-				}
-				break;
-				default:
-				{
-					return static_cast<T>(0.0);
-				}
-				}
-				return kernels::dihedrals_lazy(
-					coords.col(0), coords.col(1), coords.col(2), coords.col(3), coef);
-			};
 
 			return arma::Col<T>(
-				core::residue_kernel_engine(m_residues, 0, chi5_kernel).memptr(), m_nresidues);
+				core::residue_kernel_engine(m_residues, 0, kernels::chi5_kernel<T>(use_radians))
+					.memptr(),
+				m_nresidues);
 		}
 
 		arma::Mat<T> compute_shortest_distance() const noexcept

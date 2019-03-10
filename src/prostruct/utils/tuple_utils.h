@@ -65,14 +65,14 @@ namespace prostruct
 	auto vector_to_tuple_helper(
 		const std::vector<T>& vec, std::index_sequence<Idx...>, size_t offset)
 	{
-		return std::make_tuple(vec[Idx + offset]...);
+		return std::forward_as_tuple(vec[Idx + offset]...);
 	}
 
 	template <typename T, std::size_t... Idx>
 	auto vector_to_tuple_helper(
 		const std::vector<T>& vec, std::index_sequence<Idx...>, size_t offset, size_t pair_offset)
 	{
-		return std::make_tuple(vec[Idx + offset]..., vec[Idx + pair_offset]...);
+		return std::forward_as_tuple(vec[Idx + offset]..., vec[Idx + pair_offset]...);
 	}
 }
 

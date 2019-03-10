@@ -125,3 +125,69 @@ TYPED_TEST(PDBTest, psi_angles)
 
 	EXPECT_NEAR(psi_rad(10), 1.6497685, get_epsilon<TypeParam>());
 }
+
+
+TYPED_TEST(PDBTest, chi1_angles)
+{
+	auto pdb = PDB<TypeParam>("test.pdb");
+
+	auto chi1_degree = pdb.calculate_chi1();
+
+	EXPECT_NEAR(arma::accu(chi1_degree), -6986.2436469, get_epsilon<TypeParam>());
+
+	auto chi1_rad = pdb.calculate_chi1(true);
+
+	EXPECT_NEAR(arma::accu(chi1_rad), -121.93295, get_epsilon<TypeParam>());
+}
+
+TYPED_TEST(PDBTest, chi2_angles)
+{
+	auto pdb = PDB<TypeParam>("test.pdb");
+
+	auto chi2_degree = pdb.calculate_chi2();
+
+	EXPECT_NEAR(arma::accu(chi2_degree), 1760.1520070, get_epsilon<TypeParam>());
+
+	auto chi2_rad = pdb.calculate_chi2(true);
+
+	EXPECT_NEAR(arma::accu(chi2_rad), 30.72044785, get_epsilon<TypeParam>());
+}
+
+TYPED_TEST(PDBTest, chi3_angles)
+{
+	auto pdb = PDB<TypeParam>("test.pdb");
+
+	auto chi3_degree = pdb.calculate_chi3();
+
+	EXPECT_NEAR(arma::accu(chi3_degree), 432.825740151, get_epsilon<TypeParam>());
+
+	auto chi3_rad = pdb.calculate_chi3(true);
+
+	EXPECT_NEAR(arma::accu(chi3_rad), 7.554243, get_epsilon<TypeParam>());
+}
+
+TYPED_TEST(PDBTest, chi4_angles)
+{
+	auto pdb = PDB<TypeParam>("test.pdb");
+
+	auto chi4_degree = pdb.calculate_chi4();
+
+	EXPECT_NEAR(arma::accu(chi4_degree), 1583.2659, get_epsilon<TypeParam>());
+
+	auto chi4_rad = pdb.calculate_chi4(true);
+
+	EXPECT_NEAR(arma::accu(chi4_rad), 27.6332, get_epsilon<TypeParam>());
+}
+
+TYPED_TEST(PDBTest, chi5_angles)
+{
+	auto pdb = PDB<TypeParam>("test.pdb");
+
+	auto chi5_degree = pdb.calculate_chi5();
+
+	EXPECT_NEAR(arma::accu(chi5_degree), -352.310317, get_epsilon<TypeParam>());
+
+	auto chi5_rad = pdb.calculate_chi5(true);
+
+	EXPECT_NEAR(arma::accu(chi5_rad), -6.1489725, get_epsilon<TypeParam>());
+}
