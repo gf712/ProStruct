@@ -439,7 +439,6 @@ namespace prostruct
 										const std::shared_ptr<Residue<T>>& residue_neighbour) {
 				auto sidechain = residue->get_sidechain_atoms();
 				auto sidechain_neighbour = residue_neighbour->get_sidechain_atoms();
-				T shortest_distance = std::numeric_limits<T>::infinity();
 				T found_neighbour = 0;
 
 				for (arma::uword i = 0; i < sidechain.n_cols; ++i)
@@ -449,10 +448,10 @@ namespace prostruct
 						auto dist = kernels::distance_lazy<T>(
 							sidechain.col(i), sidechain_neighbour.col(j));
 						if (dist < threshold)
-							found_neighbour = 1;
+							return 1;
 					}
 				}
-				return found_neighbour;
+				return 0;
 			};
 			return core::pairwise_residue_kernel_engine(m_residues, 0, neighbour_kernel).slice(0);
 		}

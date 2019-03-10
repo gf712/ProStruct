@@ -100,6 +100,9 @@ namespace prostruct::core
 							result.tube(i, j));
 					}
 				}
+				for (arma::uword k = 0; k < n_computations; ++k) {
+					result.slice(k) = arma::symmatu(result.slice(k));
+				}
 			}
 			else
 			{
