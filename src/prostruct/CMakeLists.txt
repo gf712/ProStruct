@@ -12,7 +12,8 @@ set(PROSTRUCT_INCLUDE ${PROJECT_SOURCE_DIR}/src)
 
 target_include_directories(${TARGET_NAME}
         PUBLIC ${PROSTRUCT_INCLUDE}
-        PUBLIC ${CMAKE_BINARY_DIR}/src)
+        PUBLIC ${CMAKE_BINARY_DIR}/src
+        PUBLIC ${ARMADILLO_INCLUDE_DIR})
 
 target_link_libraries(${TARGET_NAME}
         PUBLIC ${ARMADILLO_LIBRARIES}

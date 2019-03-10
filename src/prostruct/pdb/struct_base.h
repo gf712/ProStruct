@@ -418,7 +418,6 @@ namespace prostruct
 				auto sidechain_neighbour = residue_neighbour->get_sidechain_atoms();
 				T shortest_distance = std::numeric_limits<T>::infinity();
 
-#pragma omp parallel for collapse(2)
 				for (arma::uword i = 0; i < sidechain.n_cols; ++i)
 				{
 					for (arma::uword j = i + 1; j < sidechain_neighbour.n_cols; ++j)
@@ -441,8 +440,8 @@ namespace prostruct
 				auto sidechain = residue->get_sidechain_atoms();
 				auto sidechain_neighbour = residue_neighbour->get_sidechain_atoms();
 				T shortest_distance = std::numeric_limits<T>::infinity();
+				T found_neighbour = 0;
 
-#pragma omp parallel for collapse(2)
 				for (arma::uword i = 0; i < sidechain.n_cols; ++i)
 				{
 					for (arma::uword j = i + 1; j < sidechain_neighbour.n_cols; ++j)
@@ -450,10 +449,10 @@ namespace prostruct
 						auto dist = kernels::distance_lazy<T>(
 							sidechain.col(i), sidechain_neighbour.col(j));
 						if (dist < threshold)
-							return 1;
+							found_neighbour = 1;
 					}
 				}
-				return 0;
+				return found_neighbour;
 			};
 			return core::pairwise_residue_kernel_engine(m_residues, 0, neighbour_kernel).slice(0);
 		}

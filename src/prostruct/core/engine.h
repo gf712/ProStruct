@@ -88,7 +88,7 @@ namespace prostruct::core
 				window_displacement = 1;
 			if constexpr (is_symmmetric::value)
 			{
-#pragma omp parallel for collapse(2)
+#pragma omp parallel for
 				for (size_t i = start; i < residues.size() - window_size + 1; ++i)
 				{
 					for (size_t j = i + window_displacement; j < residues.size() - window_size + 1;
@@ -103,7 +103,7 @@ namespace prostruct::core
 			}
 			else
 			{
-#pragma omp parallel for collapse(2)
+#pragma omp parallel for
 				for (size_t i = start; i < residues.size() - window_size + 1; ++i)
 				{
 					for (size_t j = start + window_displacement;
