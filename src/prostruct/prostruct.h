@@ -9,6 +9,8 @@
 #ifndef PROSTRUCT_PROSTRUCT_H
 #define PROSTRUCT_PROSTRUCT_H
 
-#include "pdb/PDB.h"
-
+#include <prostruct/pdb/PDB.h>
+#ifdef SWIGPYTHON
+#include <prostruct/pdb/custom_pdb.h>
+#endif
 #endif //PROSTRUCT_PROSTRUCT_H

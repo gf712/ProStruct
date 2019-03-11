@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <memory>
 
+using namespace prostruct;
+
 static const std::map<std::string, std::vector<std::string>> elementName
 {
 	//       name
@@ -384,5 +386,5 @@ bool Atom<T>::hasBond(const std::shared_ptr<Atom<T>>& atom2)
 	return false;
 }
 
-template class Atom<float>;
-template class Atom<double>;
+template class prostruct::Atom<float>;
+template class prostruct::Atom<double>;

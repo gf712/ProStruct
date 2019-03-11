@@ -14,6 +14,7 @@
 
 %feature("python:slot", "tp_repr", functype="reprfunc") prostruct::PDB::to_string;
 %feature("python:slot", "tp_repr", functype="reprfunc") prostruct::Chain::to_string;
+%feature("python:slot", "tp_repr", functype="reprfunc") prostruct::CustomKernel::to_string;
 
 %typemap(out) std::vector<std::string>
 {

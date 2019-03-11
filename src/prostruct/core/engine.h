@@ -10,8 +10,7 @@
 #define PROSTRUCT_ENGINE_H
 
 #include <armadillo>
-#include <prostruct/pdb/PDB.h>
-#include <prostruct/struct/residue.h>
+#include <prostruct/struct/utils.h>
 #include <prostruct/utils/tuple_utils.h>
 #include <prostruct/utils/type_traits.h>
 

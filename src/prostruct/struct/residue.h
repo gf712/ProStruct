@@ -193,9 +193,6 @@ namespace prostruct
 		atomVector<T> atoms; /**< A vector with the pointers to the Atom objects */
 		std::map<std::string, int> atomMap; /**< Map atom name to internal index */
 	};
-
-	template <typename T>
-	using residueVector = std::vector<std::shared_ptr<Residue<T>>>;
 }
 
 #endif // PROSTRUCT_RESIDUE_H

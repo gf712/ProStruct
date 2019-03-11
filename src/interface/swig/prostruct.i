@@ -6,7 +6,12 @@
  *
  */
  
+#ifdef SWIGPYTHON
+%module(directors="1") prostruct
+#else
 %module prostruct
+#endif
+
 #ifdef SWIGPYTHON
 %include <std_shared_ptr.i>
 #elif SWIGR
@@ -37,6 +42,7 @@
   #include <prostruct/prostruct.h>
 %}
 
+%include "prostruct/struct/utils.h"
 %include "prostruct/struct/chain.h"
 %include "prostruct/struct/residue.h"
 %include "prostruct/pdb/struct_base.h"
@@ -73,6 +79,17 @@
 
 %template(Residue_float)  prostruct::Residue<float>;
 %template(Residue_double) prostruct::Residue<double>;
+
+#ifdef SWIGPYTHON
+%shared_ptr(prostruct::CustomPDB)
+%director prostruct::CustomPDB;
+%feature("director:except") {
+    if ($error != NULL) {
+        throw Swig::DirectorMethodException();
+    }
+}
+%include "prostruct/pdb/custom_pdb.h"
+#endif
 
 %init %{
 #ifdef SWIGPYTHON
