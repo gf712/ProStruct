@@ -12,6 +12,8 @@
 #include <fstream>
 #include <sstream>
 
+using namespace prostruct;
+
 inline void remove_whitespace(std::string& str)
 {
 	str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());

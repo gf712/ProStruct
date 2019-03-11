@@ -29,7 +29,7 @@ namespace prostruct
 	public:
 		StructBase() {};
 
-		virtual std::string to_string()
+		virtual std::string to_string() const
 		{
 			return format(fmt("<prostruct.StructBase {} precision, with {} atoms, {} "
 							  "residues at {}>"),
@@ -109,7 +109,7 @@ namespace prostruct
 
 		void recentre() noexcept { geometry::recentre_molecule(m_xyz); }
 
-		virtual arma::Mat<T> calculate_phi_psi(bool use_radians = false) const noexcept
+		arma::Mat<T> calculate_phi_psi(bool use_radians = false) const noexcept
 		{
 			return core::residue_kernel_engine(m_residues, 0, kernels::phi_kernel<T>(use_radians),
 				kernels::psi_kernel<T>(use_radians));
@@ -257,7 +257,7 @@ namespace prostruct
 			m_natoms += residue.n_atoms();
 		}
 
-		virtual arma::Mat<T> get_backbone_atoms() const noexcept
+		arma::Mat<T> get_backbone_atoms() const noexcept
 		{
 			arma::Mat<T> result(3, m_nresidues * 4);
 			arma::uword pos = 0;

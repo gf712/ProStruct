@@ -37,6 +37,8 @@ radii = pdb.get_radii() # numpy array
 ks = pdb.compute_kabsch_sander() # numpy array
 ```
 
+The python behaviour can be further extended using SWIG directors, as shown [here](src/interface/README.md).
+
 R:
 ```R
 dyn.load(paste("prostruct", .Platform$dynlib.ext, sep=""))
