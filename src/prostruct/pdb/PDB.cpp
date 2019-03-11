@@ -53,25 +53,25 @@ PDB<T> PDB<T>::fetch(std::string PDB_id)
 	throw "Not implemented";
 }
 
-template <typename T>
-arma::Mat<T> PDB<T>::get_backbone_atoms() const noexcept
-{
-	arma::Mat<T> result(3, this->m_nresidues * 4);
-	arma::uword pos = 0;
-	arma::uword i = 0;
+// template <typename T>
+// arma::Mat<T> PDB<T>::get_backbone_atoms() const noexcept
+// {
+// 	arma::Mat<T> result(3, this->m_nresidues * 4);
+// 	arma::uword pos = 0;
+// 	arma::uword i = 0;
 
-	for (auto const& chain : m_chain_order)
-	{
-		for (auto const& residue : m_chain_map.at(chain)->get_residues())
-		{
-			result(arma::span::all, arma::span(i, i + 3))
-				= this->m_xyz(arma::span::all, arma::span(pos, pos + 3));
-			pos += residue->n_atoms();
-			i += 4;
-		}
-	}
-	return result;
-}
+// 	for (auto const& chain : m_chain_order)
+// 	{
+// 		for (auto const& residue : m_chain_map.at(chain)->get_residues())
+// 		{
+// 			result(arma::span::all, arma::span(i, i + 3))
+// 				= this->m_xyz(arma::span::all, arma::span(pos, pos + 3));
+// 			pos += residue->n_atoms();
+// 			i += 4;
+// 		}
+// 	}
+// 	return result;
+// }
 
 template class prostruct::PDB<float>;
 template class prostruct::PDB<double>;

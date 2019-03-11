@@ -6,7 +6,7 @@
  *
  */
 
-#include "prostruct/struct/residue.h"
+#include <prostruct/struct/residue.h>
 #include <algorithm>
 #include <iostream>
 

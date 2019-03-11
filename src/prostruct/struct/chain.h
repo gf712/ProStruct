@@ -32,7 +32,7 @@ namespace prostruct
 		Chain(const std::vector<std::shared_ptr<Residue<T>>>&, const std::string&,
 			const arma::Mat<T>& xyz);
 
-		virtual std::string to_string()
+		virtual std::string to_string() const noexcept final
 		{
 			return format(fmt("<prostruct.Chain {} precision, with {} atoms, {} "
 							  "residues at {}>"),

@@ -34,7 +34,7 @@ namespace prostruct
 
 		static PDB fetch(std::string);
 
-		std::string to_string() final
+		virtual std::string to_string() const noexcept
 		{
 			return format(fmt("<prostruct.PDB {} precision, with {} atoms, {} "
 							  "residues at {}>"),
@@ -73,7 +73,7 @@ namespace prostruct
 			return result;
 		}
 #endif
-		virtual arma::Mat<T> get_backbone_atoms() const noexcept final;
+		// virtual arma::Mat<T> get_backbone_atoms() const noexcept override;
 
 		int n_chains() { return m_number_of_chains; }
 

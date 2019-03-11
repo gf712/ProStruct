@@ -8,7 +8,9 @@
 
 #include "gtest/gtest.h"
 
-#include "prostruct/struct/atom.h"
+#include <prostruct/struct/atom.h>
+
+using namespace prostruct;
 
 TEST(AtomTest, LoadAtom)
 {

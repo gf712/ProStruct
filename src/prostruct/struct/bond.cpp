@@ -10,8 +10,10 @@
 #include <iostream>
 #include <utility>
 
-#include "prostruct/struct/atom.h"
-#include "prostruct/struct/bond.h"
+#include <prostruct/struct/atom.h>
+#include <prostruct/struct/bond.h>
+
+using namespace prostruct;
 
 template <typename T>
 Bond<T>::Bond(std::shared_ptr<Atom<T>> Atom1, std::shared_ptr<Atom<T>> Atom2, int bondType_)
@@ -63,5 +65,5 @@ void Bond<T>::initialiseBond(int bondType_)
 	length = std::sqrt(x * x + y * y + z * z);
 }
 
-template class Bond<float>;
-template class Bond<double>;
+template class prostruct::Bond<float>;
+template class prostruct::Bond<double>;

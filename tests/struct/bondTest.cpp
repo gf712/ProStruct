@@ -8,7 +8,9 @@
 
 #include "gtest/gtest.h"
 
-#include "prostruct/struct/bond.h"
+#include <prostruct/struct/bond.h>
+
+using namespace prostruct;
 
 TEST(BondTest, CreateBond1)
 {

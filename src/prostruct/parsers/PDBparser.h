@@ -9,8 +9,11 @@
 #ifndef PROSTRUCT_PDBPARSER_H
 #define PROSTRUCT_PDBPARSER_H
 
-#include <prostruct/pdb/struct_base.h>
 #include <prostruct/struct/atom.h>
+#include <prostruct/struct/utils.h>
+
+
+using namespace prostruct;
 
 struct AASequenceOrder
 {
