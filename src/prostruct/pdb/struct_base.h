@@ -29,7 +29,7 @@ namespace prostruct
 	public:
 		StructBase() {};
 
-		virtual std::string to_string() const noexcept
+		virtual std::string to_string() const
 		{
 			return format(fmt("<prostruct.StructBase {} precision, with {} atoms, {} "
 							  "residues at {}>"),

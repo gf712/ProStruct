@@ -34,7 +34,7 @@ namespace prostruct
 
 		static PDB fetch(std::string);
 
-		virtual std::string to_string() const noexcept
+		virtual std::string to_string() const
 		{
 			return format(fmt("<prostruct.PDB {} precision, with {} atoms, {} "
 							  "residues at {}>"),

@@ -24,7 +24,7 @@ namespace prostruct
 
 		virtual ~CustomPDB() {}
 
-		virtual std::string to_string() const noexcept
+		virtual std::string to_string() const
 		{
 			// repeated here due to swig director (bug?)
 			return format(fmt("<prostruct.PDB {} precision, with {} atoms, {} "
