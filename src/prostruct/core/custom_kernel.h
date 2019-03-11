@@ -40,9 +40,9 @@ namespace prostruct
 
 		arma::Col<float> run_custom_kernel() const
 		{
-			auto custom_lambda = [this](const std::shared_ptr<Residue<float>>& residue,
+			auto custom_lambda = [&custom_kernel=custom_kernel] (const std::shared_ptr<Residue<float>>& residue,
 									 const std::shared_ptr<Residue<float>>& next_residue) -> float {
-				return this->custom_kernel(residue, next_residue);
+				return custom_kernel(residue, next_residue);
 			};
 			return arma::Col<float>(
 				core::residue_kernel_engine(this->m_residues, 0, custom_lambda).memptr(),
@@ -51,9 +51,9 @@ namespace prostruct
 
 		arma::Mat<float> run_custom_pairwise_kernel() const
 		{
-			auto custom_lambda = [this](const std::shared_ptr<Residue<float>>& residue,
+			auto custom_lambda = [&custom_kernel=custom_kernel](const std::shared_ptr<Residue<float>>& residue,
 									 const std::shared_ptr<Residue<float>>& next_residue) -> float {
-				return this->custom_kernel(residue, next_residue);
+				return custom_kernel(residue, next_residue);
 			};
 			return core::pairwise_residue_kernel_engine(this->m_residues, 0, custom_lambda).slice(0);
 		}
