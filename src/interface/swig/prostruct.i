@@ -46,7 +46,7 @@
 %include "prostruct/struct/chain.h"
 %include "prostruct/struct/residue.h"
 %include "prostruct/pdb/struct_base.h"
-%include "prostruct/struct/Chain.h"
+%include "prostruct/struct/chain.h"
 %include "prostruct/pdb/PDB.h"
 
 #ifndef SWIGPERL
