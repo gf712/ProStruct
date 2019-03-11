@@ -7,7 +7,7 @@
  */
  
 #ifdef SWIGPYTHON
-%module(directors="1") prostruct
+%module(threads="1", directors="1") prostruct
 #else
 %module prostruct
 #endif
