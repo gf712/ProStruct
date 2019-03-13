@@ -56,6 +56,8 @@ namespace prostruct
 				LPAREN,
 				AND,
 				OR,
+				ATOM,
+				RESIDUE,
 				EOF_
 			};
 
@@ -83,6 +85,14 @@ namespace prostruct
 				{
 					return "LEFT_PARENTHESIS";
 				}
+				case TOKEN_TYPE::ATOM:
+				{
+					return "KEYWORD_ATOM";
+				}
+				case TOKEN_TYPE::RESIDUE:
+				{
+					return "KEYWORD_RESIDUE";
+				}
 				case TOKEN_TYPE::AND:
 				{
 					return "LOGICAL_AND";
@@ -95,7 +105,12 @@ namespace prostruct
 				{
 					return "EOF";
 				}
+				default:
+				{
+					return "N/A";
 				}
+				}
+
 			}
 
 			class Token
@@ -122,7 +137,7 @@ namespace prostruct
 				std::string get_repr() const noexcept
 				{
 					return format(
-						fmt("Token(value={}, type={})"), m_value, static_cast<int>(m_type));
+						fmt("Token(value={}, type={})"), m_value, get_string_from_enum(m_type));
 				}
 
 			private:
@@ -130,142 +145,64 @@ namespace prostruct
 				std::string m_value;
 			};
 
-			class Keyword
-			{
-			public:
-				Keyword() {}
-
-				Keyword(const Token& type, const Token& value)
-					: m_type(type)
-					, m_value(value)
-				{
-					if (type.get_type() != TOKEN_TYPE::ALPHA)
-						throw ParserException(
-							format(fmt("A keyword type must be an alpha, but got {} (value: {})"),
-								static_cast<int>(type.get_type()), type.get_value()));
-					if (type.get_type() != TOKEN_TYPE::ALPHA
-						&& type.get_type() != TOKEN_TYPE::NUMERIC)
-						throw ParserException(format(fmt("A keyword value must be an alpha or "
-														 "numeric, but got {} (value: {})"),
-							static_cast<int>(type.get_type()), type.get_value()));
-				}
-
-				void print() const noexcept { std::cout << get_repr() << "\n"; }
-
-				std::string get_repr() const noexcept
-				{
-					return format(
-						fmt("Keyword(value={}, type={})"), m_value.get_value(), m_type.get_value());
-				}
-
-				Token get_type() const noexcept { return m_type; }
-
-				Token get_value() const noexcept { return m_value; }
-
-			private:
-				Token m_type;
-				Token m_value;
-			};
-
 			class Node
 			{
 			public:
 				Node() {}
 
-				Node(const std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>>& left)
-					: m_left(left)
+				Node(Token token)
+					: m_token(token)
 				{
 				}
 
-				Node(const std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>>& left,
-					const std::shared_ptr<Token>& op,
-					const std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>>& right)
+				Node(const std::shared_ptr<Node>& left, Token token, const std::shared_ptr<Node>& right)
 					: m_left(left)
-					, m_op(op)
+					, m_token(token)
 					, m_right(right)
 				{
-					if (op->get_type() != TOKEN_TYPE::OR && op->get_type() != TOKEN_TYPE::AND)
+					if (m_token.get_type() != TOKEN_TYPE::OR && m_token.get_type() != TOKEN_TYPE::AND)
 						throw ParserException(
 							format(fmt("Expected op to be either of type {} or {}, but got {}"),
-								static_cast<int>(TOKEN_TYPE::OR), static_cast<int>(TOKEN_TYPE::AND),
-								static_cast<int>(m_op->get_type())));
+								get_string_from_enum(TOKEN_TYPE::OR), get_string_from_enum(TOKEN_TYPE::AND),
+								get_string_from_enum(m_token.get_type())));
 				}
 
-				TOKEN_TYPE get_op_type() const noexcept { return m_op->get_type(); }
+				TOKEN_TYPE get_op_type() const noexcept { return m_token.get_type(); }
 
 				std::string get_right_repr() const noexcept
 				{
-					return std::visit(
-						[](auto&& arg) {
-							if (arg != nullptr)
-								return arg->get_repr();
-							else
-								return std::string("N/A");
-						},
-						m_right);
-				}
-
-				template <typename T>
-				bool eval_left(const std::shared_ptr<Atom<T>>)
-				{
-					TOKEN_TYPE token_type
-						= std::visit([](auto&& arg) { return arg->get_type(); }, get_left());
-
-					switch (token_type)
-					{
-					case TOKEN_TYPE::ALPHA:
-					{
-					}
-					}
-				}
-
-				template <typename T>
-				bool eval_right(const std::shared_ptr<Atom<T>>)
-				{
+					if (m_right)
+						return get_right()->get_repr();
+					else
+						return std::string("N/A");
 				}
 
 				std::string get_left_repr() const noexcept
 				{
-					return std::visit(
-						[](auto&& arg) {
-							if (arg != nullptr)
-								return arg->get_repr();
-							else
-								return std::string("N/A");
-						},
-						m_left);
-				}
-
-				std::string get_op_repr() const noexcept
-				{
-					if (m_op != nullptr)
-						return m_op->get_repr();
+					if (m_right)
+						return get_left()->get_repr();
 					else
 						return std::string("N/A");
 				}
 
 				std::string get_repr() const noexcept
 				{
-					return format(fmt("Node(left={}, op={}, right={})"), get_left_repr(),
-						get_op_repr(), get_right_repr());
+					return format(fmt("Node(left={}, right={}, token={})"), get_left_repr(),
+						get_right_repr(), m_token.get_repr());
 				}
 
-				std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>> get_left() const
-					noexcept
-				{
-					return m_left;
-				}
+				std::shared_ptr<Node> get_left() const noexcept { return m_left; }
 
-				std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>> get_right() const
-					noexcept
-				{
-					return m_right;
-				}
+				std::shared_ptr<Node> get_right() const noexcept { return m_right; }
+
+				TOKEN_TYPE get_type() const noexcept { return m_token.get_type(); }
+
+				std::string get_value() const noexcept { return m_token.get_value(); }
 
 			private:
-				std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>> m_left;
-				std::shared_ptr<Token> m_op;
-				std::variant<std::shared_ptr<Keyword>, std::shared_ptr<Node>> m_right;
+				std::shared_ptr<Node> m_left;
+				std::shared_ptr<Node> m_right;
+				Token m_token;
 			};
 
 			class Lexer
@@ -288,8 +225,9 @@ namespace prostruct
 					switch (internal_token)
 					{
 					case TOKEN_TYPE::NONE:
-					{
-						value = "";
+					{					
+						++m_text_iter;
+						return get_next_token();
 					}
 					break;
 					case TOKEN_TYPE::ALPHA:
@@ -392,7 +330,7 @@ namespace prostruct
 						return process_token();
 					}
 					else
-						return Token(TOKEN_TYPE::EOF_, "");
+						return Token(TOKEN_TYPE::EOF_, "EOF");
 				}
 
 			private:
@@ -429,13 +367,14 @@ namespace prostruct
 				 */
 				void iter(TOKEN_TYPE token_type)
 				{
-					if (m_current_token.get_type() == TOKEN_TYPE::NONE)
+					// std::cout << "Iterating from " << m_current_token.get_repr() << "\n";
+					if (m_current_token.get_type() == TOKEN_TYPE::EOF_)
+						return;
+					else if (m_current_token.get_type() == token_type)
 					{
 						m_current_token = m_lexer->get_next_token();
-						iter(token_type);
+						// std::cout << "New token: " << m_current_token.get_repr() << "\n";
 					}
-					else if (m_current_token.get_type() == token_type)
-						m_current_token = m_lexer->get_next_token();
 					else
 						throw ParserException(
 							format(fmt("Invalid syntax. Expected type {} but got {} (value: {})"),
@@ -450,17 +389,28 @@ namespace prostruct
 					//"\n";
 					if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 					{
-						//			std::cout << "it's an alpha\n";
-						Token current_token = m_current_token;
+						// std::cout << "it's an alpha\n";
+						// std::cout << "factoring: " << m_current_token.get_repr() << "\n";
+						TOKEN_TYPE node_type;
+
+						if (m_current_token.get_value() == "atom")
+						{
+							node_type = TOKEN_TYPE::ATOM;
+						}
+						else if (m_current_token.get_value() == "residue")
+						{
+							node_type = TOKEN_TYPE::RESIDUE;
+						}
+						else
+						{
+							node_type = m_current_token.get_type();
+						}
 						iter(TOKEN_TYPE::ALPHA);
-						//			std::cout << "factoring: " << m_current_token.get_repr() <<
-						//"\n";
-						auto node = std::make_shared<Node>(
-							std::make_shared<Keyword>(current_token, m_current_token));
-						//					std::cout << "factored: " << node->get_repr() << "\n";
+						auto node = std::make_shared<Node>(Token(node_type, m_current_token.get_value()));
+						// std::cout << "factored: " << node->get_repr() << "\n";
 						if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 							iter(TOKEN_TYPE::ALPHA);
-						if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
+						else if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
 							iter(TOKEN_TYPE::NUMERIC);
 						return node;
 					}
@@ -468,9 +418,18 @@ namespace prostruct
 					{
 						iter(TOKEN_TYPE::LPAREN);
 						auto node = term();
-						//			std::cout << node->get_repr() << "\n";
+						// std::cout << node->get_repr() << "\n";
 						iter(TOKEN_TYPE::RPAREN);
 						return node;
+					}
+					else
+					{
+						// throw ParserException(format(fmt("Unknown token")));
+						// std::cout << format(fmt("Unknown token: {}"), m_current_token.get_repr()) << "\n";
+						iter(m_current_token.get_type());
+						// std::cout << "Skipped\n";
+						// std::cout << format(fmt("Next token: {}"), m_current_token.get_repr()) << "\n";
+						return nullptr;
 					}
 				}
 
@@ -487,7 +446,7 @@ namespace prostruct
 						//					  << "\n";
 						//			std::cout << "op: " <<
 						// std::make_shared<Token>(m_current_token)->get_repr() << "\n";
-						auto op = std::make_shared<Token>(m_current_token);
+						auto op = Token(m_current_token);
 						iter(m_current_token.get_type());
 						auto right = factor();
 						//			std::cout << "right: " << right->get_repr() << "\n";
@@ -507,19 +466,21 @@ namespace prostruct
 					std::shared_ptr<Node> node = term();
 					while (m_current_token.get_type() != TOKEN_TYPE::EOF_)
 					{
-						//					std::cout << "CURRENT LEFT NODE: " << node->get_repr()
-						//<<
-						//"\n";
-						auto maybe_op_token = std::make_shared<Token>(m_current_token);
-						if (maybe_op_token->get_type() == TOKEN_TYPE::OR)
-							iter(TOKEN_TYPE::OR);
-						else if (maybe_op_token->get_type() == TOKEN_TYPE::AND)
-							iter(TOKEN_TYPE::AND);
-						//			std::cout << "CURRENT TOKEN: " << maybe_op_token->get_repr() <<
-						//"\n";
-						auto left = term();
-						//			std::cout << "CURRENT RIGHT NODE: " << left->get_repr() << "\n";
-						node = std::make_shared<Node>(node, maybe_op_token, left);
+						// std::cout << "Current token: " << m_current_token.get_repr() << "\n";
+						// std::cout << "CURRENT LEFT NODE: " << node->get_repr() << "\n";
+						auto maybe_op_token = Token(m_current_token);
+						// if (maybe_op_token.get_type() == TOKEN_TYPE::OR)
+						// 	iter(TOKEN_TYPE::OR);
+						// else if (maybe_op_token.get_type() == TOKEN_TYPE::AND)
+						// 	iter(TOKEN_TYPE::AND);
+						// std::cout << "CURRENT TOKEN: " << maybe_op_token.get_repr() << "\n";
+						auto right = term();
+						if (right)
+						{
+							std::cout << "CURRENT RIGHT NODE: " << right->get_repr() << "\n";
+							node = std::make_shared<Node>(node, maybe_op_token, right);
+						}
+						// std::cout << "End node: " << node->get_repr() << "\n";
 					}
 					return node;
 				}
@@ -544,7 +505,6 @@ namespace prostruct
 			{
 				arma::Col<arma::uword> max_result(m_structure.n_atoms());
 				auto node = m_parser->expr();
-				std::cout << node->get_repr() << "\n";
 				arma::uword idx = 0;
 				arma::uword i = 0;
 				for (const auto& atom : m_structure.get_atoms())
@@ -563,40 +523,27 @@ namespace prostruct
 			bool visit_op(
 				const std::shared_ptr<detail::Node>& node, const std::shared_ptr<Atom<T>>& atom) const
 			{
-				if (std::visit([](auto&& arg) { return arg == nullptr; }, node->get_right()))
+				if (node->get_right()==nullptr && node->get_left()==nullptr)
 				{
-					auto key = std::get<std::shared_ptr<detail::Keyword>>(node->get_left());
-					if (key->get_type().get_value() == "atom")
-					{
-						return atom->get_name() == key->get_value().get_value();
-					}
-					else if (key->get_type().get_value() == "residue")
-					{
-						return atom->get_residue_name() == key->get_value().get_value();
-					}
-					else
-					{
-						throw detail::ParserException(
-							format(fmt("Unknown keyword: {}"), key->get_repr()));
+					switch (node->get_type()) {
+						case detail::TOKEN_TYPE::ATOM:
+							return atom->get_name() == node->get_value();
+						case detail::TOKEN_TYPE::RESIDUE:
+							return atom->get_residue_name() == node->get_value();
+						default:
+							throw detail::ParserException(
+								format(fmt("Unknown keyword: {}"), node->get_repr()));
 					}
 				}
 				switch (node->get_op_type())
 				{
-				case detail::TOKEN_TYPE::AND:
-				{
-					return visit_op(std::get<std::shared_ptr<detail::Node>>(node->get_left()), atom)
-						&& visit_op(
-							std::get<std::shared_ptr<detail::Node>>(node->get_right()), atom);
-				}
-				case detail::TOKEN_TYPE::OR:
-				{
-					return visit_op(std::get<std::shared_ptr<detail::Node>>(node->get_left()), atom)
-						|| visit_op(
-							std::get<std::shared_ptr<detail::Node>>(node->get_right()), atom);
-				}
-				default:
-					throw detail::ParserException(format(
-						fmt("Unknown op: {}"), detail::get_string_from_enum(node->get_op_type())));
+					case detail::TOKEN_TYPE::AND:
+						return visit_op(node->get_left(), atom) && visit_op(node->get_right(), atom);
+					case detail::TOKEN_TYPE::OR:
+						return visit_op(node->get_left(), atom) || visit_op(node->get_right(), atom);
+					default:
+						throw detail::ParserException(format(
+							fmt("Unknown op: {}"), detail::get_string_from_enum(node->get_op_type())));
 				}
 			}
 
