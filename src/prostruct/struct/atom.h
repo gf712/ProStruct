@@ -16,8 +16,10 @@
 #include <vector>
 
 #include <prostruct/struct/bond.h>
-#include <armadillo>
 #include <prostruct/struct/residue.h>
+
+#include <armadillo>
+
 
 namespace prostruct {
 
@@ -76,16 +78,47 @@ namespace prostruct {
 
 		std::string get_name() const noexcept { return name; }
 
-		void set_parent_residue(std::weak_ptr<Residue<T>> residue)
+		std::string get_residue_name_string() const noexcept
 		{
-			m_parent_residue = residue;
+			if (m_parent_residue)
+				return  m_parent_residue->get_name();
+			else
+				return "N/A";
 		}
 
 		std::string get_residue_name() const noexcept
 		{
-			return  m_parent_residue.lock()->get_name();
+			if (m_parent_residue)
+			{
+				std::string result = m_parent_residue->get_name();
+				return result.substr(0, result.find("-"));
+			}
+			else
+				return "N/A";
 		}
 
+		std::string get_residue_number() const noexcept
+		{
+			if (m_parent_residue)
+			{
+				std::string result = m_parent_residue->get_name();
+				auto first = result.find("-");
+				return result.substr(first+1, result.find("-", first+1)-first-1);
+			}
+			else
+				return "N/A";
+		}
+#ifndef SWIG
+		void set_parent_residue(Residue<T>* residue)
+		{
+			m_parent_residue = residue;
+		}
+
+		const Residue<T>& get_residue() const noexcept
+		{
+			return *m_parent_residue;
+		}
+#endif
 	private:
 		T x, y, z;
 		T radius;
@@ -101,7 +134,7 @@ namespace prostruct {
 		std::string element;
 		std::string name;
 		std::vector<std::shared_ptr<Bond<T>>> bonds;
-		std::weak_ptr<Residue<T>> m_parent_residue;
+		Residue<T>* m_parent_residue; // pointer is controlled by a smart pointer so can't delete it in ~Atom
 	};
 }
 

@@ -501,6 +501,8 @@ template <typename T>
 Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_,
 	const std::string& residue_name, bool n_terminus, bool c_terminus)
 {
+	m_residue_name = residue_name;
+
 	backbone = std::vector<int>(4);
 
 	if (aminoAcidIndex.find(aminoAcidName_) != aminoAcidIndex.end())
@@ -546,7 +548,7 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_,
 
 		atomMap[name] = i;
 		atom->setRadius(aminoAcidRadii.at(static_cast<int>(m_amino_acid)).at(name));
-		atom->set_parent_residue(this->weak_from_this());
+		atom->set_parent_residue(this);
 		atoms.emplace_back(atom);
 		i++;
 	}
@@ -555,8 +557,6 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_,
 	{
 		throw "Expected four atoms in the backbone, got " + std::to_string(backbone.size());
 	}
-
-	m_residue_name = residue_name;
 
 	createBonds();
 

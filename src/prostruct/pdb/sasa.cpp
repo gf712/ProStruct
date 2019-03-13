@@ -7,7 +7,6 @@
  */
 
 #include "prostruct/pdb/geometry.h"
-#include "prostruct/struct/atom.h"
 
 namespace prostruct
 {

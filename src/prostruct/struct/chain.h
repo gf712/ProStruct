@@ -10,7 +10,6 @@
 #define PROSTRUCT_CHAIN_H
 
 #include <prostruct/pdb/struct_base.h>
-#include <prostruct/struct/residue.h>
 #include <prostruct/utils/io.h>
 
 #include <fmt/format.h>
@@ -37,6 +36,11 @@ namespace prostruct
 			return format(fmt("<prostruct.Chain {} precision, with {} atoms, {} "
 							  "residues at {}>"),
 				demangled_type<T>(), this->m_natoms, this->m_nresidues, fmt::ptr(this));
+		}
+
+		std::string get_name() const noexcept
+		{
+			return m_chain_name;
 		}
 
 #ifndef SWIG

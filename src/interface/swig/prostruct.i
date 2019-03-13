@@ -31,7 +31,7 @@
     SWIG_exception(SWIG_RuntimeError, e); 
   } catch (const std::string& e) { 
     SWIG_exception(SWIG_RuntimeError, e.c_str()); 
-  } 
+  }
 }
 
 #ifndef SWIGPYTHON

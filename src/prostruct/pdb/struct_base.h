@@ -15,8 +15,8 @@
 #include <prostruct/core/kernels.h>
 #include <prostruct/pdb/geometry.h>
 #include <prostruct/struct/residue.h>
-#include <prostruct/utils/io.h>
 #include <prostruct/utils/ast.h>
+#include <prostruct/utils/io.h>
 
 #include <fmt/format.h>
 
@@ -28,7 +28,7 @@ namespace prostruct
 	class StructBase
 	{
 	public:
-		StructBase() {};
+		StructBase(){};
 
 		virtual std::string to_string() const
 		{
@@ -55,9 +55,9 @@ namespace prostruct
 		atomVector<T> get_atoms() const noexcept
 		{
 			atomVector<T> result;
-			for (const auto& residue: m_residues)
+			for (const auto& residue : m_residues)
 			{
-				for (const auto& atom: residue->get_atoms())
+				for (const auto& atom : residue->get_atoms())
 					result.emplace_back(atom);
 			}
 			return result;
@@ -252,10 +252,10 @@ namespace prostruct
 		//    rotation_y, rotation_z] void rotate(T rotation_angle, std::string
 		//    axis);
 		//    // axis = {"x", "y", "z"}
-		void append_new_residue(const std::pair<const std::string, atomVector<T>>& atom_pair,
+		void append_new_residue(const std::pair<std::string, atomVector<T>>& atom_pair,
 			residueVector<T>& residues, bool n_terminus, bool c_terminus)
 		{
-			residues.emplace_back(std::make_shared<Residue<T>>(atom_pair.second,
+			residues.emplace_back(std::make_shared<Residue<T>>(std::move(atom_pair.second),
 				atom_pair.first.substr(0, 3), atom_pair.first, n_terminus, c_terminus));
 			m_xyz.insert_cols(static_cast<arma::uword>(m_natoms), residues.back()->get_xyz());
 			m_radii.insert_rows(static_cast<arma::uword>(m_natoms), residues.back()->get_radii());

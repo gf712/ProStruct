@@ -47,6 +47,12 @@ namespace prostruct
 				std::string m_message;
 			};
 
+			/**
+			 * The possible token types. Note that this enum
+			 * is also used by the lexer to merger ALPHA and
+			 * NUMERIC to form ATOM_NAME, ATOM_NUMBER and so
+			 * on
+			 */
 			enum class TOKEN_TYPE
 			{
 				NONE,
@@ -56,11 +62,19 @@ namespace prostruct
 				LPAREN,
 				AND,
 				OR,
-				ATOM,
-				RESIDUE,
+				ATOM_NAME,
+				ATOM_NUMBER,
+				RESIDUE_NAME,
+				RESIDUE_NUMBER,
+				CHAIN_NAME,
 				EOF_
 			};
 
+			/**
+			 * A helper function to make TOKEN_TYPE human readable
+			 * @param token_type the token type enum
+			 * @return the token type string representation
+			 */
 			inline std::string get_string_from_enum(TOKEN_TYPE token_type)
 			{
 				switch (token_type)
@@ -85,13 +99,21 @@ namespace prostruct
 				{
 					return "LEFT_PARENTHESIS";
 				}
-				case TOKEN_TYPE::ATOM:
+				case TOKEN_TYPE::ATOM_NAME:
 				{
-					return "KEYWORD_ATOM";
+					return "KEYWORD_ATOM_NAME";
 				}
-				case TOKEN_TYPE::RESIDUE:
+				case TOKEN_TYPE::RESIDUE_NAME:
 				{
-					return "KEYWORD_RESIDUE";
+					return "KEYWORD_RESIDUE_NAME";
+				}
+				case TOKEN_TYPE::RESIDUE_NUMBER:
+				{
+					return "KEYWORD_RESIDUE_NUMBER";
+				}
+				case TOKEN_TYPE::CHAIN_NAME:
+				{
+					return "KEYWORD_CHAIN_NAME";
 				}
 				case TOKEN_TYPE::AND:
 				{
@@ -110,9 +132,37 @@ namespace prostruct
 					return "N/A";
 				}
 				}
-
 			}
 
+			/**
+			 * Extension to the enum class TOKEN_TYPE ++operator
+			 * This is needed to allow switching from NAME -> NUMBER
+			 * with ++TOKEN_TYPE
+			 */
+			inline TOKEN_TYPE& operator++(TOKEN_TYPE& lhs)
+			{
+				lhs = static_cast<TOKEN_TYPE>(
+					static_cast<std::underlying_type_t<TOKEN_TYPE>>(lhs) + 1);
+			}
+
+			/**
+			 * Convert a string to lower case.
+			 * Straight from https://en.cppreference.com/w/cpp/string/byte/tolower.
+			 * @param s
+			 * @return
+			 */
+			inline std::string str_tolower(std::string s)
+			{
+				std::transform(s.begin(), s.end(), s.begin(),
+					[](unsigned char c) { return std::tolower(c); }
+				);
+				return s;
+			}
+
+			/**
+			 * A token is a combination of a key that helps
+			 * identify the type of the value of the Token.
+			 */
 			class Token
 			{
 			public:
@@ -145,6 +195,10 @@ namespace prostruct
 				std::string m_value;
 			};
 
+			/**
+			 * The Node in the AST tree with various
+			 * helper functions.
+			 */
 			class Node
 			{
 			public:
@@ -155,15 +209,18 @@ namespace prostruct
 				{
 				}
 
-				Node(const std::shared_ptr<Node>& left, Token token, const std::shared_ptr<Node>& right)
+				Node(const std::shared_ptr<Node>& left, Token token,
+					const std::shared_ptr<Node>& right)
 					: m_left(left)
 					, m_token(token)
 					, m_right(right)
 				{
-					if (m_token.get_type() != TOKEN_TYPE::OR && m_token.get_type() != TOKEN_TYPE::AND)
+					if (m_token.get_type() != TOKEN_TYPE::OR
+						&& m_token.get_type() != TOKEN_TYPE::AND)
 						throw ParserException(
 							format(fmt("Expected op to be either of type {} or {}, but got {}"),
-								get_string_from_enum(TOKEN_TYPE::OR), get_string_from_enum(TOKEN_TYPE::AND),
+								get_string_from_enum(TOKEN_TYPE::OR),
+								get_string_from_enum(TOKEN_TYPE::AND),
 								get_string_from_enum(m_token.get_type())));
 				}
 
@@ -205,6 +262,10 @@ namespace prostruct
 				Token m_token;
 			};
 
+			/**
+			 * The Lexer parses a string and represents with
+			 * Tokens. The Lexer ignores whitespaces.
+			 */
 			class Lexer
 			{
 			public:
@@ -225,7 +286,7 @@ namespace prostruct
 					switch (internal_token)
 					{
 					case TOKEN_TYPE::NONE:
-					{					
+					{
 						++m_text_iter;
 						return get_next_token();
 					}
@@ -342,8 +403,8 @@ namespace prostruct
 			};
 
 			/**
-			 * Parser to build an AST to find atoms with specific
-			 * properties.
+			 * The Parser builds the AST with the Tokens
+			 * from the Lexer
 			 */
 			class Parser
 			{
@@ -361,6 +422,8 @@ namespace prostruct
 					}
 				}
 
+				std::shared_ptr<Node> parse() {return expr();}
+			private:
 				/**
 				 * Checks TOKEN_TYPE and then iterates.
 				 * @param token_type
@@ -385,28 +448,37 @@ namespace prostruct
 
 				std::shared_ptr<Node> factor()
 				{
-					//				std::cout << "factoring: " << m_current_token.get_repr() <<
-					//"\n";
+					// std::cout << "factoring: " << m_current_token.get_repr() << "\n";
 					if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 					{
 						// std::cout << "it's an alpha\n";
 						// std::cout << "factoring: " << m_current_token.get_repr() << "\n";
 						TOKEN_TYPE node_type;
 
-						if (m_current_token.get_value() == "atom")
+						if (str_tolower(m_current_token.get_value()) == "atom")
 						{
-							node_type = TOKEN_TYPE::ATOM;
+							node_type = TOKEN_TYPE::ATOM_NAME;
 						}
-						else if (m_current_token.get_value() == "residue")
+						else if (str_tolower(m_current_token.get_value()) == "residue")
 						{
-							node_type = TOKEN_TYPE::RESIDUE;
+							node_type = TOKEN_TYPE::RESIDUE_NAME;
+						}
+						else if (str_tolower(m_current_token.get_value()) == "chain")
+						{
+							node_type = TOKEN_TYPE::CHAIN_NAME;
 						}
 						else
 						{
 							node_type = m_current_token.get_type();
 						}
 						iter(TOKEN_TYPE::ALPHA);
-						auto node = std::make_shared<Node>(Token(node_type, m_current_token.get_value()));
+						if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
+						{
+							++node_type; // if it is numeric we get the next enum value, which
+										 // switches alpha to numeric
+						}
+						auto node
+							= std::make_shared<Node>(Token(node_type, m_current_token.get_value()));
 						// std::cout << "factored: " << node->get_repr() << "\n";
 						if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 							iter(TOKEN_TYPE::ALPHA);
@@ -424,28 +496,21 @@ namespace prostruct
 					}
 					else
 					{
-						// throw ParserException(format(fmt("Unknown token")));
-						// std::cout << format(fmt("Unknown token: {}"), m_current_token.get_repr()) << "\n";
-						iter(m_current_token.get_type());
-						// std::cout << "Skipped\n";
-						// std::cout << format(fmt("Next token: {}"), m_current_token.get_repr()) << "\n";
-						return nullptr;
+						throw ParserException(
+							format(fmt("Unknown token: {}"), m_current_token.get_repr()));
+						// std::cout << format(fmt("Unknown token: {}"), m_current_token.get_repr())
+						// << "\n"; iter(m_current_token.get_type()); std::cout << "Skipped\n";
+						// std::cout << format(fmt("Next token: {}"), m_current_token.get_repr()) <<
+						// "\n"; return nullptr;
 					}
 				}
 
 				std::shared_ptr<Node> term()
 				{
 					auto node = factor();
-					if (m_current_token.get_type() == TOKEN_TYPE::OR
-						|| m_current_token.get_type() == TOKEN_TYPE::AND)
+					if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 					{
-						//			std::cout << "it's an OR\n";
-						//			std::cout << "left: "
-						//					  << std::visit([](auto arg) { return arg->get_repr();
-						//}, node->get_left())
-						//					  << "\n";
-						//			std::cout << "op: " <<
-						// std::make_shared<Token>(m_current_token)->get_repr() << "\n";
+						// std::cout << "op: " << std::make_shared<Token>(m_current_token)->get_repr() << "\n";
 						auto op = Token(m_current_token);
 						iter(m_current_token.get_type());
 						auto right = factor();
@@ -464,33 +529,52 @@ namespace prostruct
 				std::shared_ptr<Node> expr()
 				{
 					std::shared_ptr<Node> node = term();
-					while (m_current_token.get_type() != TOKEN_TYPE::EOF_)
+					while (m_current_token.get_type() == TOKEN_TYPE::OR
+						|| m_current_token.get_type() == TOKEN_TYPE::AND)
 					{
 						// std::cout << "Current token: " << m_current_token.get_repr() << "\n";
 						// std::cout << "CURRENT LEFT NODE: " << node->get_repr() << "\n";
 						auto maybe_op_token = Token(m_current_token);
-						// if (maybe_op_token.get_type() == TOKEN_TYPE::OR)
-						// 	iter(TOKEN_TYPE::OR);
-						// else if (maybe_op_token.get_type() == TOKEN_TYPE::AND)
-						// 	iter(TOKEN_TYPE::AND);
 						// std::cout << "CURRENT TOKEN: " << maybe_op_token.get_repr() << "\n";
+						if (m_current_token.get_type() == TOKEN_TYPE::OR)
+							iter(TOKEN_TYPE::OR);
+						if (m_current_token.get_type() == TOKEN_TYPE::AND)
+							iter(TOKEN_TYPE::AND);
 						auto right = term();
-						if (right)
-						{
-							std::cout << "CURRENT RIGHT NODE: " << right->get_repr() << "\n";
-							node = std::make_shared<Node>(node, maybe_op_token, right);
-						}
+						// if (right)
+						// {
+						// 	std::cout << "CURRENT RIGHT NODE: " << right->get_repr() << "\n";
+						// }
+						node = std::make_shared<Node>(node, maybe_op_token, right);
+						
 						// std::cout << "End node: " << node->get_repr() << "\n";
 					}
 					return node;
 				}
-
-			private:
 				std::shared_ptr<Lexer> m_lexer;
 				Token m_current_token;
 			};
 		}
 
+		/**
+		 * The DSL (domain specific language) interpreter
+		 * of ProStruct.
+		 * Rules:
+		 * 	- 'and' and 'or' are the logical operators
+		 * 	- 'atom', 'residue' and 'chain' are the keywords
+		 * 	- '(' and ')' determine resolution order
+		 * 	- keywords can either be either of numeric or string
+		 * 	type which is deduced by the parser.
+		 * 	- whitespaces are ignored and are only used for delimiting
+		 * 	- keywords are case insensitive
+		 *
+		 * 	@example
+		 * 	- DSLInterpreter("atom CA") returns all CA atoms
+		 * 	- DSLInterpreter("residue ALA") returns all alanine residues
+		 * 	- DSLInterpreter("atom CA and residue ALA") returns all CA atoms of alanine
+		 * residues
+		 *
+		 */
 		class DSLInterpreter
 		{
 		public:
@@ -504,12 +588,12 @@ namespace prostruct
 			arma::Col<arma::uword> interpret(const StructBase<T>& m_structure) const
 			{
 				arma::Col<arma::uword> max_result(m_structure.n_atoms());
-				auto node = m_parser->expr();
+				auto node = m_parser->parse();
 				arma::uword idx = 0;
 				arma::uword i = 0;
 				for (const auto& atom : m_structure.get_atoms())
 				{
-					if (visit_op(node, atom))
+					if (visit_op(node, atom, idx))
 					{
 						max_result(i) = idx;
 						++i;
@@ -519,35 +603,53 @@ namespace prostruct
 				return max_result.head(i);
 			}
 
+		private:
+			/**
+			 * Does the atom wise AST evaluation
+			 *
+			 * @tparam T the Atom type (float or double)
+			 * @param node the top Node of the AST
+			 * @param atom the atom object to evaluate
+			 * @param pos the atom position
+			 * @return result of the AST evaluation
+			 */
 			template <typename T>
-			bool visit_op(
-				const std::shared_ptr<detail::Node>& node, const std::shared_ptr<Atom<T>>& atom) const
+			bool visit_op(const std::shared_ptr<detail::Node>& node,
+				const std::shared_ptr<Atom<T>>& atom, int pos) const
 			{
-				if (node->get_right()==nullptr && node->get_left()==nullptr)
+				if (node->get_right() == nullptr && node->get_left() == nullptr)
 				{
-					switch (node->get_type()) {
-						case detail::TOKEN_TYPE::ATOM:
-							return atom->get_name() == node->get_value();
-						case detail::TOKEN_TYPE::RESIDUE:
-							return atom->get_residue_name() == node->get_value();
-						default:
-							throw detail::ParserException(
-								format(fmt("Unknown keyword: {}"), node->get_repr()));
+					switch (node->get_type())
+					{
+					case detail::TOKEN_TYPE::ATOM_NAME:
+						return atom->get_name() == node->get_value();
+					case detail::TOKEN_TYPE::ATOM_NUMBER:
+						return pos == std::stoi(node->get_value());
+					case detail::TOKEN_TYPE::RESIDUE_NAME:
+						return atom->get_residue_name() == node->get_value();
+					case detail::TOKEN_TYPE::RESIDUE_NUMBER:
+						return atom->get_residue_number() == node->get_value();
+					case detail::TOKEN_TYPE::CHAIN_NAME:
+						return atom->get_residue().get_chain_name() == node->get_value();
+					default:
+						throw detail::ParserException(
+							format(fmt("Unknown keyword: {}"), node->get_repr()));
 					}
 				}
 				switch (node->get_op_type())
 				{
-					case detail::TOKEN_TYPE::AND:
-						return visit_op(node->get_left(), atom) && visit_op(node->get_right(), atom);
-					case detail::TOKEN_TYPE::OR:
-						return visit_op(node->get_left(), atom) || visit_op(node->get_right(), atom);
-					default:
-						throw detail::ParserException(format(
-							fmt("Unknown op: {}"), detail::get_string_from_enum(node->get_op_type())));
+				case detail::TOKEN_TYPE::AND:
+					return visit_op(node->get_left(), atom, pos)
+						&& visit_op(node->get_right(), atom, pos);
+				case detail::TOKEN_TYPE::OR:
+					return visit_op(node->get_left(), atom, pos)
+						|| visit_op(node->get_right(), atom, pos);
+				default:
+					throw detail::ParserException(format(
+						fmt("Unknown op: {}"), detail::get_string_from_enum(node->get_op_type())));
 				}
 			}
 
-		private:
 			std::shared_ptr<detail::Parser> m_parser;
 		};
 	}

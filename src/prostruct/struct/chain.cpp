@@ -14,17 +14,19 @@ using namespace prostruct;
 
 template <typename T>
 Chain<T>::Chain(
-	const std::vector<std::shared_ptr<Residue<T>>>& residues, const std::string& chainName)
+	const std::vector<std::shared_ptr<Residue<T>>>& residues, const std::string& chain_name)
 {
 
 	bool first = true;
 	this->m_residues = residues;
 	std::shared_ptr<Residue<T>> previousResidue;
 	this->m_natoms = 0;
+	this->m_chain_name = chain_name;
 
 	// link residues
 	for (auto const& residue : residues)
 	{
+		residue->set_parent_chain(this);
 		if (first)
 		{
 			previousResidue = residue;
@@ -44,7 +46,7 @@ Chain<T>::Chain(
 
 template <typename T>
 Chain<T>::Chain(const std::vector<std::shared_ptr<Residue<T>>>& residues,
-	const std::string& chainName, const arma::Mat<T>& xyz)
+	const std::string& chain_name, const arma::Mat<T>& xyz)
 {
 
 	bool first = true;
@@ -52,10 +54,12 @@ Chain<T>::Chain(const std::vector<std::shared_ptr<Residue<T>>>& residues,
 	this->m_residues = residues;
 	std::shared_ptr<Residue<T>> previousResidue;
 	this->m_natoms = 0;
+	this->m_chain_name = chain_name;
 
 	// link residues
 	for (auto const& residue : residues)
 	{
+		residue->set_parent_chain(this);
 		if (first)
 		{
 			previousResidue = residue;

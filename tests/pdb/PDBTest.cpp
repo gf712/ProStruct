@@ -191,3 +191,10 @@ TYPED_TEST(PDBTest, chi5_angles)
 
 	EXPECT_NEAR(arma::accu(chi5_rad), -6.1489725, get_epsilon<TypeParam>());
 }
+
+TYPED_TEST(PDBTest, residue_selection)
+{
+	auto pdb = PDB<TypeParam>("test.pdb");
+	auto selection = pdb.select("atom CA");
+	EXPECT_EQ(pdb.n_residues(), selection.size());
+}

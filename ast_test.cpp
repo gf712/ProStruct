@@ -6,7 +6,7 @@ using namespace prostruct::parser::detail;
 
 int main()
 {
-	auto test = std::string("(atom CA) or atom CB");
+	auto test = std::string("atom CA or atom CB or chain L");
 	auto pdb = PDB<float>("./build/test.pdb");
 	// std::cout << pdb.n_atoms() << "\n";
 	// auto test = std::string("atom CA or atom CB and residue 10");
@@ -42,15 +42,7 @@ int main()
 		std::cout << exc.what() << "\n" << "ABORTING\n";
 		return 0;
 	}
-	std::cout << node->get_repr() << "\n";
-	auto dsl_interp = prostruct::parser::DSLInterpreter(test);
-	dsl_interp.interpret(pdb).print();
+	std::cout << "RESULT: " << node->get_repr() << "\n";
+	// auto dsl_interp = prostruct::parser::DSLInterpreter(test);
+	// dsl_interp.interpret(pdb); //.print();
 }
-						
-	// 					BinaryOp
-	// 						|				
-	// 			|						|						
-	// 		BinaryOp				residue 10
-	// 			|		
-	// 	|				|
-	// atom CA 		  atom CB

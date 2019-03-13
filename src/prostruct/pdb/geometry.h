@@ -9,10 +9,11 @@
 #ifndef PROSTRUCT_GEOMETRY_H
 #define PROSTRUCT_GEOMETRY_H
 
-#include "prostruct/struct/residue.h"
+#include <vector>
+
 #include "prostruct/utils/tuple_utils.h"
+
 #include <armadillo>
-#include <array>
 
 #ifndef DNDEBUG
 #define ARMA_NO_DEBUG

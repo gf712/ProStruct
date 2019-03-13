@@ -17,6 +17,21 @@ find_package(Armadillo 7.9 REQUIRED)
 
 option(USE_OPENMP "Enable OpenMP" ON)
 
+# taken from https://stackoverflow.com/a/3818084
+if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+    if(MSVC)
+        # Force to always compile with W4
+        if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+            string(REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+        else()
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+        endif()
+    elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+        # Update if necessary
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+    endif()
+endif()
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND (NOT APPLE) AND USE_OPENMP)
     set(OpenMP_CXX "${CMAKE_CXX_COMPILER}")
     set(OpenMP_CXX_FLAGS "-fopenmp=libomp -Wno-unused-command-line-argument")

@@ -10,7 +10,7 @@
 #define PROSTRUCT_RESIDUE_H
 
 #include <prostruct/struct/atom.h>
-#include <prostruct/struct/utils.h>
+#include <prostruct/struct/chain.h>
 #include <prostruct/utils/type_traits.h>
 
 namespace prostruct
@@ -19,8 +19,11 @@ namespace prostruct
 	using aminoAcidAtomMap = std::vector<std::map<std::string, std::string>>;
 	using stringIndexMap = std::map<std::string, int>;
 
+	template <typename T1>
+	class Chain;
+
 	template <typename T>
-	class Residue: std::enable_shared_from_this<Residue<T>>
+	class Residue
 	{
 		template <typename T1>
 		friend class Chain;
@@ -176,7 +179,16 @@ namespace prostruct
 		{
 			return xyz(arma::Col<arma::uword>({ 0, 1, 2 }), idx);
 		}
+
+		void set_parent_chain(Chain<T>* parent_chain)
+		{
+			m_parent_chain = parent_chain;
+		}
 #endif
+		std::string get_chain_name() const noexcept
+		{
+			return m_parent_chain->get_name();
+		}
 
 	private:
 		arma::Mat<T> xyz;
@@ -192,6 +204,7 @@ namespace prostruct
 		std::string m_residue_name; /**< Name of the residue, e.g. ALA1 */
 		atomVector<T> atoms; /**< A vector with the pointers to the Atom objects */
 		std::map<std::string, int> atomMap; /**< Map atom name to internal index */
+		Chain<T>* m_parent_chain;
 	};
 }
 
