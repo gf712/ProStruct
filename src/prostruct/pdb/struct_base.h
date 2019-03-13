@@ -16,6 +16,7 @@
 #include <prostruct/pdb/geometry.h>
 #include <prostruct/struct/residue.h>
 #include <prostruct/utils/io.h>
+#include <prostruct/utils/ast.h>
 
 #include <fmt/format.h>
 
@@ -49,6 +50,17 @@ namespace prostruct
 			internalKS(E);
 			E.for_each([](T& elem) { elem = elem < -0.5; });
 			return E;
+		}
+
+		atomVector<T> get_atoms() const noexcept
+		{
+			atomVector<T> result;
+			for (const auto& residue: m_residues)
+			{
+				for (const auto& atom: residue->get_atoms())
+					result.emplace_back(atom);
+			}
+			return result;
 		}
 
 		void compute_dssp() const noexcept
@@ -246,14 +258,14 @@ namespace prostruct
 			residues.emplace_back(std::make_shared<Residue<T>>(atom_pair.second,
 				atom_pair.first.substr(0, 3), atom_pair.first, n_terminus, c_terminus));
 			m_xyz.insert_cols(static_cast<arma::uword>(m_natoms), residues.back()->get_xyz());
-			m_radii.insert_rows(static_cast<arma::uword>(m_natoms), residues.back()->getRadii());
+			m_radii.insert_rows(static_cast<arma::uword>(m_natoms), residues.back()->get_radii());
 			m_natoms += residues.back()->n_atoms();
 		}
 
 		void append_new_residue(const Residue<T>& residue, bool n_terminus, bool c_terminus)
 		{
 			m_xyz.insert_cols(static_cast<arma::uword>(m_natoms), residue.get_xyz());
-			m_radii.insert_rows(static_cast<arma::uword>(m_natoms), residue.getRadii());
+			m_radii.insert_rows(static_cast<arma::uword>(m_natoms), residue.get_radii());
 			m_natoms += residue.n_atoms();
 		}
 
@@ -271,6 +283,12 @@ namespace prostruct
 				i += 4;
 			}
 			return result;
+		}
+
+		arma::Col<arma::uword> select(const std::string& expression)
+		{
+			auto dsl_interp = parser::DSLInterpreter(expression);
+			return dsl_interp.interpret(*this);
 		}
 
 	protected:

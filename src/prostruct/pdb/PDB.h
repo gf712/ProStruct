@@ -13,6 +13,7 @@
 #include <prostruct/pdb/struct_base.h>
 #include <prostruct/struct/chain.h>
 #include <prostruct/utils/io.h>
+#include <prostruct/utils/ast.h>
 
 #include <set>
 

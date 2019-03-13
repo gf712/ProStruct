@@ -17,15 +17,24 @@
 
 #include <prostruct/struct/bond.h>
 #include <armadillo>
+#include <prostruct/struct/residue.h>
 
 namespace prostruct {
+
+	template<typename T>
+	class Residue;
+
 	template<typename T>
 	class Atom : public std::enable_shared_from_this<Atom<T>> {
 
 	public:
-		Atom(const std::string &element) { load_atom(element); }
+		Atom(const std::string &element) {
+			load_atom(element);
+		}
 
-		Atom(const std::string &, const std::string &) { load_atom(element, name); }
+		Atom(const std::string &, const std::string &) {
+			load_atom(element, name);
+		}
 
 		Atom(const std::string &element, const std::string &name, T x, T y, T z) {
 			load_atom(element, name, x, y, z);
@@ -67,6 +76,16 @@ namespace prostruct {
 
 		std::string get_name() const noexcept { return name; }
 
+		void set_parent_residue(std::weak_ptr<Residue<T>> residue)
+		{
+			m_parent_residue = residue;
+		}
+
+		std::string get_residue_name() const noexcept
+		{
+			return  m_parent_residue.lock()->get_name();
+		}
+
 	private:
 		T x, y, z;
 		T radius;
@@ -82,6 +101,7 @@ namespace prostruct {
 		std::string element;
 		std::string name;
 		std::vector<std::shared_ptr<Bond<T>>> bonds;
+		std::weak_ptr<Residue<T>> m_parent_residue;
 	};
 }
 

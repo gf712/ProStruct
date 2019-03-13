@@ -46,7 +46,8 @@ namespace prostruct {
 		// keep a weak reference to std::shared<Atom>
 		// otherwise Bond owns Atom, which doesn't make sense
 		// and can cause memory issues
-		std::weak_ptr<Atom<T>> atom1, atom2;
+		std::weak_ptr<Atom<T>> atom1;
+		std::weak_ptr<Atom<T>> atom2;
 		T x, y, z;
 		std::vector<T> bondVector;
 		int bondType;

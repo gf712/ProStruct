@@ -20,7 +20,7 @@ namespace prostruct
 	using stringIndexMap = std::map<std::string, int>;
 
 	template <typename T>
-	class Residue
+	class Residue: std::enable_shared_from_this<Residue<T>>
 	{
 		template <typename T1>
 		friend class Chain;
@@ -81,9 +81,9 @@ namespace prostruct
 
 		int n_atoms() const noexcept { return atoms.size(); };
 
-		atomVector<T> getAtoms() const noexcept { return atoms; }
+		atomVector<T> get_atoms() const noexcept { return atoms; }
 
-		arma::Col<T> getRadii() const noexcept { return radii; }
+		arma::Col<T> get_radii() const noexcept { return radii; }
 
 		bool is_n_terminus() const noexcept { return m_n_terminus; }
 

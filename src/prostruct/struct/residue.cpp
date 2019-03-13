@@ -513,7 +513,7 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_,
 
 	// each atom is responsible to form a bond with the previous atom
 	int i = 0;
-	for (auto atom : atoms_)
+	for (const auto& atom : atoms_)
 	{
 
 		// assumes that we are using the following scheme:
@@ -545,8 +545,9 @@ Residue<T>::Residue(atomVector<T> atoms_, const std::string& aminoAcidName_,
 		}
 
 		atomMap[name] = i;
-		atoms.emplace_back(atom);
 		atom->setRadius(aminoAcidRadii.at(static_cast<int>(m_amino_acid)).at(name));
+		atom->set_parent_residue(this->weak_from_this());
+		atoms.emplace_back(atom);
 		i++;
 	}
 
