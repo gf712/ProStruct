@@ -143,6 +143,7 @@ namespace prostruct
 			{
 				lhs = static_cast<TOKEN_TYPE>(
 					static_cast<std::underlying_type_t<TOKEN_TYPE>>(lhs) + 1);
+				return lhs;
 			}
 
 			/**
@@ -274,10 +275,57 @@ namespace prostruct
 					, m_text_iter(text.cbegin())
 					, m_text_end(text.cend())
 					, internal_token(TOKEN_TYPE::NONE)
-					, m_freeze(false)
 				{
 				}
 
+				Token get_next_token()
+				{
+					m_text_start = m_text_iter;
+
+					// skip whitespace
+					while (std::isspace(*m_text_iter))
+					{
+						++m_text_iter;
+						m_text_start = m_text_iter;
+					}
+					// return EOF
+					if (m_text_iter == m_text_end)
+					{
+						return Token(TOKEN_TYPE::EOF_, "EOF");
+					}
+					// process punctuation
+					if (valid_punctuation())
+					{
+						if (*m_text_iter == ')')
+							internal_token = TOKEN_TYPE::RPAREN;
+						else if (*m_text_iter == '(')
+							internal_token = TOKEN_TYPE::LPAREN;
+						else
+							throw ParserException("This is a bug. A new punctuation has been added but no rule is known!");
+						++m_text_iter;
+						return process_token();
+					}
+					// process alphas and digits
+					while (!std::isspace(*m_text_iter) && !valid_punctuation() && m_text_iter != m_text_end)
+					{
+						if (std::isalpha(*m_text_iter))
+						{
+							internal_token = TOKEN_TYPE::ALPHA;
+						}
+						else if (std::isdigit(*m_text_iter))
+						{
+							internal_token = TOKEN_TYPE::NUMERIC;
+						}
+						else
+							throw ParserException("Invalid character.");
+						++m_text_iter;
+					}
+
+					return process_token();
+				}
+
+			private:
+				
 				void advance() { std::next(m_text_end, 1); }
 
 				Token process_token()
@@ -286,11 +334,7 @@ namespace prostruct
 					switch (internal_token)
 					{
 					case TOKEN_TYPE::NONE:
-					{
-						++m_text_iter;
-						return get_next_token();
-					}
-					break;
+						throw ParserException("Unknown character.");
 					case TOKEN_TYPE::ALPHA:
 					{
 						std::copy(m_text_start, m_text_iter, std::back_inserter(value));
@@ -303,103 +347,46 @@ namespace prostruct
 					case TOKEN_TYPE::NUMERIC:
 					{
 						std::copy(m_text_start, m_text_iter, std::back_inserter(value));
+						if (!is_valid_numeric(value))
+						{
+							// if it is not all numeric it is parsed as alpha
+							internal_token = TOKEN_TYPE::ALPHA;
+						}
 					}
 					break;
 					case TOKEN_TYPE::RPAREN:
 					case TOKEN_TYPE::LPAREN:
 					{
-						value = std::string(m_text_iter, m_text_iter + 1);
+						std::copy(m_text_start, m_text_iter, std::back_inserter(value));
 					}
 					break;
 					default:
 						throw ParserException("tokenizer error");
 					}
-					if (!m_freeze)
-						++m_text_iter;
 					return Token(internal_token, value);
 				}
 
-				Token get_next_token()
+				bool is_valid_numeric(const std::string& token) const noexcept
 				{
-					bool look_ahead = false;
-
-					while (m_text_iter != m_text_end)
+					for (const char& character: token)
 					{
-						if (std::isspace(*m_text_iter))
-						{
-							look_ahead = false;
-							m_freeze = false;
-							auto result = process_token();
-							internal_token = TOKEN_TYPE::NONE;
-							return result;
-						}
-						else if (std::isalpha(*m_text_iter))
-						{
-							if (!look_ahead)
-								m_text_start = m_text_iter;
-							look_ahead = true;
-							m_freeze = false;
-							internal_token = TOKEN_TYPE::ALPHA;
-							++m_text_iter;
-						}
-						else if (std::isdigit(*m_text_iter))
-						{
-							if (!look_ahead)
-								m_text_start = m_text_iter;
-							// if the token started as a alpha it will stay an alpha
-							if (internal_token == TOKEN_TYPE::ALPHA)
-								internal_token = TOKEN_TYPE::ALPHA;
-							else
-								internal_token = TOKEN_TYPE::NUMERIC;
-							look_ahead = true;
-							m_freeze = false;
-							++m_text_iter;
-						}
-						else if (std::ispunct(*m_text_iter))
-						{
-							look_ahead = false;
-							if (*m_text_iter == '(')
-							{
-								m_freeze = false;
-								internal_token = TOKEN_TYPE::LPAREN;
-							}
-							else if (*m_text_iter == ')')
-							{
-								if (m_freeze)
-									m_freeze = false;
-								else
-								{
-									m_freeze = true;
-									return process_token();
-								}
-								internal_token = TOKEN_TYPE::RPAREN;
-							}
-							else
-								throw ParserException(
-									format(fmt("Unknown punctuation character {}"), *m_text_iter));
-							auto result = process_token();
-							internal_token = TOKEN_TYPE::NONE;
-							return result;
-						}
-						else
-							throw ParserException(
-								format(fmt("Unknown character {}"), *m_text_iter));
+						if (!std::isdigit(character))
+							return false;
 					}
-					if (!m_freeze)
-					{
-						m_freeze = true;
-						return process_token();
-					}
-					else
-						return Token(TOKEN_TYPE::EOF_, "EOF");
+					return true;
 				}
 
-			private:
+				bool valid_punctuation() const noexcept
+				{
+					if (std::ispunct(*m_text_iter))
+						if (*m_text_iter == '(' or *m_text_iter == ')')
+							return true;
+					return false;
+				}
 				std::string::const_iterator m_text_start;
 				std::string::const_iterator m_text_iter;
 				std::string::const_iterator m_text_end;
 				TOKEN_TYPE internal_token;
-				bool m_freeze;
 			};
 
 			/**
@@ -508,7 +495,9 @@ namespace prostruct
 				std::shared_ptr<Node> term()
 				{
 					auto node = factor();
-					if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
+					if (m_current_token.get_type() == TOKEN_TYPE::ALPHA || 
+						m_current_token.get_type() == TOKEN_TYPE::OR || 
+						m_current_token.get_type() == TOKEN_TYPE::AND)
 					{
 						// std::cout << "op: " << std::make_shared<Token>(m_current_token)->get_repr() << "\n";
 						auto op = Token(m_current_token);
@@ -546,7 +535,7 @@ namespace prostruct
 						// 	std::cout << "CURRENT RIGHT NODE: " << right->get_repr() << "\n";
 						// }
 						node = std::make_shared<Node>(node, maybe_op_token, right);
-						
+
 						// std::cout << "End node: " << node->get_repr() << "\n";
 					}
 					return node;
@@ -560,13 +549,16 @@ namespace prostruct
 		 * The DSL (domain specific language) interpreter
 		 * of ProStruct.
 		 * Rules:
-		 * 	- 'and' and 'or' are the logical operators
-		 * 	- 'atom', 'residue' and 'chain' are the keywords
-		 * 	- '(' and ')' determine resolution order
-		 * 	- keywords can either be either of numeric or string
+		 * 	* 'and' and 'or' are the logical operators
+		 * 	* 'atom', 'residue' and 'chain' are the keywords
+		 * 	* '(' and ')' determine resolution order
+		 * 	* keywords can be either numeric or string
 		 * 	type which is deduced by the parser.
-		 * 	- whitespaces are ignored and are only used for delimiting
-		 * 	- keywords are case insensitive
+		 *     * a name is deduced as string if it has any alpha
+		 *		 characters [a-z|A-Z]
+		 *	   * a name is deduced as numeric if it only has digits
+		 * 	* whitespaces are ignored and are only used for delimiting
+		 * 	* keywords are case insensitive
 		 *
 		 * 	@example
 		 * 	- DSLInterpreter("atom CA") returns all CA atoms
