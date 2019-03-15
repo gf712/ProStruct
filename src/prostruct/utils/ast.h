@@ -84,6 +84,7 @@ namespace prostruct
 				LPAREN,
 				AND,
 				OR,
+				RANGE,
 				ATOM_NAME,
 				ATOM_NUMBER,
 				RESIDUE_NAME,
@@ -144,6 +145,10 @@ namespace prostruct
 				case TOKEN_TYPE::OR:
 				{
 					return "LOGICAL_OR";
+				}
+				case TOKEN_TYPE::RANGE:
+				{
+					return "RANGE";
 				}
 				case TOKEN_TYPE::EOF_:
 				{
@@ -428,10 +433,12 @@ namespace prostruct
 					case TOKEN_TYPE::ALPHA:
 					{
 						std::copy(m_text_start, m_text_iter, std::back_inserter(value));
-						if (value == "and")
+						if (str_tolower(value) == "and")
 							internal_token = TOKEN_TYPE::AND;
-						if (value == "or")
+						if (str_tolower(value) == "or")
 							internal_token = TOKEN_TYPE::OR;
+						if (str_tolower(value) == "to")
+							internal_token = TOKEN_TYPE::RANGE;
 					}
 					break;
 					case TOKEN_TYPE::NUMERIC:
@@ -641,7 +648,7 @@ namespace prostruct
 					{
 						auto copy_paren = Token(m_current_token);
 						iter(TOKEN_TYPE::LPAREN);
-						auto node = term();
+						auto node = expr();
 						std::cout << "Solving PAREN: " << node->get_repr() << "\n";
 						try
 						{
@@ -660,47 +667,29 @@ namespace prostruct
 				}
 
 				/**
-				 * Evaluates a term, i.e. what is between
-				 * two logical operations
+				 * Evaluates an expression.
 				 *
-				 * @return the node which holds neighbouring
-				 * factors (keyword + name)
-				 */
-				std::shared_ptr<Node> term()
-				{
-					auto node = factor();
-					if (m_current_token.get_type() == TOKEN_TYPE::OR
-						|| m_current_token.get_type() == TOKEN_TYPE::AND)
-					{
-						auto op = Token(m_current_token);
-						iter(m_current_token.get_type());
-						auto right = factor();
-						return std::make_shared<Node>(node, op, right);
-					}
-					else
-						return node;
-				}
-
-				/**
-				 * Evaluates an expression whilst there are
-				 * keywords left.
-				 *
-				 * @return the top node
+				 * @return the top Node
 				 */
 				std::shared_ptr<Node> expr()
 				{
-					std::shared_ptr<Node> node = term();
-					while (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
+					auto node = factor();
+					while (m_current_token.get_type() == TOKEN_TYPE::OR
+						|| m_current_token.get_type() == TOKEN_TYPE::AND)
 					{
-						auto maybe_op_token = Token(m_current_token);
+						auto op = Token(m_current_token);
 						if (m_current_token.get_type() == TOKEN_TYPE::OR)
 							iter(TOKEN_TYPE::OR);
-						if (m_current_token.get_type() == TOKEN_TYPE::AND)
+						else if (m_current_token.get_type() == TOKEN_TYPE::AND)
 							iter(TOKEN_TYPE::AND);
-						node = std::make_shared<Node>(node, maybe_op_token, term());
+						auto right = factor();
+						node = std::make_shared<Node>(node, op, right);
 					}
+					if (m_current_token.get_type() != TOKEN_TYPE::EOF_)
+						traceback("Unexpected keyword: '{}'.", m_current_token.get_value());
 					return node;
 				}
+
 				/** The lexer object that returns the tokens */
 				std::shared_ptr<Lexer> m_lexer;
 				/** The current token returned by the lexer */
