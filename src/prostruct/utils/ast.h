@@ -12,9 +12,6 @@
 #define FMT_STRING_ALIAS 1
 
 #include <armadillo>
-#include <iostream>
-#include <unordered_map>
-#include <variant>
 
 #include <fmt/format.h>
 
@@ -30,21 +27,45 @@ namespace prostruct
 	{
 		namespace detail
 		{
+			/**
+			 * The exception raised by any class involved
+			 * in the parsing and interpreting of
+			 * Prostruct's DSL
+			 */
 			class ParserException : public std::exception
 			{
 			public:
+				/**
+				 * The ParserException constructor that can
+				 * be passed a messaged and an arbitrary number
+				 * of parameters.
+				 *
+				 * @tparam Args the argument pack types
+				 * @param message the main message that is passed to
+				 * fmt::format
+				 * @param args the additional values passed to the
+				 * main message
+				 */
 				template <typename... Args>
 				ParserException(const std::string& message, Args... args)
 				{
 					m_message = fmt::format(message, args...);
 				}
-				const char* what() const noexcept
+				/**
+				 * Returns the message as a char array
+				 *
+				 * @return the exception message
+				 */
+				const char* what() const noexcept final
 				{
 					return format(fmt("{}{}"), m_error_msg_start, m_message).c_str();
 				}
 
+				/** The start of the error message */
 				static constexpr std::string_view m_error_msg_start = "Parser error: ";
+
 			private:
+				/** The exception message */
 				std::string m_message;
 			};
 
@@ -161,18 +182,30 @@ namespace prostruct
 			}
 
 			/**
-			 * A token is a combination of a key that helps
-			 * identify the type of the value of the Token.
+			 * A token maps a value to its type
+			 * and position in the expression
 			 */
 			class Token
 			{
 			public:
+				/**
+				 * The default Token constructor used as a placeholder
+				 */
 				Token()
 					: m_type(TOKEN_TYPE::NONE)
-					, m_value(""), m_position(0)
+					, m_value("")
+					, m_position(0)
 				{
 				}
-
+				/**
+				 * The Token constructor that maps a value to
+				 * its type and the records its position in the
+				 * expression.
+				 *
+				 * @param name the token type
+				 * @param value the value of the token
+				 * @param position the position in the expression
+				 */
 				Token(TOKEN_TYPE name, const std::string& value, size_t position)
 					: m_type(name)
 					, m_value(value)
@@ -180,23 +213,27 @@ namespace prostruct
 				{
 				}
 
+				/** Token type getter */
 				TOKEN_TYPE get_type() const noexcept { return m_type; }
-
+				/** Token value getter */
 				std::string get_value() const noexcept { return m_value; }
-
+				/** Token position getter */
 				size_t get_position() const noexcept { return m_position; }
-
+				/** Print the token representation */
 				void print() const noexcept { std::cout << get_repr() << "\n"; }
-
+				/** Returns the Token representation as a string */
 				std::string get_repr() const noexcept
 				{
-					return format(
-						fmt("Token(value={}, type={}, pos={})"), m_value, get_string_from_enum(m_type), m_position);
+					return format(fmt("Token(value={}, type={}, pos={})"), m_value,
+						get_string_from_enum(m_type), m_position);
 				}
 
 			private:
+				/** The Token type */
 				TOKEN_TYPE m_type;
+				/** The Token value */
 				std::string m_value;
+				/** The Token position in the expression */
 				size_t m_position;
 			};
 
@@ -207,17 +244,34 @@ namespace prostruct
 			class Node
 			{
 			public:
+				/**
+				 * Node default constructor with a
+				 * default Token
+				 */
 				Node() {}
-
+				/**
+				 * Node constructor for the tree stumps,
+				 * i.e. does not have a left or right Node
+				 * connection.
+				 *
+				 * @param token the Token instance of the node
+				 */
 				Node(Token token)
-					: m_token(token)
+					: m_token(std::move(token))
 				{
 				}
-
+				/**
+				 * Node constructor with further Node
+				 * connections.
+				 *
+				 * @param left the left Node
+				 * @param token the Token instance of the node
+				 * @param right the right Node
+				 */
 				Node(const std::shared_ptr<Node>& left, Token token,
 					const std::shared_ptr<Node>& right)
 					: m_left(left)
-					, m_token(token)
+					, m_token(std::move(token))
 					, m_right(right)
 				{
 					if (m_token.get_type() != TOKEN_TYPE::OR
@@ -229,8 +283,9 @@ namespace prostruct
 							get_string_from_enum(m_token.get_type()));
 				}
 
+				/** Returns the operation type given by the Token */
 				TOKEN_TYPE get_op_type() const noexcept { return m_token.get_type(); }
-
+				/** Returns the string representation of the right Node */
 				std::string get_right_repr() const noexcept
 				{
 					if (m_right)
@@ -238,7 +293,7 @@ namespace prostruct
 					else
 						return std::string("N/A");
 				}
-
+				/** Returns the string representation of the left Node */
 				std::string get_left_repr() const noexcept
 				{
 					if (m_right)
@@ -246,34 +301,43 @@ namespace prostruct
 					else
 						return std::string("N/A");
 				}
-
+				/** Returns the string representation of this Node */
 				std::string get_repr() const noexcept
 				{
 					return format(fmt("Node(left={}, right={}, token={})"), get_left_repr(),
 						get_right_repr(), m_token.get_repr());
 				}
-
+				/** Left Node getter */
 				std::shared_ptr<Node> get_left() const noexcept { return m_left; }
-
+				/** Right Node getter */
 				std::shared_ptr<Node> get_right() const noexcept { return m_right; }
-
+				/** Token type getter */
 				TOKEN_TYPE get_type() const noexcept { return m_token.get_type(); }
-
+				/** Token value getter */
 				std::string get_value() const noexcept { return m_token.get_value(); }
 
 			private:
+				/** the left Node */
 				std::shared_ptr<Node> m_left;
+				/** the right Node */
 				std::shared_ptr<Node> m_right;
+				/** the node Token */
 				Token m_token;
 			};
 
 			/**
-			 * The Lexer parses a string and represents with
+			 * The Lexer parses a string and splits it into
 			 * Tokens. The Lexer ignores whitespaces.
 			 */
 			class Lexer
 			{
 			public:
+				/**
+				 * Lexer constructor for a given
+				 * expression.
+				 *
+				 * @param text the text to be tokenised
+				 */
 				Lexer(const std::string& text)
 					: m_text_beginning(text.cbegin())
 					, m_text_start(text.cbegin())
@@ -283,6 +347,13 @@ namespace prostruct
 				{
 				}
 
+				/**
+				 * Returns the next token. First call starts
+				 * at the beginning of the sentence.
+				 * The end of the expression return a EOF Token.
+				 *
+				 * @return the next Token instance
+				 */
 				Token get_next_token()
 				{
 					m_text_start = m_text_iter;
@@ -296,7 +367,8 @@ namespace prostruct
 					// return EOF
 					if (m_text_iter == m_text_end)
 					{
-						return Token(TOKEN_TYPE::EOF_, "EOF", std::distance(m_text_beginning, m_text_start));
+						return Token(
+							TOKEN_TYPE::EOF_, "EOF", std::distance(m_text_beginning, m_text_start));
 					}
 					// process punctuation
 					if (valid_punctuation())
@@ -330,15 +402,22 @@ namespace prostruct
 
 					return process_token();
 				}
-
+				/** Getter for the full string being parsed */
 				std::string get_full_string() const noexcept
 				{
 					return std::string(m_text_beginning, m_text_end);
 				}
 
 			private:
+				/** Iterates one position over the string */
 				void advance() { std::next(m_text_end, 1); }
-
+				/**
+				 * Processes a given Token. Figures out
+				 * what the whole value is and what the type
+				 * is.
+				 *
+				 * @return the current Token
+				 */
 				Token process_token()
 				{
 					std::string value;
@@ -374,9 +453,10 @@ namespace prostruct
 					default:
 						throw ParserException("tokenizer error");
 					}
-					return Token(internal_token, value, std::distance(m_text_beginning, m_text_start));
+					return Token(
+						internal_token, value, std::distance(m_text_beginning, m_text_start));
 				}
-
+				/** Internal function to check if a string represent a digit */
 				bool is_valid_numeric(const std::string& token) const noexcept
 				{
 					for (const char& character : token)
@@ -386,7 +466,7 @@ namespace prostruct
 					}
 					return true;
 				}
-
+				/** Internal function to check if the punctuation is valid in the DSL */
 				bool valid_punctuation() const noexcept
 				{
 					if (std::ispunct(*m_text_iter))
@@ -394,10 +474,15 @@ namespace prostruct
 							return true;
 					return false;
 				}
+				/** The iterator recorded at the start of the string */
 				std::string::const_iterator m_text_beginning;
+				/** The iterator recorded at the start of the current Token */
 				std::string::const_iterator m_text_start;
+				/** The current iterator */
 				std::string::const_iterator m_text_iter;
+				/** The end position of the string */
 				std::string::const_iterator m_text_end;
+				/** Stores the token type */
 				TOKEN_TYPE internal_token;
 			};
 
@@ -408,6 +493,10 @@ namespace prostruct
 			class Parser
 			{
 			public:
+				/**
+				 * The parser constructor with a lexer shared pointer
+				 * @param lexer the lexer that provides the tokens.
+				 */
 				Parser(const std::shared_ptr<Lexer>& lexer)
 					: m_lexer(lexer)
 				{
@@ -421,6 +510,11 @@ namespace prostruct
 					}
 				}
 
+				/**
+				 * Parses the sentence being tokenised by the lexer.
+				 *
+				 * @return the top Node of the AST
+				 */
 				std::shared_ptr<Node> parse() { return expr(); }
 
 			private:
@@ -430,15 +524,10 @@ namespace prostruct
 				 */
 				void iter(TOKEN_TYPE token_type)
 				{
-					std::cout << "Iterating from " << m_current_token.get_repr() << "\n";
-					
 					if (m_current_token.get_type() == token_type)
 					{
 						m_current_token = m_lexer->get_next_token();
-						// std::cout << "New token: " << m_current_token.get_repr() << "\n";
 					}
-					// else if (m_current_token.get_type() == TOKEN_TYPE::EOF_)
-					// 	return;
 					else
 						throw ParserException(
 							"Invalid syntax. Expected type {} but got {} (value: {})",
@@ -446,43 +535,75 @@ namespace prostruct
 							get_string_from_enum(m_current_token.get_type()),
 							m_current_token.get_value());
 				}
-
-				template <typename ...Args>
+				/**
+				 * Traceback the error and raise error with a formatted
+				 * message, where additional arguments can be passed here.
+				 * It will use the current token to traceback.
+				 *
+				 * @tparam Args types of argument pack
+				 * @param error_message the main error message
+				 * @param args additional values required in the error message
+				 */
+				template <typename... Args>
 				void traceback(const std::string& error_message, Args... args) const
 				{
 					traceback(m_current_token, error_message, args...);
 				}
+
+				/**
+				 * Traceback the error with given token and raise error message.
+				 *
+				 * @param token that raised the error
+				 * @param error_message the main error message
+				 */
 				void traceback(const Token& token, const std::string& error_message) const
 				{
 					traceback(token, error_message, "");
 				}
-				template <typename ...Args>
-				void traceback(const Token& token, const std::string& error_message, Args... args) const
+				/**
+				 * Traceback the error with given token and raise custom error
+				 * message, where additional arguments can be passed here.
+				 *
+				 * @tparam Args types of argument pack
+				 * @param token that raised the error
+				 * @param error_message the main error message
+				 * @param args additional values required in the error message
+				 */
+				template <typename... Args>
+				void traceback(
+					const Token& token, const std::string& error_message, Args... args) const
 				{
-					int error_msg_offset = ParserException::m_error_msg_start.size();
-					auto expression = std::string(error_msg_offset, ' ') + "\"" + m_lexer->get_full_string() + "\"";
-					std::string error_location(expression.size()+error_msg_offset, ' ');
-					int error_start = token.get_position()+error_msg_offset;
-					int error_end = error_start + token.get_value().size()+1;
+					auto error_msg_offset = ParserException::m_error_msg_start.size();
+					auto expression = std::string(error_msg_offset, ' ') + "\""
+						+ m_lexer->get_full_string() + "\"";
+					std::string error_location(expression.size() + error_msg_offset, ' ');
+					auto error_start = token.get_position() + error_msg_offset;
+					auto error_end = error_start + token.get_value().size() + 1;
 
-					for (int i = 0; i < expression.size()+error_msg_offset; ++i)
+					for (int i = 0; i < expression.size() + error_msg_offset; ++i)
 					{
 						if (i > error_start && i < error_end)
 							error_location[i] = '^';
 					}
 
 					expression.append("\n");
-					std::string new_error_message = error_message + "\n" + expression + error_location;
+					std::string new_error_message
+						= error_message + "\n" + expression + error_location;
 					throw ParserException(new_error_message, args...);
 				}
 
+				/**
+				 * Evaluates everythin between logical
+				 * operators and decides how to interpret
+				 * keywords and whether they should be words
+				 * or numbers
+				 *
+				 * @return the node
+				 */
 				std::shared_ptr<Node> factor()
 				{
-					// std::cout << "factoring: " << m_current_token.get_repr() << "\n";
 					if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 					{
-						// std::cout << "it's an alpha\n";
-						// std::cout << "factoring: " << m_current_token.get_repr() << "\n";
 						TOKEN_TYPE node_type;
 
 						if (str_tolower(m_current_token.get_value()) == "atom")
@@ -504,12 +625,12 @@ namespace prostruct
 						iter(TOKEN_TYPE::ALPHA);
 						if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
 						{
-							++node_type; // if it is numeric we get the next enum value, which
-										 // switches alpha to numeric
+							// if it is numeric we get the next enum value, which
+							// switches alpha to numeric
+							++node_type;
 						}
-						auto node
-							= std::make_shared<Node>(Token(node_type, m_current_token.get_value(), m_current_token.get_position()));
-						// std::cout << "factored: " << node->get_repr() << "\n";
+						auto node = std::make_shared<Node>(Token(node_type,
+							m_current_token.get_value(), m_current_token.get_position()));
 						if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 							iter(TOKEN_TYPE::ALPHA);
 						else if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
@@ -521,11 +642,13 @@ namespace prostruct
 						auto copy_paren = Token(m_current_token);
 						iter(TOKEN_TYPE::LPAREN);
 						auto node = term();
-						std::cout << "Solving PAREN: " <<  node->get_repr() << "\n";
-						try {
+						std::cout << "Solving PAREN: " << node->get_repr() << "\n";
+						try
+						{
 							iter(TOKEN_TYPE::RPAREN);
 						}
-						catch (const ParserException& e) {
+						catch (const ParserException& e)
+						{
 							traceback(copy_paren, "Unbalanced paranthesis.");
 						}
 						return node;
@@ -533,26 +656,25 @@ namespace prostruct
 					else
 					{
 						throw ParserException("Unknown token: {}", m_current_token.get_repr());
-						// std::cout << format(fmt("Unknown token: {}"), m_current_token.get_repr())
-						// << "\n"; iter(m_current_token.get_type()); std::cout << "Skipped\n";
-						// std::cout << format(fmt("Next token: {}"), m_current_token.get_repr()) <<
-						// "\n"; return nullptr;
 					}
 				}
 
+				/**
+				 * Evaluates a term, i.e. what is between
+				 * two logical operations
+				 *
+				 * @return the node which holds neighbouring
+				 * factors (keyword + name)
+				 */
 				std::shared_ptr<Node> term()
 				{
 					auto node = factor();
 					if (m_current_token.get_type() == TOKEN_TYPE::OR
 						|| m_current_token.get_type() == TOKEN_TYPE::AND)
 					{
-						// std::cout << "op: " <<
-						// std::make_shared<Token>(m_current_token)->get_repr() << "\n";
 						auto op = Token(m_current_token);
 						iter(m_current_token.get_type());
 						auto right = factor();
-						//			std::cout << "right: " << right->get_repr() << "\n";
-						//			std::cout << "making node\n";
 						return std::make_shared<Node>(node, op, right);
 					}
 					else
@@ -560,34 +682,28 @@ namespace prostruct
 				}
 
 				/**
-				 * Evaluates an expression.
+				 * Evaluates an expression whilst there are
+				 * keywords left.
 				 *
+				 * @return the top node
 				 */
 				std::shared_ptr<Node> expr()
 				{
 					std::shared_ptr<Node> node = term();
 					while (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 					{
-						// std::cout << "Current token: " << m_current_token.get_repr() << "\n";
-						// std::cout << "CURRENT LEFT NODE: " << node->get_repr() << "\n";
 						auto maybe_op_token = Token(m_current_token);
-						// std::cout << "CURRENT TOKEN: " << maybe_op_token.get_repr() << "\n";
 						if (m_current_token.get_type() == TOKEN_TYPE::OR)
 							iter(TOKEN_TYPE::OR);
 						if (m_current_token.get_type() == TOKEN_TYPE::AND)
 							iter(TOKEN_TYPE::AND);
-						auto right = term();
-						// if (right)
-						// {
-						// 	std::cout << "CURRENT RIGHT NODE: " << right->get_repr() << "\n";
-						// }
-						node = std::make_shared<Node>(node, maybe_op_token, right);
-
-						// std::cout << "End node: " << node->get_repr() << "\n";
+						node = std::make_shared<Node>(node, maybe_op_token, term());
 					}
 					return node;
 				}
+				/** The lexer object that returns the tokens */
 				std::shared_ptr<Lexer> m_lexer;
+				/** The current token returned by the lexer */
 				Token m_current_token;
 			};
 		}
@@ -596,16 +712,16 @@ namespace prostruct
 		 * The DSL (domain specific language) interpreter
 		 * of ProStruct.
 		 * Rules:
-		 * 	* 'and' and 'or' are the logical operators
-		 * 	* 'atom', 'residue' and 'chain' are the keywords
-		 * 	* '(' and ')' determine resolution order
-		 * 	* keywords can be either numeric or string
-		 * 	type which is deduced by the parser.
+		 *  * 'and' and 'or' are the logical operators
+		 *  * 'atom', 'residue' and 'chain' are the keywords
+		 *  * '(' and ')' determine resolution order
+		 *  * keywords can be either numeric or string
+		 *  type which is deduced by the parser.
 		 *     * a name is deduced as string if it has any alpha
-		 *		 characters [a-z|A-Z]
-		 *	   * a name is deduced as numeric if it only has digits
-		 * 	* whitespaces are ignored and are only used for delimiting
-		 * 	* keywords are case insensitive
+		 *  	 characters [a-z|A-Z]
+		 *     * a name is deduced as numeric if it only has digits
+		 *  * whitespaces are ignored and are only used for delimiting
+		 *  * keywords are case insensitive
 		 *
 		 * 	@example
 		 * 	- DSLInterpreter("atom CA") returns all CA atoms
@@ -621,18 +737,26 @@ namespace prostruct
 			{
 				auto lexer = std::make_shared<detail::Lexer>(expression);
 				m_parser = std::make_shared<detail::Parser>(lexer);
+				// do parsing here so can potentially reuse node
+				m_node = m_parser->parse();
 			}
-
+			/**
+			 * Interpretes the expression and returns
+			 * the atom selection.
+			 *
+			 * @tparam T the float precision type of StructBase
+			 * @param m_structure the structure to evaluate
+			 * @return the indices selected of the selected atoms
+			 */
 			template <typename T>
-			arma::Col<arma::uword> interpret(const StructBase<T>& m_structure) const
+			arma::Col<arma::uword> interpret(const StructBase<T>& structure) const
 			{
-				arma::Col<arma::uword> max_result(m_structure.n_atoms());
-				auto node = m_parser->parse();
+				arma::Col<arma::uword> max_result(structure.n_atoms());
 				arma::uword idx = 0;
 				arma::uword i = 0;
-				for (const auto& atom : m_structure.get_atoms())
+				for (const auto& atom : structure.get_atoms())
 				{
-					if (visit_op(node, atom, idx))
+					if (visit_op(m_node, atom, idx))
 					{
 						max_result(i) = idx;
 						++i;
@@ -654,7 +778,7 @@ namespace prostruct
 			 */
 			template <typename T>
 			bool visit_op(const std::shared_ptr<detail::Node>& node,
-				const std::shared_ptr<Atom<T>>& atom, int pos) const
+				const std::shared_ptr<Atom<T>>& atom, arma::uword pos) const
 			{
 				if (node->get_right() == nullptr && node->get_left() == nullptr)
 				{
@@ -687,8 +811,10 @@ namespace prostruct
 						"Unknown op: {}", detail::get_string_from_enum(node->get_op_type()));
 				}
 			}
-
+			/** The parser instance for given expression */
 			std::shared_ptr<detail::Parser> m_parser;
+			/** The top node of the AST */
+			std::shared_ptr<detail::Node> m_node;
 		};
 	}
 }
