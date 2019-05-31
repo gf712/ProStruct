@@ -84,11 +84,11 @@ namespace prostruct
 				LPAREN,
 				AND,
 				OR,
+				LESS,
+				MORE,
 				RANGE,
 				ATOM_NAME,
-				ATOM_NUMBER,
 				RESIDUE_NAME,
-				RESIDUE_NUMBER,
 				CHAIN_NAME,
 				EOF_
 			};
@@ -130,10 +130,6 @@ namespace prostruct
 				{
 					return "KEYWORD_RESIDUE_NAME";
 				}
-				case TOKEN_TYPE::RESIDUE_NUMBER:
-				{
-					return "KEYWORD_RESIDUE_NUMBER";
-				}
 				case TOKEN_TYPE::CHAIN_NAME:
 				{
 					return "KEYWORD_CHAIN_NAME";
@@ -145,6 +141,14 @@ namespace prostruct
 				case TOKEN_TYPE::OR:
 				{
 					return "LOGICAL_OR";
+				}
+				case TOKEN_TYPE::LESS:
+				{
+					return "LOGICAL_LESS";
+				}
+				case TOKEN_TYPE::MORE:
+				{
+					return "LOGICAL_MORE";
 				}
 				case TOKEN_TYPE::RANGE:
 				{
@@ -198,6 +202,7 @@ namespace prostruct
 				 */
 				Token()
 					: m_type(TOKEN_TYPE::NONE)
+					, m_primitive_type(TOKEN_TYPE::NONE)
 					, m_value("")
 					, m_position(0)
 				{
@@ -208,18 +213,27 @@ namespace prostruct
 				 * expression.
 				 *
 				 * @param name the token type
+				 * @param primitive_type the primitive token type
 				 * @param value the value of the token
 				 * @param position the position in the expression
 				 */
-				Token(TOKEN_TYPE name, const std::string& value, size_t position)
-					: m_type(name)
+				Token(TOKEN_TYPE token_type, TOKEN_TYPE primitive_type, const std::string& value, size_t position)
+					: m_type(token_type)
 					, m_value(value)
 					, m_position(position)
+					, m_primitive_type(primitive_type)
 				{
 				}
 
 				/** Token type getter */
 				TOKEN_TYPE get_type() const noexcept { return m_type; }
+				/** Token type setter */
+				void set_type(TOKEN_TYPE token_type) noexcept 
+				{ 
+					m_type = token_type; 
+				}
+				/** Token primitive type getter */
+				TOKEN_TYPE get_primitive_type() const noexcept { return m_primitive_type; }
 				/** Token value getter */
 				std::string get_value() const noexcept { return m_value; }
 				/** Token position getter */
@@ -229,13 +243,21 @@ namespace prostruct
 				/** Returns the Token representation as a string */
 				std::string get_repr() const noexcept
 				{
-					return format(fmt("Token(value={}, type={}, pos={})"), m_value,
-						get_string_from_enum(m_type), m_position);
+					return format(fmt("Token(value={}, type={}, primitive_type={}, pos={})"), m_value,
+						get_string_from_enum(m_type), get_string_from_enum(m_primitive_type), m_position);
 				}
+				/** Token primitive type setter */
+				void set_primitive_type(TOKEN_TYPE token_type) noexcept 
+				{ 
+					m_primitive_type = token_type; 
+				}
+
 
 			private:
 				/** The Token type */
 				TOKEN_TYPE m_type;
+				/** The primitive type of the token */
+				TOKEN_TYPE m_primitive_type;
 				/** The Token value */
 				std::string m_value;
 				/** The Token position in the expression */
@@ -280,16 +302,16 @@ namespace prostruct
 					, m_right(right)
 				{
 					if (m_token.get_type() != TOKEN_TYPE::OR
-						&& m_token.get_type() != TOKEN_TYPE::AND)
+						&& m_token.get_type() != TOKEN_TYPE::AND
+						&& m_token.get_type() != TOKEN_TYPE::RANGE)
 						throw ParserException(
-							"Expected op to be either of type {} or {}, but got {}",
+							"Expected op to be either of type {}, {} or {}, but got {}",
 							get_string_from_enum(TOKEN_TYPE::OR),
 							get_string_from_enum(TOKEN_TYPE::AND),
+							get_string_from_enum(TOKEN_TYPE::RANGE),
 							get_string_from_enum(m_token.get_type()));
 				}
 
-				/** Returns the operation type given by the Token */
-				TOKEN_TYPE get_op_type() const noexcept { return m_token.get_type(); }
 				/** Returns the string representation of the right Node */
 				std::string get_right_repr() const noexcept
 				{
@@ -318,8 +340,22 @@ namespace prostruct
 				std::shared_ptr<Node> get_right() const noexcept { return m_right; }
 				/** Token type getter */
 				TOKEN_TYPE get_type() const noexcept { return m_token.get_type(); }
+				/** Token type setter */
+				void set_type(TOKEN_TYPE token_type) noexcept 
+				{ 
+					m_token.set_type(token_type); 
+				}
 				/** Token value getter */
 				std::string get_value() const noexcept { return m_token.get_value(); }
+				/** Token getter */
+				Token get_token() const noexcept { return m_token; }
+				/** Token primitive type getter */
+				TOKEN_TYPE get_primitive_type() const noexcept { return m_token.get_primitive_type(); }
+				/** Token primitive type setter */
+				void set_primitive_type(TOKEN_TYPE token_type) noexcept 
+				{ 
+					m_token.set_primitive_type(token_type); 
+				}
 
 			private:
 				/** the left Node */
@@ -373,7 +409,7 @@ namespace prostruct
 					if (m_text_iter == m_text_end)
 					{
 						return Token(
-							TOKEN_TYPE::EOF_, "EOF", std::distance(m_text_beginning, m_text_start));
+							TOKEN_TYPE::EOF_, TOKEN_TYPE::EOF_, "EOF", std::distance(m_text_beginning, m_text_start));
 					}
 					// process punctuation
 					if (valid_punctuation())
@@ -461,7 +497,7 @@ namespace prostruct
 						throw ParserException("tokenizer error");
 					}
 					return Token(
-						internal_token, value, std::distance(m_text_beginning, m_text_start));
+						internal_token, internal_token, value, std::distance(m_text_beginning, m_text_start));
 				}
 				/** Internal function to check if a string represent a digit */
 				bool is_valid_numeric(const std::string& token) const noexcept
@@ -630,13 +666,7 @@ namespace prostruct
 							traceback("Unknown keyword '{}'.", m_current_token.get_value());
 						}
 						iter(TOKEN_TYPE::ALPHA);
-						if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
-						{
-							// if it is numeric we get the next enum value, which
-							// switches alpha to numeric
-							++node_type;
-						}
-						auto node = std::make_shared<Node>(Token(node_type,
+						auto node = std::make_shared<Node>(Token(node_type, m_current_token.get_primitive_type(),
 							m_current_token.get_value(), m_current_token.get_position()));
 						if (m_current_token.get_type() == TOKEN_TYPE::ALPHA)
 							iter(TOKEN_TYPE::ALPHA);
@@ -649,7 +679,6 @@ namespace prostruct
 						auto copy_paren = Token(m_current_token);
 						iter(TOKEN_TYPE::LPAREN);
 						auto node = expr();
-						std::cout << "Solving PAREN: " << node->get_repr() << "\n";
 						try
 						{
 							iter(TOKEN_TYPE::RPAREN);
@@ -658,6 +687,13 @@ namespace prostruct
 						{
 							traceback(copy_paren, "Unbalanced paranthesis.");
 						}
+						return node;
+					}
+					else if (m_current_token.get_type() == TOKEN_TYPE::NUMERIC)
+					{
+						auto node = std::make_shared<Node>(Token(TOKEN_TYPE::NUMERIC, TOKEN_TYPE::LESS,
+							m_current_token.get_value(), m_current_token.get_position()));
+						iter(TOKEN_TYPE::NUMERIC);
 						return node;
 					}
 					else
@@ -674,19 +710,40 @@ namespace prostruct
 				std::shared_ptr<Node> expr()
 				{
 					auto node = factor();
+					bool is_range = false;
 					while (m_current_token.get_type() == TOKEN_TYPE::OR
-						|| m_current_token.get_type() == TOKEN_TYPE::AND)
+						|| m_current_token.get_type() == TOKEN_TYPE::AND
+						|| m_current_token.get_type() == TOKEN_TYPE::RANGE)
 					{
 						auto op = Token(m_current_token);
 						if (m_current_token.get_type() == TOKEN_TYPE::OR)
 							iter(TOKEN_TYPE::OR);
 						else if (m_current_token.get_type() == TOKEN_TYPE::AND)
 							iter(TOKEN_TYPE::AND);
+						else if (m_current_token.get_type() == TOKEN_TYPE::RANGE)
+						{
+							std::cout << "Starting range node from: " <<node->get_repr() << "\n";
+							if (node->get_right()->get_primitive_type() != TOKEN_TYPE::NUMERIC)
+								traceback(m_current_token, "Expected numeric value 1.");
+							node->set_primitive_type(TOKEN_TYPE::MORE);
+							iter(TOKEN_TYPE::RANGE);
+							if (m_current_token.get_primitive_type() != TOKEN_TYPE::NUMERIC)
+								traceback(m_current_token, "Expected numeric value 2.");
+							is_range = true;
+							// 'to' is just setting two conditions '<' *and* '>'
+							op.set_type(TOKEN_TYPE::AND);
+						}
 						auto right = factor();
+						if (is_range)
+						{
+							std::cout << "range node right: " << right->get_repr() << "\n";
+							right->set_type(node->get_type());
+							is_range = false;
+						}
 						node = std::make_shared<Node>(node, op, right);
 					}
-					if (m_current_token.get_type() != TOKEN_TYPE::EOF_)
-						traceback("Unexpected keyword: '{}'.", m_current_token.get_value());
+					// if (m_current_token.get_type() != TOKEN_TYPE::EOF_)
+					// 	traceback("Unexpected keyword: '{}'.", m_current_token.get_value());
 					return node;
 				}
 
@@ -702,6 +759,7 @@ namespace prostruct
 		 * of ProStruct.
 		 * Rules:
 		 *  * 'and' and 'or' are the logical operators
+		 *  * 'to' is the range operator (includes start and end)
 		 *  * 'atom', 'residue' and 'chain' are the keywords
 		 *  * '(' and ')' determine resolution order
 		 *  * keywords can be either numeric or string
@@ -774,20 +832,31 @@ namespace prostruct
 					switch (node->get_type())
 					{
 					case detail::TOKEN_TYPE::ATOM_NAME:
-						return atom->get_name() == node->get_value();
-					case detail::TOKEN_TYPE::ATOM_NUMBER:
-						return pos == std::stoi(node->get_value());
+						if (node->get_token().get_primitive_type() == detail::TOKEN_TYPE::NUMERIC)
+							return pos == std::stoi(node->get_value());
+						else if (node->get_token().get_primitive_type() == detail::TOKEN_TYPE::LESS)
+							return pos <= std::stoi(node->get_value());
+						else if (node->get_token().get_primitive_type() == detail::TOKEN_TYPE::MORE)
+							return pos >= std::stoi(node->get_value());
+						else
+							return atom->get_name() == node->get_value();
 					case detail::TOKEN_TYPE::RESIDUE_NAME:
-						return atom->get_residue_name() == node->get_value();
-					case detail::TOKEN_TYPE::RESIDUE_NUMBER:
-						return atom->get_residue_number() == node->get_value();
+						if (node->get_token().get_primitive_type() == detail::TOKEN_TYPE::NUMERIC)
+							return atom->get_residue_number() == node->get_value();
+						else if (node->get_token().get_primitive_type() == detail::TOKEN_TYPE::LESS)
+							return std::stoi(atom->get_residue_number()) <= std::stoi(node->get_value());
+						else if (node->get_token().get_primitive_type() == detail::TOKEN_TYPE::MORE)
+							return std::stoi(atom->get_residue_number()) >= std::stoi(node->get_value());
+						else
+							return atom->get_residue_name() == node->get_value();
 					case detail::TOKEN_TYPE::CHAIN_NAME:
 						return atom->get_residue().get_chain_name() == node->get_value();
 					default:
 						throw detail::ParserException("Unknown keyword: {}", node->get_repr());
 					}
+					return false;
 				}
-				switch (node->get_op_type())
+				switch (node->get_type())
 				{
 				case detail::TOKEN_TYPE::AND:
 					return visit_op(node->get_left(), atom, pos)
@@ -797,7 +866,7 @@ namespace prostruct
 						|| visit_op(node->get_right(), atom, pos);
 				default:
 					throw detail::ParserException(
-						"Unknown op: {}", detail::get_string_from_enum(node->get_op_type()));
+						"Unknown op: {}", detail::get_string_from_enum(node->get_type()));
 				}
 			}
 			/** The parser instance for given expression */

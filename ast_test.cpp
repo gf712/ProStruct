@@ -6,13 +6,14 @@ using namespace prostruct::parser::detail;
 
 int main()
 {
-	auto test = std::string("atom CA or atom CB or chain L");
+	auto test = std::string("residue 10 to 20 and atom CA");
 	auto pdb = PDB<float>("./build/test.pdb");
 	// std::cout << pdb.n_atoms() << "\n";
 	// auto test = std::string("atom CA or atom CB and residue 10");
 	auto test_parser = std::string(test);
 	auto lexer = std::make_shared<Lexer>(test_parser);
-	while (true)
+	int i = 0;
+	while (i<10)
 	{
 		Token token;
 		try {
@@ -29,13 +30,15 @@ int main()
 			std::cout << "END\n";
 			break;
 		}
+		i++;
 	}
+	std::cout << "\n=====\n";
 	std::shared_ptr<Node> node;
 	lexer = std::make_shared<Lexer>(test);
 	auto parser = Parser(lexer);
 	try
 	{
-		node = parser.expr();
+		node = parser.parse();
 	}
 	catch (const std::exception& exc)
 	{
@@ -43,6 +46,6 @@ int main()
 		return 0;
 	}
 	std::cout << "RESULT: " << node->get_repr() << "\n";
-	// auto dsl_interp = prostruct::parser::DSLInterpreter(test);
-	// dsl_interp.interpret(pdb); //.print();
+	auto dsl_interp = prostruct::parser::DSLInterpreter(test);
+	dsl_interp.interpret(pdb).print();
 }

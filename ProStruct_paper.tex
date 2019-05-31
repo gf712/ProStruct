@@ -1,0 +1,37 @@
+ProStruct: A modern C++ protein structure analysis library with extendible interfaces
+
+Abstract
+
+
+Introduction
+
+The programming language of choice for many scientists is usually dynamically typed, as it 
+is easier to learn and to apply. This comes at a cost of execution speed and the lack
+of type checking can lead to errors. Several packages have been written for protein
+structure analysis for python and other interpreted language and they leverage 
+the speed given by code written in C/C++ or other compiled languages. However, these
+libraries are written around the target interpreted language, which makes the design
+less efficient and more difficult to extend in the backend. 
+This paper introduces a new protein structure analysis tool written in C++17 which takes
+advantage of the newest developments of the C++ programming language in order to make it easier
+to extend and make more efficient. In order to make it accessible to most scientists, Prostruct
+also has interfaces written in SWIG (Simplified Wrapper and Interface Generator). This wrapper
+provides a set a C/C++ functions that connect the backend in C++ with the interpreted languages.
+
+Methods
+
+A protein structure can be broken down to several elements: the atoms, their bonds, the amino acids 
+(or residues), the chain and the overall structure. These are all represented by C++ classes
+which are exposed to the interfaces. 
+
+At its core ProStruct has a so-called kernel engine that applies a function along a protein sequence.
+A kernel is represented by a C++ lambda or function, but the former has a better performance. The advantage
+of this is that any function can be easily represented by a user and the engine takes care of 
+the execution and is optimised by the compiler.
+
+TALK ABOUT DIRECTOR CLASS
+
+TALK ABOUT DSL
+
+Applications
+
